@@ -1,0 +1,139 @@
+---
+/**
+ * A mechanical digit-wheel counter.
+ *
+ * Each digit is a 0–9 strip that slides vertically, so a change reads as the
+ * wheel physically rolling rather than the glyph swapping. That mechanical
+ * quality is the point: a meter turns whether or not anyone is watching, which
+ * is exactly what the uptime meter does to your bill.
+ *
+ * Set values from script with `el.dataset.value = '00.1234'`; the observer in
+ * this component rolls the wheels to match. Non-digit characters (., :, $) are
+ * rendered as fixed separators.
+ */
+interface Props {
+  /** Initial reading. Its length fixes the number of wheels. */
+  value: string;
+  /** Meter identity — drives the glow colour via the .meter-* class. */
+  meter?: 'time' | 'egress' | 'calls';
+  /** Wheel height. */
+  size?: string;
+  id?: string;
+  label?: string;
+}
+
+const { value, meter, size = '2.5rem', id, label } = Astro.props;
+const chars = [...value];
+---
+
+{label && <span class="odo-sr">{label}</span>}
+<span
+  class:list={['odo', meter && `meter-${meter}`]}
+  data-value={value}
+  style={`--odo-size:${size}`}
+  id={id}
+  aria-hidden="true"
+>
+  {
+    chars.map((c) =>
+      /\d/.test(c) ? (
+        <span class="odo-wheel" data-digit={c}>
+          <span class="odo-strip" style={`transform:translateY(${-Number(c) * 10}%)`}>
+            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+            <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+          </span>
+        </span>
+      ) : (
+        <span class="odo-sep">{c}</span>
+      )
+    )
+  }
+</span>
+
+<style>
+  .odo {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 1px;
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: var(--odo-size);
+    line-height: 1;
+    color: var(--meter, var(--on-dark));
+    text-shadow: 0 0 12px color-mix(in srgb, var(--meter, #fff) 55%, transparent);
+  }
+
+  /* The wheels carry their own dark housing so the counter reads as a physical
+     instrument wherever it is placed, light section or dark. */
+  .odo-wheel {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    width: 0.66em;
+    height: 1.2em;
+    background: #0b1119;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    /* The glass: a highlight across the top third of every wheel. */
+    box-shadow:
+      inset 0 0.16em 0.22em rgba(255, 255, 255, 0.09),
+      inset 0 -0.14em 0.26em rgba(0, 0, 0, 0.6);
+  }
+
+  .odo-strip {
+    display: block;
+    height: 1000%;
+    transition: transform 620ms cubic-bezier(0.2, 1.5, 0.35, 1);
+    will-change: transform;
+  }
+
+  .odo-strip > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 10%;
+  }
+
+  .odo-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .odo-sep {
+    display: flex;
+    align-items: flex-end;
+    padding: 0 0.08em 0.16em;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8em;
+  }
+</style>
+
+<script>
+  // Roll every wheel whose digit no longer matches data-value.
+  const sync = (odo: HTMLElement) => {
+    const target = odo.dataset.value ?? '';
+    const digits = [...target].filter((c) => /\d/.test(c));
+    const wheels = odo.querySelectorAll<HTMLElement>('.odo-wheel');
+
+    wheels.forEach((wheel, i) => {
+      const next = digits[i];
+      if (next === undefined || wheel.dataset.digit === next) return;
+      wheel.dataset.digit = next;
+      const strip = wheel.firstElementChild as HTMLElement | null;
+      if (strip) strip.style.transform = `translateY(${-Number(next) * 10}%)`;
+    });
+  };
+
+  for (const odo of document.querySelectorAll<HTMLElement>('.odo')) {
+    sync(odo);
+    new MutationObserver(() => sync(odo)).observe(odo, {
+      attributes: true,
+      attributeFilter: ['data-value'],
+    });
+  }
+</script>

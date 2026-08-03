@@ -1,0 +1,153 @@
+@import '@fontsource-variable/open-sans';
+
+/*
+ * AWS Bill Explained.
+ *
+ * The palette and type are deliberately close to Cloudscape, the design system
+ * behind the AWS console, so the site feels like it belongs next to the thing
+ * it explains. Amazon Ember is proprietary, so we use Open Sans — Cloudscape's
+ * own fallback — rather than inventing a look.
+ *
+ * The one idea layered on top of Cloudscape is the site's teaching device:
+ *   SATURATED = you are being charged.  GREY = it's free.
+ * Every diagram obeys it, so a reader can find the money before reading a word.
+ */
+
+:root {
+  /* Cloudscape surfaces */
+  --bg: #ffffff;
+  --surface: #f9f9fa;
+  --surface-sunken: #f2f3f3;
+  --border: #c6c6cd;
+  --border-subtle: #e9ebed;
+
+  /* AWS console header */
+  --squid-ink: #232f3e;
+
+  /* Text */
+  --text: #0f141a;
+  --text-dim: #424650;
+  --text-faint: #656871;
+  --on-dark: #ffffff;
+
+  /*
+   * The three meters, taken from AWS's own accent colours: the orange from the
+   * logo, Cloudscape's link blue, and its error red. Three hues that already
+   * read as "AWS" and stay distinguishable side by side.
+   */
+  --m-time: #ff9900;
+  --m-egress: #0972d3;
+  --m-calls: #d13212;
+
+  /* Tints for filled backgrounds behind each meter. */
+  --m-time-tint: #fef6e7;
+  --m-egress-tint: #f0f8ff;
+  --m-calls-tint: #fdf3f1;
+
+  /* Unlit. Anything free renders in this and never takes a hue. */
+  --unlit: #9ba7b6;
+
+  --font-body:
+    'Open Sans Variable', 'Open Sans', 'Helvetica Neue', Roboto, Arial,
+    'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  --font-ui: var(--font-body);
+  --font-display: var(--font-body);
+  --font-mono: 'Amazon Ember Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --measure: 44rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius: 8px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Type ---- */
+
+.display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+a {
+  color: var(--m-egress);
+  text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--m-egress);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: var(--text-dim);
+}
+
+/* ---- Meter semantics ---- */
+
+.meter-time {
+  --meter: var(--m-time);
+  --meter-tint: var(--m-time-tint);
+}
+
+.meter-egress {
+  --meter: var(--m-egress);
+  --meter-tint: var(--m-egress-tint);
+}
+
+.meter-calls {
+  --meter: var(--m-calls);
+  --meter-tint: var(--m-calls-tint);
+}
+
+/* ---- Motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

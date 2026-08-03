@@ -1,0 +1,253 @@
+---
+import Base from '../layouts/Base.astro';
+import { METER_ORDER } from '../domain/meter';
+import { loadCatalogue } from '../infrastructure/service-repository';
+import { localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const s = t(lang);
+const catalogue = loadCatalogue();
+
+const counts = catalogue.countByMeter();
+const categories = catalogue.categories();
+---
+
+<Base title={`${s.services.title} — ${s.siteTitle}`} lang={lang}>
+  <section class="si">
+    <p class="eyebrow">{s.nav.services}</p>
+    <h1 class="display si-h">{s.services.title}</h1>
+    <p class="si-lede">{s.services.lede}</p>
+
+    <!-- Filtering is a client concern; the counts come from the domain. -->
+    <div class="si-filters" role="group">
+      <button type="button" class="si-chip is-on" data-filter="all" aria-pressed="true">
+        {s.services.filterAll}
+        <span class="si-n">{catalogue.size}</span>
+      </button>
+      {
+        METER_ORDER.map((m) => (
+          <button type="button" class={`si-chip meter-${m}`} data-filter={m} aria-pressed="false">
+            {s.meters[m].name}
+            <span class="si-n">{counts[m]}</span>
+          </button>
+        ))
+      }
+      <button type="button" class="si-chip" data-filter="free" aria-pressed="false">
+        {s.services.filterFree}
+        <span class="si-n">{catalogue.free().length}</span>
+      </button>
+    </div>
+
+    {
+      categories.map((category) => (
+        <section class="si-cat" data-category>
+          <h2 class="si-cat-h">{s.categories[category]}</h2>
+          <ul class="si-list">
+            {catalogue.inCategory(category).map((service) => (
+              <li
+                class="si-item"
+                data-meters={service.meters.toArray().join(' ')}
+                data-free={service.isFree ? 'true' : 'false'}
+              >
+                <a href={localePath(lang, `/services/${service.slug}/`)}>
+                  <span class="si-name">
+                    {service.name}
+                    <span class="si-lamps" aria-hidden="true">
+                      {METER_ORDER.map((m) => (
+                        <i class={service.turns(m) ? `is-on meter-${m}` : ''} />
+                      ))}
+                    </span>
+                  </span>
+                  <span class="si-one">{service.oneLiner}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </section>
+</Base>
+
+<style>
+  .si {
+    padding-inline: var(--gutter);
+    max-width: 68rem;
+    margin-inline: auto;
+    padding-top: clamp(2.5rem, 7vw, 4rem);
+  }
+
+  .si-h {
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .si-lede {
+    max-width: var(--measure);
+    margin: 0 0 2rem;
+    color: var(--text-dim);
+  }
+
+  .si-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .si-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg);
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  .si-chip:hover {
+    border-color: var(--meter, var(--text-faint));
+  }
+
+  .si-chip.is-on {
+    background: var(--meter, var(--squid-ink));
+    border-color: var(--meter, var(--squid-ink));
+    color: var(--on-dark);
+  }
+
+  .si-n {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    opacity: 0.75;
+  }
+
+  .si-cat {
+    margin-bottom: 3rem;
+  }
+
+  .si-cat[hidden] {
+    display: none;
+  }
+
+  .si-cat-h {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .si-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 1px;
+    background: var(--border-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .si-item[hidden] {
+    display: none;
+  }
+
+  .si-item a {
+    display: grid;
+    gap: 0.3rem;
+    height: 100%;
+    padding: 1rem 1.1rem 1.15rem;
+    background: var(--bg);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .si-item a:hover {
+    background: var(--surface);
+  }
+
+  .si-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .si-item a:hover .si-name {
+    color: var(--m-egress);
+  }
+
+  .si-lamps {
+    display: inline-flex;
+    gap: 3px;
+    flex: none;
+  }
+
+  .si-lamps i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  .si-lamps i.is-on {
+    background: var(--meter);
+    border-color: var(--meter);
+  }
+
+  .si-one {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--text-faint);
+  }
+</style>
+
+<script>
+  // Filter in the browser so the whole catalogue stays one static page.
+  const chips = document.querySelectorAll<HTMLButtonElement>('.si-chip');
+  const items = document.querySelectorAll<HTMLElement>('.si-item');
+  const groups = document.querySelectorAll<HTMLElement>('[data-category]');
+
+  const apply = (filter: string) => {
+    for (const item of items) {
+      const meters = (item.dataset.meters ?? '').split(' ').filter(Boolean);
+      const free = item.dataset.free === 'true';
+      const show =
+        filter === 'all' || (filter === 'free' ? free : meters.includes(filter));
+      item.hidden = !show;
+    }
+    // Hide a category heading once everything under it is filtered out.
+    for (const group of groups) {
+      const visible = group.querySelectorAll('.si-item:not([hidden])').length;
+      group.hidden = visible === 0;
+    }
+  };
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      for (const other of chips) {
+        const on = other === chip;
+        other.classList.toggle('is-on', on);
+        other.setAttribute('aria-pressed', String(on));
+      }
+      apply(chip.dataset.filter ?? 'all');
+    });
+  }
+</script>

@@ -1,0 +1,224 @@
+---
+import type { MeterId } from '../data/meters';
+import { t, type Lang } from '../i18n/strings';
+
+/**
+ * A sequence diagram with a billing gutter.
+ *
+ * The left two-thirds is the usual lifelines-and-messages picture. The right
+ * third is what the AWS docs never put next to it: which meter ticked on that
+ * exact message, and for how much. Reading down the gutter gives you the
+ * invoice for the interaction.
+ */
+export interface SeqStep {
+  from: string;
+  to: string;
+  label: string;
+  /** Dashed line, for a return message. */
+  reply?: boolean;
+  /** Which meter this message turns. Omit for free. */
+  meter?: MeterId;
+  /** Gutter text, e.g. "1 GB × $0.09". */
+  charge?: string;
+}
+
+interface Props {
+  actors: { id: string; label: string }[];
+  steps: SeqStep[];
+  caption?: string;
+  lang?: Lang;
+}
+
+const { actors, steps, caption, lang = 'en' } = Astro.props;
+const s = t(lang).diagram;
+
+const COL_W = 150;
+const PAD_X = 10;
+const HEAD_H = 42;
+const STEP_H = 58;
+const GUTTER_W = 178;
+
+const laneX = (id: string) => PAD_X + actors.findIndex((a) => a.id === id) * COL_W + COL_W / 2;
+const stepY = (i: number) => HEAD_H + 34 + i * STEP_H;
+
+const LANES_W = PAD_X * 2 + actors.length * COL_W;
+const W = LANES_W + GUTTER_W;
+const H = HEAD_H + 34 + steps.length * STEP_H + 16;
+
+const billed = steps.filter((s) => s.meter);
+---
+
+<figure class="sq">
+  <div class="sq-scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="sq-svg" role="img" aria-label={caption}>
+      <defs>
+        <marker id="sq-head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7"
+                orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" fill="context-stroke"></path>
+        </marker>
+      </defs>
+
+      {/* Billing gutter — the column AWS's own diagrams are missing. */}
+      <rect x={LANES_W} y="0" width={GUTTER_W} height={H} fill="var(--surface)" />
+      <line x1={LANES_W} y1="0" x2={LANES_W} y2={H} stroke="var(--border)" stroke-width="1" />
+      <text x={LANES_W + 14} y="24" class="sq-gutter-head">{s.meter}</text>
+
+      {
+        actors.map((a) => (
+          <g>
+            <rect x={laneX(a.id) - COL_W / 2 + 12} y="10" width={COL_W - 24} height={HEAD_H - 14}
+                  rx="6" fill="var(--surface)" stroke="var(--border)"
+                  stroke-width="1.5" />
+            <text x={laneX(a.id)} y={HEAD_H - 12} text-anchor="middle" class="sq-actor">
+              {a.label}
+            </text>
+            <line x1={laneX(a.id)} y1={HEAD_H} x2={laneX(a.id)} y2={H - 8}
+                  stroke="var(--border-subtle)" stroke-width="1" stroke-dasharray="3 5" />
+          </g>
+        ))
+      }
+
+      {
+        steps.map((step, i) => {
+          const y = stepY(i);
+          const x1 = laneX(step.from);
+          const x2 = laneX(step.to);
+          const lit = Boolean(step.meter);
+          const stroke = lit ? `var(--m-${step.meter})` : 'var(--unlit)';
+          const forward = x2 > x1;
+          const from = x1 + (forward ? 6 : -6);
+          const to = x2 + (forward ? -6 : 6);
+          return (
+            <g class:list={['sq-step', lit && 'is-lit']} style={`--stroke:${stroke}`}>
+              <line x1={from} y1={y} x2={to} y2={y} stroke={stroke}
+                    stroke-width={lit ? 2.25 : 1.5}
+                    stroke-dasharray={step.reply ? '6 4' : undefined}
+                    marker-end="url(#sq-head)" />
+              <text x={(from + to) / 2} y={y - 9} text-anchor="middle"
+                    class:list={['sq-label', lit && 'is-lit']}>
+                {step.label}
+              </text>
+
+              {/* Gutter row */}
+              <line x1={LANES_W} y1={y + 18} x2={W} y2={y + 18} stroke="var(--bg)"
+                    stroke-width="1" />
+              {lit ? (
+                <>
+                  <circle cx={LANES_W + 20} cy={y - 3} r="4" fill={stroke} class="sq-lamp" />
+                  <text x={LANES_W + 32} y={y + 1} class="sq-meter" fill={stroke}>
+                    {t(lang).meters[step.meter as MeterId].name}
+                  </text>
+                  {step.charge && (
+                    <text x={LANES_W + 32} y={y + 14} class="sq-charge">
+                      {step.charge}
+                    </text>
+                  )}
+                </>
+              ) : (
+                <>
+                  <circle cx={LANES_W + 20} cy={y - 3} r="4" fill="none" stroke="var(--unlit)"
+                          stroke-width="1.25" />
+                  <text x={LANES_W + 32} y={y + 1} class="sq-none">{s.idle}</text>
+                </>
+              )}
+            </g>
+          );
+        })
+      }
+    </svg>
+  </div>
+
+  <figcaption class="sq-cap">
+    {caption}
+    {
+      billed.length === 0 && (
+        <strong class="sq-verdict"> {s.nothing}</strong>
+      )
+    }
+  </figcaption>
+</figure>
+
+<style>
+  .sq {
+    margin: 2.5rem 0;
+  }
+
+  .sq-scroll {
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -0.5);
+    padding-inline: calc(var(--gutter) * 0.5);
+  }
+
+  .sq-svg {
+    display: block;
+    width: 100%;
+    max-width: 58rem;
+    height: auto;
+    min-width: 36rem;
+    margin-inline: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+  }
+
+  .sq-actor {
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    font-weight: 600;
+    fill: var(--text);
+  }
+
+  .sq-label {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    fill: var(--text-dim);
+  }
+
+  .sq-label.is-lit {
+    fill: var(--text);
+  }
+
+  .sq-step.is-lit line:first-child {
+  }
+
+  .sq-gutter-head {
+    font-family: var(--font-display);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    fill: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .sq-meter {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .sq-charge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--text-dim);
+  }
+
+  .sq-none {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    fill: var(--unlit);
+  }
+
+  .sq-lamp {
+  }
+
+  .sq-cap {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-faint);
+    line-height: 1.7;
+  }
+
+  .sq-verdict {
+    color: var(--text-dim);
+  }
+</style>

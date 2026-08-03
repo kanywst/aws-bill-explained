@@ -1,0 +1,387 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Odometer from './Odometer.astro';
+import PathDiagram from './PathDiagram.astro';
+import { METER_ORDER } from '../data/meters';
+import { localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const s = t(lang);
+
+const topics = (await getCollection('topics'))
+  .filter((e) => e.id.startsWith(`${lang}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
+---
+
+<Base title={`${s.siteTitle} — ${s.hero.headA} ${s.hero.headB}`} lang={lang}>
+  <section class="hero">
+    <p class="eyebrow">{s.hero.eyebrow}</p>
+    <h1 class="display hero-h">
+      {s.hero.headA}<br /><span class="hero-count">{s.hero.headB}</span>
+    </h1>
+    <p class="hero-lede">{s.hero.lede}</p>
+
+    <!-- The thesis as an object that moves: a meter nobody asked to start. -->
+    <div class="rig">
+      <p class="rig-head">{s.hero.rigHead}</p>
+
+      <div class="rig-dials">
+        <div class="meter-time">
+          <Odometer id="dial-time" value="00:00:00" meter="time" size="2.1rem"
+                    label={s.hero.capElapsed} />
+          <p class="rig-cap">{s.hero.capElapsed}</p>
+        </div>
+        <div class="meter-time">
+          <Odometer id="dial-cost" value="0.000000" meter="time" size="2.1rem"
+                    label={s.hero.capAccrued} />
+          <p class="rig-cap">{s.hero.capAccrued}</p>
+        </div>
+      </div>
+
+      <p class="rig-foot">
+        {s.hero.rigFoot}
+        <span class="rig-assume">{s.hero.rigAssume}</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="meters">
+    <h2 class="eyebrow sec-head">{s.sections.meters}</h2>
+    <ol class="meter-list">
+      {
+        METER_ORDER.map((id, i) => {
+          const m = s.meters[id];
+          return (
+            <li class={`meter-card meter-${id}`}>
+              <p class="meter-n num">{String(i + 1).padStart(2, '0')}</p>
+              <h3 class="meter-name">{m.name}</h3>
+              <p class="meter-test">{m.test}</p>
+              <dl class="meter-dl">
+                <dt>{s.meterHeads.counts}</dt>
+                <dd>{m.counts}</dd>
+                <dt>{s.meterHeads.trap}</dt>
+                <dd>{m.trap}</dd>
+                <dt>{s.meterHeads.bill}</dt>
+                <dd><code>{m.onTheBill}</code></dd>
+              </dl>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </section>
+
+  <section class="apply">
+    <h2 class="eyebrow sec-head">{s.sections.reading}</h2>
+    <p class="apply-lede">{s.reading.lede}</p>
+
+    <PathDiagram
+      lang={lang}
+      caption={s.reading.diagramCaption}
+      nodes={[
+        { id: 'user', label: s.reading.nodeClient, sub: 'internet' },
+        { id: 'igw', label: s.reading.nodeIgw, sub: s.reading.nodeIgwSub },
+        { id: 'ec2', label: 'EC2', sub: 't3.micro', charges: ['time'] },
+      ]}
+      hops={[
+        { from: 'user', to: 'ec2', label: s.reading.hopIn },
+        { from: 'ec2', to: 'user', label: s.reading.hopOut, meter: 'egress', cost: '$0.09/GB' },
+      ]}
+    />
+
+    <p class="apply-note">{s.reading.note}</p>
+  </section>
+
+  <section class="index">
+    <h2 class="eyebrow sec-head">{s.sections.topics}</h2>
+    <p class="index-lede">{s.topicsLede}</p>
+    <ul class="index-list">
+      {
+        topics.map((topic) => (
+          <li>
+            <a class="index-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
+              <span class="index-title">{topic.data.short ?? topic.data.title}</span>
+              <span class="index-one">{topic.data.oneLiner}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  section {
+    padding-inline: var(--gutter);
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .sec-head {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ---- Hero ---- */
+
+  .hero {
+    max-width: none;
+    padding: clamp(4rem, 10vw, 7rem) var(--gutter) clamp(3.5rem, 8vw, 5.5rem);
+    background:
+      radial-gradient(90rem 40rem at 15% -10%, rgba(255, 153, 0, 0.16), transparent 60%),
+      radial-gradient(70rem 40rem at 85% 0%, rgba(9, 114, 211, 0.18), transparent 62%),
+      var(--squid-ink);
+    color: var(--on-dark);
+  }
+
+  .hero > * {
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .hero .eyebrow {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .hero-h {
+    font-size: clamp(2.4rem, 7vw, 4.75rem);
+    margin: 0.8rem 0 1.5rem;
+    letter-spacing: -0.035em;
+  }
+
+  .hero-count {
+    color: var(--m-time);
+  }
+
+  .hero-lede {
+    max-width: var(--measure);
+    margin: 0 0 3rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .rig {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: clamp(1.35rem, 3.5vw, 2rem);
+  }
+
+  .rig-head {
+    margin: 0 0 1.6rem;
+    max-width: 34rem;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .rig-dials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+  }
+
+  .rig-cap {
+    margin: 0.7rem 0 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .rig-foot {
+    margin: 1.85rem 0 0;
+    padding-top: 1.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 40rem;
+  }
+
+  .rig-assume {
+    display: block;
+    margin-top: 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  /* ---- Meters ---- */
+
+  .meters {
+    margin-top: clamp(3.5rem, 8vw, 5.5rem);
+  }
+
+  .meter-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .meter-card {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-top: 3px solid var(--meter);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.5rem 1.9rem;
+    box-shadow: 0 1px 2px rgba(15, 20, 26, 0.05);
+  }
+
+  .meter-n {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--meter);
+  }
+
+  .meter-name {
+    margin: 0.35rem 0 0.8rem;
+    font-family: var(--font-display);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .meter-test {
+    margin: 0 0 1.35rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--meter-tint);
+    border-radius: 6px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .meter-dl {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.7;
+  }
+
+  .meter-dl dt {
+    font-family: var(--font-ui);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-top: 1rem;
+  }
+
+  .meter-dl dd {
+    margin: 0.2rem 0 0;
+    color: var(--text-dim);
+  }
+
+  .meter-dl code {
+    font-size: 0.74rem;
+  }
+
+  /* ---- Apply ---- */
+
+  .apply {
+    margin-top: clamp(3.5rem, 8vw, 5.5rem);
+  }
+
+  .apply-lede,
+  .apply-note {
+    max-width: var(--measure);
+    margin: 0;
+    color: var(--text-dim);
+  }
+
+  .apply-note {
+    font-size: 0.92rem;
+    color: var(--text-faint);
+  }
+
+  /* ---- Index ---- */
+
+  .index {
+    margin-top: clamp(3.5rem, 8vw, 5.5rem);
+  }
+
+  .index-lede {
+    max-width: var(--measure);
+    margin: 0 0 1.5rem;
+    color: var(--text-faint);
+    font-size: 0.92rem;
+  }
+
+  .index-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .index-item {
+    display: grid;
+    grid-template-columns: minmax(9rem, 15rem) 1fr;
+    gap: 0.35rem 2rem;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    align-items: baseline;
+  }
+
+  .index-item:hover .index-title {
+    color: var(--m-egress);
+  }
+
+  .index-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .index-one {
+    color: var(--text-faint);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  @media (max-width: 40rem) {
+    .index-item {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // The hero meter starts on load and never asks permission, which is the
+  // lesson of meter one delivered before the reader scrolls.
+  const RATE_PER_HOUR = 0.0104; // t3.micro, on-demand, us-east-1
+  const time = document.getElementById('dial-time');
+  const cost = document.getElementById('dial-cost');
+
+  if (time && cost) {
+    const start = performance.now();
+    const pad = (n: number) => String(Math.floor(n)).padStart(2, '0');
+
+    const tick = () => {
+      const secs = (performance.now() - start) / 1000;
+      time.dataset.value = `${pad(secs / 3600)}:${pad((secs / 60) % 60)}:${pad(secs % 60)}`;
+      // Six decimals so the rightmost wheel is always visibly moving.
+      cost.dataset.value = ((secs / 3600) * RATE_PER_HOUR).toFixed(6);
+      window.setTimeout(tick, 100);
+    };
+
+    tick();
+  }
+</script>

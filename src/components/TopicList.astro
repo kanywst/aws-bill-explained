@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import MeterLamps from './MeterLamps.astro';
+import { localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const s = t(lang);
+
+const topics = (await getCollection('topics'))
+  .filter((e) => e.id.startsWith(`${lang}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
+---
+
+<Base title={`${s.nav.topics} — ${s.siteTitle}`} lang={lang}>
+  <section class="tl">
+    <p class="eyebrow">{s.sections.topics}</p>
+    <h1 class="display tl-h">{s.topicsLede}</h1>
+
+    <ul class="tl-list">
+      {
+        topics.map((topic) => (
+          <li>
+            <a class="tl-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
+              <span class="tl-main">
+                <span class="tl-title">{topic.data.title}</span>
+                <span class="tl-one">{topic.data.oneLiner}</span>
+              </span>
+              <MeterLamps active={topic.data.meters} lang={lang} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .tl {
+    padding-inline: var(--gutter);
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-top: clamp(2.5rem, 7vw, 4.5rem);
+  }
+
+  .tl-h {
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    max-width: 26ch;
+    margin: 0.7rem 0 3rem;
+    color: var(--text-dim);
+  }
+
+  .tl-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tl-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.85rem 2rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+  }
+
+  .tl-list li:last-child .tl-item {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tl-main {
+    display: grid;
+    gap: 0.3rem;
+    max-width: 38rem;
+  }
+
+  .tl-title {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+  }
+
+  .tl-item:hover .tl-title {
+    color: var(--m-egress);
+  }
+
+  .tl-one {
+    color: var(--text-faint);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+</style>

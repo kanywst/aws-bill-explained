@@ -1,0 +1,182 @@
+---
+import '../styles/global.css';
+import LangSwitch from '../components/LangSwitch.astro';
+import { METER_ORDER } from '../data/meters';
+import { localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  title: string;
+  lang: Lang;
+  description?: string;
+  /** Locales this page exists in; drives the language switcher. */
+  available?: Lang[];
+}
+
+const { title, lang, description, available } = Astro.props;
+const s = t(lang);
+const path = Astro.url.pathname;
+
+const nav = [
+  { href: localePath(lang, '/'), label: s.nav.home },
+  { href: localePath(lang, '/services/'), label: s.nav.services },
+  { href: localePath(lang, '/topics/'), label: s.nav.topics },
+];
+---
+
+<!doctype html>
+<html lang={s.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description ?? s.siteDescription} />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="skip" href="#main">{s.skip}</a>
+
+    <header class="hd">
+      <a class="hd-mark" href={localePath(lang, '/')} aria-label={s.siteTitle}>
+        <span class="hd-top">{s.markTop}</span>
+        <span class="hd-bottom">{s.markBottom}</span>
+        {/* Three segments, one per meter. The logo is the thesis. */}
+        <span class="hd-rule" aria-hidden="true">
+          {METER_ORDER.map((m) => <i style={`background:var(--m-${m})`} />)}
+        </span>
+      </a>
+
+      <div class="hd-right">
+        <nav class="hd-nav">
+          {
+            nav.map((n) => (
+              <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+        <LangSwitch lang={lang} available={available} />
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="ft">
+      <p class="ft-line">{s.footerPrices}</p>
+      <p class="ft-line ft-dim">{s.footerDisclaimer}</p>
+    </footer>
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -999px;
+      }
+
+      .skip:focus {
+        left: var(--gutter);
+        top: 0.6rem;
+        z-index: 10;
+        background: var(--surface);
+        padding: 0.5rem 0.9rem;
+        border-radius: 4px;
+      }
+
+      .hd {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 2rem;
+        flex-wrap: wrap;
+        padding: 0.85rem var(--gutter);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: saturate(180%) blur(12px);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .hd-mark {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+
+      .hd-top {
+        font-weight: 400;
+        font-size: 1.02rem;
+        color: var(--text-faint);
+      }
+
+      .hd-bottom {
+        font-weight: 700;
+        font-size: 1.02rem;
+        color: var(--text);
+      }
+
+      /* Three segments, one per meter — the only colour in the bar. */
+      .hd-rule {
+        display: flex;
+        gap: 2px;
+        align-self: center;
+        margin-left: 0.5rem;
+      }
+
+      .hd-rule i {
+        height: 4px;
+        width: 14px;
+        border-radius: 1px;
+      }
+
+      .hd-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .hd-nav {
+        display: flex;
+        gap: 1.5rem;
+        font-family: var(--font-ui);
+        font-size: 0.82rem;
+      }
+
+      .hd-nav a {
+        color: var(--text-faint);
+        text-decoration: none;
+        padding-bottom: 3px;
+        border-bottom: 2px solid transparent;
+      }
+
+      .hd-nav a:hover,
+      .hd-nav a[aria-current='page'] {
+        color: var(--text);
+        border-bottom-color: var(--m-time);
+      }
+
+      .ft {
+        margin-top: 5rem;
+        padding: 2rem var(--gutter) 3rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.82rem;
+        line-height: 1.8;
+      }
+
+      .ft-line {
+        max-width: 44rem;
+        margin: 0 0 0.5rem;
+        color: var(--text-faint);
+      }
+
+      .ft-dim {
+        color: var(--unlit);
+      }
+    </style>
+  </body>
+</html>

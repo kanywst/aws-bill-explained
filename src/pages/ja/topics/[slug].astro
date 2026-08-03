@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import Topic from '../../../components/Topic.astro';
+
+export async function getStaticPaths() {
+  const topics = await getCollection('topics');
+  return topics
+    .filter((entry) => entry.id.startsWith('ja/'))
+    .map((entry) => ({
+      params: { slug: entry.id.slice('ja/'.length) },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+---
+
+<Topic entry={entry} lang="ja" />

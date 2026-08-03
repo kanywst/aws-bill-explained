@@ -1,0 +1,242 @@
+[
+  {
+    "slug": "s3",
+    "name": "Amazon S3",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Storage is the boring part - the requests and the egress are what actually blow up your bill.",
+    "trap": "PUT/COPY/POST/LIST cost about 10x more per request than GET, and DELETEs are free. IA and Glacier classes add retrieval fees, a 128 KB minimum object size, and early-delete charges.",
+    "billOn": [
+      "TimedStorage-ByteHrs",
+      "Requests-Tier1",
+      "Requests-Tier2",
+      "DataTransfer-Out-Bytes",
+      "Retrieval-SIA",
+      "EarlyDelete-SIA"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/aws-usage-report-understand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "s3-glacier",
+    "name": "Amazon S3 Glacier",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Cheap to park data, expensive to want it back - retrieval bills per GB and per restore request.",
+    "trap": "A restore costs a per-request fee AND a per-GB retrieval fee, and Expedited/Standard/Bulk changes both. Delete before 90 days (Deep Archive: 180) and you still pay the remaining days.",
+    "billOn": [
+      "TimedStorage-GlacierByteHrs",
+      "Standard-Retrieval-Bytes",
+      "Requests-Tier3",
+      "EarlyDelete-ByteHrs"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ebs",
+    "name": "Amazon Elastic Block Store (EBS)",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "You pay for the size you provisioned, not what you used, and snapshots keep billing after the volume is gone.",
+    "trap": "Detached volumes still bill in full. gp3 IOPS and throughput above baseline bill separately, EBS direct API blocks bill per request, and archived snapshots have a 90-day minimum.",
+    "billOn": [
+      "EBS:VolumeUsage.gp3",
+      "EBS:VolumeP-IOPS.gp3",
+      "EBS:SnapshotUsage",
+      "EBS:SnapshotArchiveStorage",
+      "EBS:directAPI.snapshot.Get"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ebs/pricing/",
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-billing-usage-reports.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "efs",
+    "name": "Amazon Elastic File System (EFS)",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Storage is only half of it - with Elastic throughput every GB you read or write gets metered too.",
+    "trap": "Elastic throughput bills per GB read AND written, direction-agnostic. IA and Archive add data-access fees on every read, a 128 KiB minimum file size, and Archive has a 90-day minimum.",
+    "billOn": [
+      "TimedStorage-ByteHrs",
+      "IATimedStorage-ByteHrs",
+      "ETDataAccess-Bytes",
+      "IADataAccess-Bytes",
+      "ProvisionedTP-MiBpsHrs"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/efs/pricing/",
+      "https://docs.aws.amazon.com/efs/latest/ug/billing-usage-reports-understand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "fsx",
+    "name": "Amazon FSx",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Four different file systems under one name, each billing provisioned capacity plus provisioned throughput.",
+    "trap": "Throughput capacity and SSD IOPS are provisioned and billed separately from storage. Once ONTAP capacity-pool or Lustre Intelligent-Tiering holds your data, every read and write adds a request charge.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/fsx/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "backup",
+    "name": "AWS Backup",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Backups bill per GB-month like storage, but restoring costs extra and cold storage locks you in.",
+    "trap": "Restores are charged per GB, so the stored backup is not the whole bill. Cold-tier backups have a 90-day minimum, so deleting early still pays out the remaining days.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/backup/pricing/",
+      "https://docs.aws.amazon.com/aws-backup/latest/devguide/metering-and-billing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "storage-gateway",
+    "name": "AWS Storage Gateway",
+    "category": "storage",
+    "meters": [
+      "egress"
+    ],
+    "oneLiner": "The rare AWS service that charges you to write data IN and nothing to read it back out.",
+    "trap": "Inverted from everything else: you pay per GB written to AWS (capped per gateway per month) and reads are free. The S3 or EBS behind it bills separately.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/storagegateway/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "datasync",
+    "name": "AWS DataSync",
+    "category": "storage",
+    "meters": [
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "A flat per-GB toll on everything you move, either direction, on top of what S3 and EFS charge you.",
+    "trap": "The per-GB fee is direction-agnostic and is only DataSync's cut. S3 LIST/HEAD/GET/PUT requests and cross-region transfer bill on top. Enhanced mode adds a per-task-execution fee.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/datasync/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "s3-express-one-zone",
+    "name": "Amazon S3 Express One Zone",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Built for request-heavy work: requests are dirt cheap, storage is not, and bytes moved are metered.",
+    "trap": "Unlike S3 Standard it also bills per GB uploaded and retrieved on top of the per-request fee. Storage costs multiples of S3 Standard, so it punishes idle data.",
+    "billOn": [
+      "TimedStorage-XZ-ByteHrs",
+      "Requests-XZ-Tier1",
+      "Upload-XZ",
+      "Retrieval-XZ"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/storage-classes/express-one-zone/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elastic-disaster-recovery",
+    "name": "AWS Elastic Disaster Recovery",
+    "category": "storage",
+    "meters": [
+      "time"
+    ],
+    "oneLiner": "One flat hourly fee per source server - the real cost is the EBS and EC2 it quietly runs for you.",
+    "trap": "The per-server hour is the small part. A staging EBS volume per source disk, snapshots and replication EC2 instances bill under EBS/EC2 and run 24/7 even when you never fail over.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/disaster-recovery/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "file-cache",
+    "name": "Amazon File Cache",
+    "category": "storage",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Bills like a provisioned file system - you buy cache capacity by the GB-month, warm or not.",
+    "trap": "Throughput is not its own line item; it is bundled into capacity, so you buy GB to get MB/s. Cross-AZ and VPC-peering traffic is charged per GB in BOTH directions.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/filecache/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "snow-family",
+    "name": "AWS Snow Family",
+    "category": "storage",
+    "meters": [
+      "time"
+    ],
+    "oneLiner": "You rent a physical box by the day; importing into S3 is free, exporting out of it is not.",
+    "trap": "Data transfer INTO AWS is free, but export jobs pay normal S3 data-transfer-out per GB. The job fee covers a fixed window of on-site days; sitting on the device past that bills per extra day.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/snowball/pricing/"
+    ],
+    "checked": "2026-08-04"
+  }
+]

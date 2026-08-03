@@ -1,0 +1,95 @@
+---
+import { METER_ORDER, type MeterId } from '../data/meters';
+import { t, type Lang } from '../i18n/strings';
+
+/**
+ * Three lamps, lit for the meters a topic actually turns.
+ *
+ * This is the site's structural device. Generic 01/02/03 numbering would imply
+ * an order that doesn't exist here; the lamps instead encode something true and
+ * checkable about every page — which meters apply — and they appear in the same
+ * place on every topic, so the shape of a page is readable before the words.
+ */
+interface Props {
+  active: MeterId[];
+  size?: 'sm' | 'lg';
+  lang?: Lang;
+}
+
+const { active, size = 'sm', lang = 'en' } = Astro.props;
+const copy = t(lang);
+---
+
+<ul class:list={['lamps', `is-${size}`]}>
+  {
+    METER_ORDER.map((id) => {
+      const on = active.includes(id);
+      return (
+        <li class:list={['lamp', on && 'is-on']} style={`--meter:var(--m-${id})`}>
+          <i />
+          <span>{copy.meters[id].name}</span>
+          <span class="sr">{on ? copy.a11y.billed : copy.a11y.notBilled}</span>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .lamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.24rem 0.6rem 0.24rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--unlit);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  .lamp i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.25px solid var(--unlit);
+    flex: none;
+  }
+
+  .lamp.is-on {
+    color: var(--meter);
+    border-color: color-mix(in oklab, var(--meter) 40%, var(--border));
+  }
+
+  .lamp.is-on i {
+    background: var(--meter);
+    border-color: var(--meter);
+    box-shadow: none;
+  }
+
+  .is-lg .lamp {
+    font-size: 0.8rem;
+    padding: 0.34rem 0.8rem 0.34rem 0.65rem;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

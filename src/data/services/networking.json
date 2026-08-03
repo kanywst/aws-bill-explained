@@ -1,0 +1,345 @@
+[
+  {
+    "slug": "vpc",
+    "name": "Amazon Virtual Private Cloud (VPC)",
+    "category": "networking",
+    "meters": [],
+    "oneLiner": "The VPC itself is free. Everything you get billed for is something you attached to it.",
+    "trap": "People hunt for a VPC line item and find nothing. The real cost is NAT gateways, interface endpoints, public IPv4 hours and cross-AZ transfer, each billed separately.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpc/pricing/",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-billing-usage-reports.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "nat-gateway",
+    "name": "NAT Gateway",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Charged per hour just for existing, plus a per-GB fee on every byte it touches.",
+    "trap": "The per-GB data processing fee is direction-agnostic - downloads cost exactly what uploads do. 'Inbound is free' does not apply here, and it stacks on top of normal data transfer out.",
+    "billOn": [
+      "NatGateway-Hours",
+      "NatGateway-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpc/pricing/",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "internet-gateway",
+    "name": "Internet Gateway",
+    "category": "networking",
+    "meters": [
+      "egress"
+    ],
+    "oneLiner": "The gateway is free; you only pay for the bytes that leave through it.",
+    "trap": "There is no internet gateway line item - egress lands on EC2 DataTransfer-Out-Bytes. Inbound genuinely is free here, unlike NAT gateway processing. Egress-only IGW is free too.",
+    "billOn": [
+      "DataTransfer-Out-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "transit-gateway",
+    "name": "AWS Transit Gateway",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Hourly per attachment, then again per GB for traffic sent into the gateway.",
+    "trap": "Every attachment bills hourly at zero traffic. Processing is direction-agnostic and charged to the sender, but traffic arriving from a peering attachment is not processed-charged again.",
+    "billOn": [
+      "TransitGateway-Hours",
+      "TransitGateway-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/transit-gateway/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "privatelink-interface-endpoint",
+    "name": "AWS PrivateLink Interface VPC Endpoint",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Billed per hour per AZ per endpoint, plus per GB processed - the AZ count is what bites.",
+    "trap": "Hourly billing runs per AZ even while the endpoint is pending or rejected, and the per-GB processing fee applies regardless of the traffic's source or destination - inbound is not free.",
+    "billOn": [
+      "VpcEndpoint-Hours",
+      "VpcEndpoint-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/privatelink/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "gateway-vpc-endpoint",
+    "name": "Gateway VPC Endpoint (S3, DynamoDB)",
+    "category": "networking",
+    "meters": [],
+    "oneLiner": "Genuinely free - no hourly fee, no per-GB fee, for S3 and DynamoDB only.",
+    "trap": "Do not confuse with interface endpoints for the same services: those charge hourly AND per GB. Gateway endpoints are route-table based and cannot be reached over peering, VPN or Direct Connect.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/vpc/latest/privatelink/vpce-gateway.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "vpc-peering",
+    "name": "Amazon VPC Peering",
+    "category": "networking",
+    "meters": [
+      "egress"
+    ],
+    "oneLiner": "The peering connection costs nothing; only bytes crossing an AZ or Region boundary do.",
+    "trap": "Same-AZ peering traffic is free, but cross-AZ is metered on BOTH resources - you see two line items for the same GB. Cross-Region charges the sending side; the receiving side is free.",
+    "billOn": [
+      "DataTransfer-Regional-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpc/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "application-load-balancer",
+    "name": "Application Load Balancer (ALB)",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "An hourly fee plus LCUs, where an LCU is whichever of four dimensions runs hottest.",
+    "trap": "LCU is the MAX of new connections, active connections, processed bytes and rule evaluations - not the sum. A chatty low-byte API can bill entirely on connections, never on traffic.",
+    "billOn": [
+      "LoadBalancerUsage",
+      "LCUUsage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/elasticloadbalancing/pricing/",
+      "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-billing-usage-reports.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "network-load-balancer",
+    "name": "Network Load Balancer (NLB)",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Hourly fee plus NLCUs; long-lived TCP flows cost more than the byte count suggests.",
+    "trap": "NLCU is the MAX of new flows, active flows and processed bytes. Peak concurrent flows are sampled every minute, so idle-but-open connections bill even with near-zero traffic.",
+    "billOn": [
+      "LoadBalancerUsage",
+      "LCUUsage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/elasticloadbalancing/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "gateway-load-balancer",
+    "name": "Gateway Load Balancer (GWLB)",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Hourly per AZ plus GLCUs - and the endpoints sitting in front of it bill separately.",
+    "trap": "Gateway Load Balancer Endpoints are a distinct PrivateLink-style charge with their own hourly and per-GB fees. Budgeting only the GWLB itself misses a large slice of the bill.",
+    "billOn": [
+      "LoadBalancerUsage",
+      "VpcEndpoint-GWLBE-Hours",
+      "VpcEndpoint-GWLBE-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/elasticloadbalancing/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudfront",
+    "name": "Amazon CloudFront",
+    "category": "networking",
+    "meters": [
+      "egress",
+      "calls"
+    ],
+    "oneLiner": "Per GB out to viewers and per request - plus per GB going back the other way to your origin.",
+    "trap": "AWS-origin to edge is free, but edge back to origin (POST/PUT bodies, uploads) bills as DataTransfer-Out-OBytes. Invalidations past 1,000 paths a month also cost per path.",
+    "billOn": [
+      "DataTransfer-Out-Bytes",
+      "DataTransfer-Out-OBytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudfront/faqs/",
+      "https://aws.amazon.com/cloudfront/pricing/pay-as-you-go/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "route-53",
+    "name": "Amazon Route 53",
+    "category": "networking",
+    "meters": [
+      "time",
+      "calls"
+    ],
+    "oneLiner": "Every DNS query is a billable request; hosted zones and Resolver ENIs bill by the clock.",
+    "trap": "DNS queries really are a per-request charge. Alias records pointing at ELB/CloudFront/API Gateway and all private hosted zone queries are free, but Resolver endpoint ENIs bill hourly regardless.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/route53/pricing/",
+      "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Route53Pricing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "global-accelerator",
+    "name": "AWS Global Accelerator",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Fixed hourly fee per accelerator, plus a data transfer premium layered on normal egress.",
+    "trap": "DT-Premium is billed on the DOMINANT direction, so an upload-heavy app pays on inbound bytes everyone assumes are free. It is on top of, not instead of, standard EC2 data transfer out.",
+    "billOn": [
+      "OUT-Bytes-Internet",
+      "IN-Bytes-Internet"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/global-accelerator/pricing/",
+      "https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-pricing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "direct-connect",
+    "name": "AWS Direct Connect",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Port hours run whether or not you push a packet, then per-GB on the way out.",
+    "trap": "Data transfer IN is free, so people assume the link is cheap, but port hours bill 24/7 while provisioned, and the colo cross-connect is a separate bill from your partner, not AWS.",
+    "billOn": [
+      "DataXfer-In",
+      "DataXfer-Out"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/directconnect/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "site-to-site-vpn",
+    "name": "AWS Site-to-Site VPN",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Per connection-hour while the tunnel sits in 'available', plus normal egress on what you send.",
+    "trap": "Billing tracks the available state, not traffic - an idle tunnel still bills. There is no VPN-specific per-GB fee; bytes land on EC2 data transfer out, and the tunnel IPs cost IPv4 hours.",
+    "billOn": [
+      "DataTransfer-Out-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpn/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "client-vpn",
+    "name": "AWS Client VPN",
+    "category": "networking",
+    "meters": [
+      "time",
+      "egress"
+    ],
+    "oneLiner": "Two clocks: one per subnet association running 24/7, one per connected user.",
+    "trap": "The subnet-association fee bills round the clock with zero users connected, and it is charged per AZ. Each Client VPN ENI also carries an in-use public IPv4 address charge.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/vpn/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "public-ipv4-address",
+    "name": "Public IPv4 Address",
+    "category": "networking",
+    "meters": [
+      "time"
+    ],
+    "oneLiner": "Every public IPv4 address costs per hour now, attached or not, on any AWS service.",
+    "trap": "It is not just EC2 - RDS, ELB, EKS nodes, NAT gateways, VPN tunnels and Global Accelerator all carry it. BYOIP addresses are free and IPv6 is free, which is the whole point of the charge.",
+    "billOn": [
+      "PublicIPv4:InUseAddress",
+      "PublicIPv4:IdleAddress"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpc/pricing/",
+      "https://aws.amazon.com/blogs/aws/new-aws-public-ipv4-address-charge-public-ip-insights/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elastic-ip",
+    "name": "Elastic IP Address",
+    "category": "networking",
+    "meters": [
+      "time"
+    ],
+    "oneLiner": "Since Feb 2024 an EIP costs the same per hour whether it is attached to something or idle.",
+    "trap": "Hunting down unattached EIPs used to be the whole optimisation; attached ones now bill identically. Both share the PublicIPv4 usage types - use lineItem/Operation to tell them apart.",
+    "billOn": [
+      "PublicIPv4:InUseAddress",
+      "PublicIPv4:IdleAddress"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://repost.aws/knowledge-center/vpc-identify-public-ipv4-charges"
+    ],
+    "checked": "2026-08-04"
+  }
+]

@@ -1,0 +1,71 @@
+---
+import { LANGS, LANG_NAME, localePath, stripLocale, type Lang } from '../i18n/strings';
+
+interface Props {
+  lang: Lang;
+  /** Locales this particular page exists in. Defaults to all of them. */
+  available?: Lang[];
+}
+
+const { lang, available = [...LANGS] } = Astro.props;
+// Point each option at the same page in the other language, not at the home
+// page — losing your place is the most annoying thing a language switcher does.
+const here = stripLocale(Astro.url.pathname);
+---
+
+<div class="ls" role="group" aria-label="Language">
+  {
+    LANGS.map((l) =>
+      available.includes(l) ? (
+        <a
+          class:list={['ls-opt', l === lang && 'is-on']}
+          href={localePath(l, here)}
+          hreflang={l}
+          lang={l}
+          aria-current={l === lang ? 'true' : undefined}
+        >
+          {LANG_NAME[l]}
+        </a>
+      ) : (
+        /* Not translated yet — show it greyed rather than linking to a 404. */
+        <span class="ls-opt is-missing" lang={l} title={`Not available in ${LANG_NAME[l]}`}>
+          {LANG_NAME[l]}
+        </span>
+      )
+    )
+  }
+</div>
+
+<style>
+  .ls {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .ls-opt {
+    padding: 0.28rem 0.7rem;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .ls-opt:hover {
+    color: var(--text);
+  }
+
+  .ls-opt.is-missing {
+    color: var(--border);
+    cursor: not-allowed;
+  }
+
+  .ls-opt.is-on {
+    background: var(--squid-ink);
+    color: var(--on-dark);
+  }
+</style>

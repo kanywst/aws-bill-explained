@@ -1,0 +1,14 @@
+---
+import ServicePage from '../../../components/ServicePage.astro';
+import { loadCatalogue } from '../../../infrastructure/service-repository';
+
+export function getStaticPaths() {
+  return loadCatalogue()
+    .all()
+    .map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+const { service } = Astro.props;
+---
+
+<ServicePage service={service} lang="ja" />

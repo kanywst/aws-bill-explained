@@ -1,0 +1,153 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import MeterLamps from './MeterLamps.astro';
+import { LANGS, localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  entry: CollectionEntry<'topics'>;
+  lang: Lang;
+}
+
+const { entry, lang } = Astro.props;
+const { Content } = await render(entry);
+const s = t(lang);
+
+// Only offer a language whose translation of this topic actually exists.
+const slug = entry.id.slice(entry.id.indexOf('/') + 1);
+const all = await getCollection('topics');
+const available = LANGS.filter((l) => all.some((e) => e.id === `${l}/${slug}`));
+
+const checked = entry.data.checked.toISOString().slice(0, 10);
+---
+
+<Base
+  title={`${entry.data.title} — ${s.siteTitle}`}
+  lang={lang}
+  description={entry.data.oneLiner}
+  available={available}
+>
+  <article class="tp">
+    <header class="tp-head">
+      <a class="tp-back" href={localePath(lang, '/topics/')}>&larr; {s.nav.topics}</a>
+      <h1 class="display tp-title">{entry.data.title}</h1>
+      <MeterLamps active={entry.data.meters} lang={lang} size="lg" />
+    </header>
+
+    {/* The promise of the site, enforced by the layout: model before detail. */}
+    <section class="tp-one">
+      <p class="eyebrow">{s.oneLiner}</p>
+      <p class="tp-one-text">{entry.data.oneLiner}</p>
+    </section>
+
+    <div class="tp-body">
+      <Content />
+    </div>
+
+    <footer class="tp-foot">
+      <span class="tp-checked">{s.checked}: <time datetime={checked}>{checked}</time></span>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .tp {
+    padding-inline: var(--gutter);
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-top: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .tp-back {
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .tp-back:hover {
+    color: var(--m-egress);
+  }
+
+  .tp-title {
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    margin: 0.75rem 0 1.1rem;
+    max-width: 20ch;
+  }
+
+  /* The one-liner is set larger than the prose that justifies it, on purpose. */
+  .tp-one {
+    margin: 2.75rem 0 3.5rem;
+    padding: 1.5rem 0 1.5rem 1.5rem;
+    border-left: 3px solid var(--m-time);
+    max-width: 44rem;
+  }
+
+  .tp-one-text {
+    margin: 0.6rem 0 0;
+    font-size: clamp(1.35rem, 3.2vw, 1.95rem);
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  /* ---- Prose ---- */
+
+  .tp-body {
+    max-width: var(--measure);
+  }
+
+  .tp-body :global(h2) {
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 3.5rem 0 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tp-body :global(p) {
+    margin: 0 0 1.15rem;
+    color: var(--text-dim);
+  }
+
+  .tp-body :global(strong) {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .tp-body :global(ul) {
+    margin: 0 0 1.15rem;
+    padding-left: 1.1rem;
+    color: var(--text-dim);
+  }
+
+  .tp-body :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .tp-body :global(li::marker) {
+    color: var(--unlit);
+  }
+
+  /* Diagrams are the exception to the measure — they get the full column. */
+  .tp-body :global(figure) {
+    width: min(64rem, calc(100vw - var(--gutter) * 2));
+  }
+
+  .tp-foot {
+    margin-top: 4rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    max-width: var(--measure);
+  }
+
+  .tp-checked {
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+  }
+</style>

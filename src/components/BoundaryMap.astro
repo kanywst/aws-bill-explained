@@ -1,0 +1,157 @@
+---
+import { t, type Lang } from '../i18n/strings';
+
+/**
+ * Concentric billing boundaries.
+ *
+ * "Data transfer out" only makes sense once you know what counts as "out", and
+ * that is the thing people get wrong: they picture one boundary (the internet)
+ * when there are several nested ones. Drawing them inside each other makes the
+ * nesting the message — every ring you cross outward is a toll gate, and the
+ * innermost ring is free.
+ *
+ * Labels sit *inside* each ring rather than straddling its edge, so nothing has
+ * to knock a hole in the stroke to stay legible. Guessing a text width in SVG
+ * is unreliable, and a wrong guess leaves a visible gap in the line.
+ */
+interface Ring {
+  /** Name of the area enclosed by this ring. */
+  label: string;
+  /** What it costs to cross this ring outward. */
+  crossing: string;
+  /** Free crossings render unlit; charged ones take the egress colour. */
+  free?: boolean;
+  /** Small print beside the crossing price. */
+  note?: string;
+}
+
+interface Props {
+  /** Outermost first. */
+  rings: Ring[];
+  caption?: string;
+  lang?: Lang;
+}
+
+const { rings, caption, lang = 'en' } = Astro.props;
+const s = t(lang).diagram;
+
+const W = 700;
+const STEP_X = 68;
+const STEP_Y = 48;
+const INNER_H = 62; // height of the innermost ring
+const MARGIN_X = 16;
+const MARGIN_TOP = 14;
+const LEGEND_H = 30;
+
+const n = rings.length;
+// Derive the canvas from the innermost ring outward, so the centre is always a
+// real box. Deriving it the other way round is what collapses inner rings to a
+// negative height once the ring count grows.
+const ringsH = INNER_H + 2 * STEP_Y * (n - 1);
+const H = MARGIN_TOP + ringsH + LEGEND_H;
+
+const geom = rings.map((r, i) => ({
+  ...r,
+  x: MARGIN_X + i * STEP_X,
+  y: MARGIN_TOP + i * STEP_Y,
+  w: W - MARGIN_X * 2 - i * STEP_X * 2,
+  h: ringsH - i * STEP_Y * 2,
+  colour: r.free ? 'var(--unlit)' : 'var(--m-egress)',
+}));
+---
+
+<figure class="bm">
+  <div class="bm-scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} class="bm-svg" role="img" aria-label={caption}>
+      {
+        geom.map((r) => (
+          <g class:list={['bm-ring', r.free && 'is-free']}>
+            <rect
+              x={r.x} y={r.y} width={r.w} height={r.h} rx="10"
+              fill={r.free ? 'var(--surface-sunken)' : 'none'}
+              stroke={r.colour}
+              stroke-width={r.free ? 1.5 : 2}
+              stroke-dasharray={r.free ? '5 5' : undefined}
+            />
+
+            {/* Ring name, inside the top edge. */}
+            <text x={r.x + 16} y={r.y + 21} class="bm-name" fill={r.colour}>
+              {r.label}
+            </text>
+
+            {/* The toll, inside the bottom edge — you pay on the way out. */}
+            <text x={r.x + 16} y={r.y + r.h - 13} class="bm-toll">
+              <tspan class="bm-arrow" fill={r.colour}>↑</tspan>
+              <tspan dx="7" fill={r.colour} class="bm-price">{r.crossing}</tspan>
+              {r.note && <tspan dx="9" class="bm-note">{r.note}</tspan>}
+            </text>
+          </g>
+        ))
+      }
+
+      <text x={W / 2} y={H - 9} text-anchor="middle" class="bm-legend">{s.rings}</text>
+    </svg>
+  </div>
+  {caption && <figcaption class="bm-cap">{caption}</figcaption>}
+</figure>
+
+<style>
+  .bm {
+    margin: 2.5rem 0;
+  }
+
+  .bm-scroll {
+    overflow-x: auto;
+    margin-inline: calc(var(--gutter) * -0.5);
+    padding-inline: calc(var(--gutter) * 0.5);
+  }
+
+  .bm-svg {
+    display: block;
+    width: 100%;
+    max-width: 52rem;
+    height: auto;
+    min-width: 32rem;
+    margin-inline: auto;
+  }
+
+  .bm-name {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .bm-toll {
+    font-family: var(--font-ui);
+    font-size: 12px;
+  }
+
+  .bm-arrow {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .bm-price {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bm-note {
+    fill: var(--text-faint);
+    font-size: 11px;
+  }
+
+  .bm-legend {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    fill: var(--text-faint);
+  }
+
+  .bm-cap {
+    margin: 1rem auto 0;
+    max-width: 52rem;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+</style>

@@ -1,0 +1,228 @@
+---
+import Base from '../layouts/Base.astro';
+import MeterLamps from './MeterLamps.astro';
+import type { Service } from '../domain/service';
+import { loadCatalogue } from '../infrastructure/service-repository';
+import { localePath, t, type Lang } from '../i18n/strings';
+
+interface Props {
+  service: Service;
+  lang: Lang;
+}
+
+const { service, lang } = Astro.props;
+const s = t(lang);
+const catalogue = loadCatalogue();
+
+// "What else bills like this?" is a Catalogue question, not an array filter.
+const sameShape = catalogue
+  .byBillingShape()
+  .get(service.meters.signature)
+  ?.filter((other) => other.slug !== service.slug)
+  .slice(0, 6) ?? [];
+---
+
+<Base title={`${service.name} — ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
+  <article class="sp">
+    <header>
+      <a class="sp-back" href={localePath(lang, '/services/')}>&larr; {s.nav.services}</a>
+      <p class="eyebrow sp-cat">{s.categories[service.category]}</p>
+      <h1 class="display sp-title">{service.name}</h1>
+      <MeterLamps active={service.meters.toArray()} lang={lang} size="lg" />
+    </header>
+
+    <section class="sp-one">
+      <p class="eyebrow">{s.oneLiner}</p>
+      <p class="sp-one-text">{service.oneLiner}</p>
+      {
+        service.isFree && (
+          <p class="sp-free">{s.services.freeNote}</p>
+        )
+      }
+    </section>
+
+    <section class="sp-block">
+      <h2 class="eyebrow sp-head">{s.services.trapHead}</h2>
+      <p class="sp-trap">{service.trap}</p>
+    </section>
+
+    {
+      service.billOn.length > 0 && (
+        <section class="sp-block">
+          <h2 class="eyebrow sp-head">{s.services.billOnHead}</h2>
+          <p class="sp-hint">{s.services.billOnHint}</p>
+          <ul class="sp-usage">
+            {service.billOn.map((u) => (
+              <li><code>{u}</code></li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      sameShape.length > 0 && (
+        <section class="sp-block">
+          <h2 class="eyebrow sp-head">{s.services.sameShapeHead}</h2>
+          <p class="sp-hint">{s.services.sameShapeHint}</p>
+          <ul class="sp-related">
+            {sameShape.map((other) => (
+              <li>
+                <a href={localePath(lang, `/services/${other.slug}/`)}>{other.name}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <footer class="sp-foot">
+      <h2 class="eyebrow sp-head">{s.services.sourcesHead}</h2>
+      <ul class="sp-sources">
+        {service.sources.map((src) => (
+          <li><a href={src} rel="nofollow noopener">{src.replace(/^https:\/\//, '')}</a></li>
+        ))}
+      </ul>
+      <p class="sp-checked">
+        {s.checked}: <time datetime={service.checked}>{service.checked}</time>
+      </p>
+      {
+        service.confidence !== 'high' && (
+          <p class="sp-confidence">{s.services.mediumConfidence}</p>
+        )
+      }
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .sp {
+    padding-inline: var(--gutter);
+    max-width: 60rem;
+    margin-inline: auto;
+    padding-top: clamp(2rem, 6vw, 3.5rem);
+  }
+
+  .sp-back {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+    text-decoration: none;
+  }
+
+  .sp-back:hover {
+    color: var(--m-egress);
+  }
+
+  .sp-cat {
+    margin-top: 1rem;
+  }
+
+  .sp-title {
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    margin: 0.4rem 0 1rem;
+  }
+
+  .sp-one {
+    margin: 2.5rem 0 3rem;
+    padding: 1.4rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--m-time);
+    border-radius: var(--radius);
+  }
+
+  .sp-one-text {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+    line-height: 1.45;
+    font-weight: 600;
+  }
+
+  .sp-free {
+    margin: 0.9rem 0 0;
+    font-size: 0.86rem;
+    color: var(--text-faint);
+  }
+
+  .sp-block {
+    margin-bottom: 2.75rem;
+  }
+
+  .sp-head {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0.9rem;
+  }
+
+  .sp-trap {
+    margin: 0;
+    max-width: var(--measure);
+    color: var(--text-dim);
+  }
+
+  .sp-hint {
+    margin: 0 0 0.8rem;
+    max-width: var(--measure);
+    font-size: 0.86rem;
+    color: var(--text-faint);
+  }
+
+  .sp-usage,
+  .sp-related,
+  .sp-sources {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sp-sources {
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.82rem;
+  }
+
+  .sp-related a {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--text-dim);
+  }
+
+  .sp-related a:hover {
+    border-color: var(--m-egress);
+    color: var(--m-egress);
+  }
+
+  .sp-foot {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .sp-sources a {
+    color: var(--text-faint);
+    word-break: break-all;
+  }
+
+  .sp-checked {
+    margin: 0.9rem 0 0;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  .sp-confidence {
+    margin: 1rem 0 0;
+    padding: 0.6rem 0.85rem;
+    background: var(--m-time-tint);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    max-width: var(--measure);
+  }
+</style>

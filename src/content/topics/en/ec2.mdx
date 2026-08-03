@@ -1,0 +1,94 @@
+---
+title: What EC2 actually charges for
+short: EC2
+oneLiner: Time and outbound bytes. Calling the API is free.
+meters: ['time', 'egress']
+order: 10
+section: service
+checked: 2026-08-04
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+EC2 has two of the three meters, and the missing one is the reason people get confused.
+
+There is no per-call charge on the EC2 API. `RunInstances`, `DescribeInstances`, and the
+rest of the control plane cost nothing per invocation, no matter how often you poll them.
+So the number of times you *ask EC2 to do something* never appears on your bill.
+
+What does appear is time — every second an instance exists — and bytes that leave.
+
+The asymmetry in that second meter has a physical cause, not just a commercial one.
+Transit and peering links are full duplex, and they are billed on the busier direction
+(typically the 95th percentile of the larger of in and out). Cloud providers are
+overwhelmingly egress-heavy: requests arriving are small, responses leaving are large. The
+inbound direction on those links is capacity AWS has already paid for and is not using, so
+giving it away costs close to nothing. The commercial motive sits on top of that: cheap
+ingress removes the barrier to moving data in, and data that has moved in generates
+storage and compute revenue for years.
+
+<SequenceDiagram
+  lang="en"
+  caption="A single HTTP exchange against an instance. The request costs nothing to receive; the response is the entire charge."
+  actors={[
+    { id: 'client', label: 'Client' },
+    { id: 'ec2', label: 'EC2 instance' },
+  ]}
+  steps={[
+    { from: 'client', to: 'ec2', label: 'GET /video.mp4' },
+    { from: 'ec2', to: 'client', label: '200 OK — 1 GB body', reply: true, meter: 'egress', charge: '1 GB × $0.09' },
+  ]}
+/>
+
+## What it costs
+
+Three lines show up for a plain instance, and only one of them is the instance:
+
+- **Instance time.** Per second with a 60-second minimum on Amazon Linux, Windows, RHEL,
+  Ubuntu and Ubuntu Pro. Other operating systems — SUSE among them — still bill each
+  partial hour as a full hour, so the granularity depends on the AMI you chose.
+- **EBS.** Provisioned GB-month, plus IOPS and throughput on the volume types that
+  charge for them. This bills on the size you asked for, not the size you used.
+- **Public IPv4.** $0.005 per address-hour since 1 February 2024, charged whether or not
+  the address is attached to anything. Look for `PublicIPv4:InUseAddress` and
+  `PublicIPv4:IdleAddress` in the usage report.
+- **Data transfer out.** The first 100 GB per month across all AWS services is free;
+  beyond that, roughly $0.09/GB to the internet on the first tier.
+
+Serving 1 TB a month from an instance therefore costs about **$83 in egress alone**
+(1024 GB − 100 GB free, at $0.09), on top of whatever the instance itself costs. The
+egress can easily exceed the compute.
+
+## Traps
+
+**A NAT Gateway makes one gigabyte bill twice.** Send traffic out through NAT and you pay
+the NAT hourly charge, the NAT per-GB processing charge (about $0.045/GB in most regions),
+*and* the ordinary data transfer out. AWS's own VPC pricing page is explicit that the transfer portion is "the standard EC2
+Data Transfer charge" — so the same gigabyte appears under two different services with two
+different names.
+
+<PathDiagram
+  lang="en"
+  caption="The same 1 GB leaving through a NAT Gateway. Three meters turn, split across two services on the bill."
+  nodes={[
+    { id: 'ec2', label: 'EC2', sub: 'private subnet' },
+    { id: 'nat', label: 'NAT Gateway', sub: 'per hour + per GB', charges: ['time'] },
+    { id: 'net', label: 'Internet', sub: 'destination' },
+  ]}
+  hops={[
+    { from: 'ec2', to: 'nat', label: 'Processed by NAT', meter: 'egress', cost: '~$0.045/GB' },
+    { from: 'nat', to: 'net', label: 'Data transfer out', meter: 'egress', cost: '$0.09/GB' },
+  ]}
+/>
+
+**Cross-AZ traffic bills in both directions.** Data moving between Availability Zones in
+one region carries the usage type `<Region>-DataTransfer-Regional-Bytes`, and the AWS
+billing documentation states that you are charged for both the inbound and outbound side —
+you will see *two* line items for a single transfer. A multi-AZ deployment buys
+availability, and this is its recurring price.
+
+**Stopped is not deleted.** Stopping an instance stops the instance meter. The EBS volume
+it left behind keeps turning its own, at full provisioned size, indefinitely.

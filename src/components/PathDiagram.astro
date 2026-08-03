@@ -1,0 +1,286 @@
+---
+import type { MeterId } from '../data/meters';
+import { t, type Lang } from '../i18n/strings';
+
+/**
+ * A network path, drawn so that money is visible before words are read.
+ *
+ * Traffic runs left-to-right along the top lane and right-to-left along the
+ * bottom lane. A hop that costs something is drawn in its meter's colour with
+ * packets flowing along it; a hop that's free is drawn in --unlit and holds
+ * still. A node that bills merely for existing gets a lit lamp on its housing.
+ */
+export interface PathNode {
+  id: string;
+  label: string;
+  /** Second line inside the node, e.g. a region or AZ. */
+  sub?: string;
+  /** Meters this box turns just by being provisioned (almost always uptime). */
+  charges?: MeterId[];
+}
+
+export interface PathHop {
+  from: string;
+  to: string;
+  label: string;
+  /** Free hops stay unlit. This is the whole teaching device. */
+  meter?: MeterId;
+  /** Right-hand chip, e.g. "$0.09/GB". */
+  cost?: string;
+}
+
+interface Props {
+  nodes: PathNode[];
+  hops: PathHop[];
+  caption?: string;
+  lang?: Lang;
+}
+
+const { nodes, hops, caption, lang = 'en' } = Astro.props;
+const s = t(lang).diagram;
+const meterName = (m: MeterId) => t(lang).meters[m].name;
+
+const NODE_W = 132;
+const NODE_H = 68;
+const GAP = 104;
+const PAD_X = 12;
+const TOP = 74; // lane for left→right
+const BOT = 190; // lane for right→left
+const MID = 128;
+
+const x = (i: number) => PAD_X + i * (NODE_W + GAP);
+const cx = (i: number) => x(i) + NODE_W / 2;
+const idx = (id: string) => {
+  const i = nodes.findIndex((n) => n.id === id);
+  // Fail the build rather than drawing the hop off-canvas, which is what a -1
+  // index used to do: silently, with no error, in a diagram about money.
+  if (i < 0) throw new Error(`PathDiagram: hop references unknown node id "${id}"`);
+  return i;
+};
+
+const W = PAD_X * 2 + nodes.length * NODE_W + (nodes.length - 1) * GAP;
+
+// Only reserve the return lane when something actually flows back, otherwise a
+// one-directional diagram carries 90px of dead space under it.
+const hasReturn = hops.some((h) => idx(h.to) < idx(h.from));
+const H = hasReturn ? 250 : 178;
+
+const lanes = hops.map((hop, i) => {
+  const a = idx(hop.from);
+  const b = idx(hop.to);
+  const forward = b > a;
+  const y = forward ? TOP : BOT;
+  // Start and end at the node edges, not the centres.
+  const x1 = forward ? x(a) + NODE_W : x(a);
+  const x2 = forward ? x(b) : x(b) + NODE_W;
+  return { ...hop, key: `${hop.from}-${hop.to}-${i}`, y, x1, x2, forward };
+});
+---
+
+<figure class="pd">
+  <div class="pd-scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="pd-svg" role="img" aria-label={caption}>
+      <defs>
+        <marker id="pd-head-lit" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7"
+                markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" fill="context-stroke"></path>
+        </marker>
+        <marker id="pd-head-dim" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6"
+                markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" fill="var(--unlit)"></path>
+        </marker>
+      </defs>
+
+      {/* Hops first so node housings sit on top of the line ends. */}
+      {
+        lanes.map((hop) => {
+          const lit = Boolean(hop.meter);
+          const stroke = lit ? `var(--m-${hop.meter})` : 'var(--unlit)';
+          const dir = hop.forward ? 1 : -1;
+          return (
+            <g class:list={['pd-hop', lit ? 'is-lit' : 'is-dim']} style={`--stroke:${stroke}`}>
+              <line
+                x1={hop.x1} y1={hop.y} x2={hop.x2} y2={hop.y}
+                stroke={stroke} stroke-width={lit ? 2.5 : 1.5}
+                marker-end={lit ? 'url(#pd-head-lit)' : 'url(#pd-head-dim)'}
+              />
+              {lit && (
+                <line
+                  class="pd-flow" x1={hop.x1} y1={hop.y} x2={hop.x2} y2={hop.y}
+                  stroke={stroke} stroke-width="2.5" stroke-linecap="round"
+                  stroke-dasharray="2 14" style={`--dir:${dir * 16}px`}
+                />
+              )}
+              <text
+                x={(hop.x1 + hop.x2) / 2} y={hop.y - 13}
+                text-anchor="middle" class:list={['pd-label', lit && 'is-lit']}
+              >
+                {hop.label}
+              </text>
+              {hop.cost && (
+                <text x={(hop.x1 + hop.x2) / 2} y={hop.forward ? hop.y - 30 : hop.y + 26}
+                      text-anchor="middle" class="pd-cost" fill={stroke}>
+                  {hop.cost}
+                </text>
+              )}
+              {!hop.meter && (
+                <text x={(hop.x1 + hop.x2) / 2} y={hop.forward ? hop.y - 30 : hop.y + 24}
+                      text-anchor="middle" class="pd-free">
+                  {s.free}
+                </text>
+              )}
+            </g>
+          );
+        })
+      }
+
+      {
+        nodes.map((n, i) => (
+          <g class="pd-node">
+            <rect x={x(i)} y={MID - NODE_H / 2} width={NODE_W} height={NODE_H} rx="7"
+                  fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+            <text x={cx(i)} y={n.sub ? MID - 2 : MID + 4} text-anchor="middle" class="pd-name">
+              {n.label}
+            </text>
+            {n.sub && (
+              <text x={cx(i)} y={MID + 16} text-anchor="middle" class="pd-sub">
+                {n.sub}
+              </text>
+            )}
+            {n.charges?.map((m, k) => (
+              <circle class="pd-lamp" cx={x(i) + 12 + k * 13} cy={MID - NODE_H / 2 + 12} r="4"
+                      fill={`var(--m-${m})`} />
+            ))}
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+
+  <figcaption class="pd-cap">
+    {caption && <span class="pd-cap-text">{caption}</span>}
+    <span class="pd-key">
+      {
+        [...new Set(hops.map((h) => h.meter).filter(Boolean))].map((m) => (
+          <span class="pd-key-item">
+            <i style={`background:var(--m-${m})`} />
+            {meterName(m as MeterId)}
+          </span>
+        ))
+      }
+      <span class="pd-key-item is-dim"><i /> {s.noCharge}</span>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+  .pd {
+    margin: 2.5rem 0;
+  }
+
+  .pd-scroll {
+    overflow-x: auto;
+    /* Bleed past the prose measure — diagrams get more room than text. */
+    margin-inline: calc(var(--gutter) * -0.5);
+    padding-inline: calc(var(--gutter) * 0.5);
+    padding-block: 0.5rem;
+  }
+
+  .pd-svg {
+    display: block;
+    width: 100%;
+    max-width: 56rem;
+    height: auto;
+    min-width: 34rem;
+    margin-inline: auto;
+  }
+
+  .pd-name {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--text);
+  }
+
+  .pd-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--text-faint);
+  }
+
+  .pd-label {
+    font-family: var(--font-ui);
+    font-size: 12.5px;
+    fill: var(--text-dim);
+  }
+
+  .pd-label.is-lit {
+    fill: var(--text);
+  }
+
+  .pd-cost {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pd-free {
+    font-family: var(--font-ui);
+    font-size: 10.5px;
+    fill: var(--unlit);
+  }
+
+  /* Only billed hops glow, and only billed hops move. */
+  .pd-hop.is-lit line:first-child {
+  }
+
+  .pd-flow {
+    animation: pd-drift 900ms linear infinite;
+  }
+
+  @keyframes pd-drift {
+    to {
+      stroke-dashoffset: var(--dir);
+    }
+  }
+
+  .pd-lamp {
+  }
+
+  .pd-cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    max-width: 56rem;
+    margin: 1rem auto 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+
+  .pd-cap-text {
+    flex: 1 1 20rem;
+  }
+
+  .pd-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .pd-key-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
+  .pd-key-item i {
+    width: 12px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--unlit);
+  }
+</style>

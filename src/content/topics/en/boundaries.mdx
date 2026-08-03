@@ -1,0 +1,82 @@
+---
+title: Where "out" begins
+short: Boundaries
+oneLiner: Egress is not about the internet. It is about which ring you crossed.
+meters: ['egress']
+order: 20
+section: model
+checked: 2026-08-04
+---
+
+import BoundaryMap from '../../../components/BoundaryMap.astro';
+import PathDiagram from '../../../components/PathDiagram.astro';
+
+## Why it works that way
+
+Almost everyone pictures one boundary: inside AWS, and the internet. That mental model is
+what produces the surprise line item, because there are four rings, not one, and three of
+them cost money to cross.
+
+The rings are nested, and each one is a toll gate in the outward direction only. Traffic
+falling *inward* — a request arriving, a response coming back from a further-out ring — is
+never charged on its own.
+
+<BoundaryMap
+  lang="en"
+  caption="Crossing outward is what costs. The rate depends on how many rings you go through, not how far the packet travels."
+  rings={[
+    { label: 'Internet', crossing: '$0.09/GB', note: 'first 100 GB/month free, all services' },
+    { label: 'Other region', crossing: 'varies', note: 'rate depends on the source/destination pair' },
+    { label: 'Other AZ, same region', crossing: '$0.01/GB', note: 'charged in each direction' },
+    { label: 'Same AZ, private IP', crossing: '$0.00', free: true, note: 'the only free ring' },
+  ]}
+/>
+
+The innermost ring is the one worth designing for. Traffic between resources in the same
+Availability Zone, addressed over private IPs, is free. Step one ring out and you are
+paying a cent per gigabyte — in both directions, which is the detail that turns a
+chatty multi-AZ service mesh into a real line item.
+
+## What it costs
+
+Inter-region is deliberately shown as "varies" above, because there is no single
+inter-region rate: AWS prices it per source/destination pair, so the only correct answer
+is to look up your two regions. The rate card matters less than the usage type anyway,
+because the usage type is what you can actually search for in Cost Explorer:
+
+- `<Region>-DataTransfer-Out-Bytes` — leaving for the internet. `USE2-DataTransfer-Out-Bytes`
+  is Ohio to the internet. A usage type with no region prefix means us-east-1.
+- `<Region>-DataTransfer-Regional-Bytes` — between AZs inside one region. Expect two of
+  these per transfer, one for each side.
+
+There is no usage type for data arriving from the internet, because there is no charge for
+it.
+
+## Traps
+
+**"It never left the VPC" is not a defence.** The AZ boundary sits inside your VPC. A
+private subnet in `us-east-1a` talking to a private subnet in `us-east-1b` has crossed a
+toll gate, even though no packet touched a public IP or an internet gateway.
+
+**The device in the middle charges separately from the distance.** Egress is the distance
+fee. NAT Gateways, Transit Gateways, interface endpoints and load balancers each add a
+processing fee per gigabyte on top, and those are billed regardless of direction — inbound
+through a NAT Gateway is *not* free, even though inbound from the internet is.
+
+<PathDiagram
+  lang="en"
+  caption="Two resources one Availability Zone apart. Nothing here is public, and the transfer still bills twice."
+  nodes={[
+    { id: 'a', label: 'Service A', sub: 'us-east-1a' },
+    { id: 'b', label: 'Service B', sub: 'us-east-1b' },
+  ]}
+  hops={[
+    { from: 'a', to: 'b', label: 'Request across AZ', meter: 'egress', cost: '$0.01/GB' },
+    { from: 'b', to: 'a', label: 'Response across AZ', meter: 'egress', cost: '$0.01/GB' },
+  ]}
+/>
+
+**Free tiers hide the first symptom.** The 100 GB per month of free internet egress is
+aggregated across every AWS service and every region. It is generous enough that a small
+workload never sees a transfer charge, and abrupt enough that the first month you cross it,
+the bill looks like something broke.

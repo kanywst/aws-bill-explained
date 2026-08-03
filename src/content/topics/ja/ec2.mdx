@@ -1,0 +1,68 @@
+---
+title: EC2 は結局なにに課金しているのか
+short: EC2
+oneLiner: 時間と、出ていったバイト。API を呼ぶのは無料。
+meters: ['time', 'egress']
+order: 10
+section: service
+checked: 2026-08-04
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+EC2 は3つのうち2つのメーターしか持っていない。そして混乱の原因は、持っていない側のメーターにある。
+
+EC2 の API には回数課金がない。`RunInstances` も `DescribeInstances` も、コントロールプレーンの API は何回叩いても1円も増えない。つまり「EC2 に何かをさせた回数」は請求書に一切現れない。
+
+現れるのは、インスタンスが存在していた時間と、外に出ていったバイトだけだ。
+
+この2本目のメーターが方向で非対称なのには、商売以前に物理的な理由がある。トランジットやピアリングの回線は全二重で、課金は「混んでいる方向」に対して行われる (慣行としては in と out の大きい方の95パーセンタイル)。クラウドは圧倒的に egress 過多で、届くリクエストは小さく、出ていくレスポンスは大きい。だから inbound 方向は、AWS が既に買っていて使い切れていない帯域ということになる。そこを流しても限界費用はほぼゼロだから、無料にできる。商売の動機はその上に乗っている — 入れるのがタダなら移行の障壁が消え、入ったデータは何年も storage と compute の売上を生む。
+
+<SequenceDiagram
+  lang="ja"
+  caption="インスタンスに対する HTTP のやり取り1往復。受け取る側にコストはなく、請求はレスポンスが全部。"
+  actors={[
+    { id: 'client', label: 'クライアント' },
+    { id: 'ec2', label: 'EC2 インスタンス' },
+  ]}
+  steps={[
+    { from: 'client', to: 'ec2', label: 'GET /video.mp4' },
+    { from: 'ec2', to: 'client', label: '200 OK — 本文 1GB', reply: true, meter: 'egress', charge: '1 GB × $0.09' },
+  ]}
+/>
+
+## で、いくらなの
+
+素のインスタンス1台でも請求は複数行に割れる。しかもインスタンス本体はそのうち1行でしかない。
+
+- **インスタンス時間** — 秒単位、最低60秒。ただしこれは Amazon Linux / Windows / RHEL / Ubuntu / Ubuntu Pro の話で、SUSE など他の OS は端数を1時間に切り上げて課金される。粒度は選んだ AMI で変わる。
+- **EBS** — プロビジョンした GB-month。ボリュームタイプによっては IOPS とスループットも別建て。**使った量ではなく確保した量**で課金される。
+- **パブリック IPv4** — 2024年2月1日から $0.005 / IP / 時。**アタッチしているかどうかに関係なく**課金される。請求上は `PublicIPv4:InUseAddress` と `PublicIPv4:IdleAddress`。
+- **データ転送 OUT** — 全 AWS サービス合算で月100GB まで無料。それ以降はインターネット向け第1階層でおよそ $0.09/GB。
+
+つまりインスタンスから月 1TB 配信すると、**転送だけで約 $83** (1024GB から無料枠 100GB を引いた 924GB × $0.09)。これがインスタンス代とは別に乗る。転送がコンピュートを追い越すことは普通に起きる。
+
+## 例外と罠
+
+**NAT Gateway を通すと、同じ 1GB が2回課金される。** NAT 経由で外に出すと、NAT の時間課金、NAT の処理 GB 課金 (多くのリージョンで約 $0.045/GB)、**そして通常のデータ転送 OUT** の3つが乗る。AWS 自身の VPC 料金ページが、この転送部分を「the standard EC2 Data Transfer charge」だと明記している。同じ 1GB が、別々のサービスに別々の名前で2回出てくるということだ。
+
+<PathDiagram
+  lang="ja"
+  caption="同じ 1GB を NAT Gateway 経由で出したところ。メーターは3つ回り、請求書上は2つのサービスに割れる。"
+  nodes={[
+    { id: 'ec2', label: 'EC2', sub: 'private subnet' },
+    { id: 'nat', label: 'NAT Gateway', sub: '時間 + 処理GB', charges: ['time'] },
+    { id: 'net', label: 'インターネット', sub: '宛先' },
+  ]}
+  hops={[
+    { from: 'ec2', to: 'nat', label: 'NAT の処理', meter: 'egress', cost: '約 $0.045/GB' },
+    { from: 'nat', to: 'net', label: 'データ転送 OUT', meter: 'egress', cost: '$0.09/GB' },
+  ]}
+/>
+
+**AZ 跨ぎは往復で課金される。** 同一リージョン内で AZ を跨ぐ転送には `<Region>-DataTransfer-Regional-Bytes` という usage type が付き、AWS の課金ドキュメントは **inbound 側と outbound 側の両方に課金される**と明記している。1回の転送に対して line item が **2本**立つということ。マルチ AZ 構成は可用性を買っているわけで、これはその月額だ。
+
+**「停止」は「削除」ではない。** インスタンスを停止すればインスタンスのメーターは止まる。残された EBS ボリュームは、プロビジョンしたサイズのまま自分のメーターを回し続ける。止まらない。
