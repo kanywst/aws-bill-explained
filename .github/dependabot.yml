@@ -1,0 +1,36 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Astro and its integrations move together; separate PRs for each just
+      # produce a broken tree that has to be resolved by hand anyway.
+      astro:
+        patterns:
+          - astro
+          - '@astrojs/*'
+      dev-tooling:
+        patterns:
+          - vitest
+          - prettier
+          - typescript
+          - '@astrojs/check'
+      fonts:
+        patterns:
+          - '@fontsource-variable/*'
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore
+      include: scope

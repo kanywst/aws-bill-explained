@@ -48,8 +48,8 @@
   --unlit: #9ba7b6;
 
   --font-body:
-    'Open Sans Variable', 'Open Sans', 'Helvetica Neue', Roboto, Arial,
-    'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    'Open Sans Variable', 'Open Sans', 'Helvetica Neue', Roboto, Arial, 'Hiragino Sans',
+    'Noto Sans JP', sans-serif;
   --font-ui: var(--font-body);
   --font-display: var(--font-body);
   --font-mono: 'Amazon Ember Mono', ui-monospace, SFMono-Regular, Menlo, monospace;

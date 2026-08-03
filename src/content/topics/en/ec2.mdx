@@ -17,7 +17,7 @@ EC2 has two of the three meters, and the missing one is the reason people get co
 
 There is no per-call charge on the EC2 API. `RunInstances`, `DescribeInstances`, and the
 rest of the control plane cost nothing per invocation, no matter how often you poll them.
-So the number of times you *ask EC2 to do something* never appears on your bill.
+So the number of times you _ask EC2 to do something_ never appears on your bill.
 
 What does appear is time — every second an instance exists — and bytes that leave.
 
@@ -39,7 +39,14 @@ storage and compute revenue for years.
   ]}
   steps={[
     { from: 'client', to: 'ec2', label: 'GET /video.mp4' },
-    { from: 'ec2', to: 'client', label: '200 OK — 1 GB body', reply: true, meter: 'egress', charge: '1 GB × $0.09' },
+    {
+      from: 'ec2',
+      to: 'client',
+      label: '200 OK — 1 GB body',
+      reply: true,
+      meter: 'egress',
+      charge: '1 GB × $0.09',
+    },
   ]}
 />
 
@@ -66,7 +73,7 @@ egress can easily exceed the compute.
 
 **A NAT Gateway makes one gigabyte bill twice.** Send traffic out through NAT and you pay
 the NAT hourly charge, the NAT per-GB processing charge (about $0.045/GB in most regions),
-*and* the ordinary data transfer out. AWS's own VPC pricing page is explicit that the transfer portion is "the standard EC2
+_and_ the ordinary data transfer out. AWS's own VPC pricing page is explicit that the transfer portion is "the standard EC2
 Data Transfer charge" — so the same gigabyte appears under two different services with two
 different names.
 
@@ -87,7 +94,7 @@ different names.
 **Cross-AZ traffic bills in both directions.** Data moving between Availability Zones in
 one region carries the usage type `<Region>-DataTransfer-Regional-Bytes`, and the AWS
 billing documentation states that you are charged for both the inbound and outbound side —
-you will see *two* line items for a single transfer. A multi-AZ deployment buys
+you will see _two_ line items for a single transfer. A multi-AZ deployment buys
 availability, and this is its recurring price.
 
 **Stopped is not deleted.** Stopping an instance stops the instance meter. The EBS volume

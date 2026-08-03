@@ -34,13 +34,23 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
 
       <div class="rig-dials">
         <div class="meter-time">
-          <Odometer id="dial-time" value="00:00:00" meter="time" size="2.1rem"
-                    label={s.hero.capElapsed} />
+          <Odometer
+            id="dial-time"
+            value="00:00:00"
+            meter="time"
+            size="2.1rem"
+            label={s.hero.capElapsed}
+          />
           <p class="rig-cap">{s.hero.capElapsed}</p>
         </div>
         <div class="meter-time">
-          <Odometer id="dial-cost" value="0.000000" meter="time" size="2.1rem"
-                    label={s.hero.capAccrued} />
+          <Odometer
+            id="dial-cost"
+            value="0.000000"
+            meter="time"
+            size="2.1rem"
+            label={s.hero.capAccrued}
+          />
           <p class="rig-cap">{s.hero.capAccrued}</p>
         </div>
       </div>
@@ -69,7 +79,9 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
                 <dt>{s.meterHeads.trap}</dt>
                 <dd>{m.trap}</dd>
                 <dt>{s.meterHeads.bill}</dt>
-                <dd><code>{m.onTheBill}</code></dd>
+                <dd>
+                  <code>{m.onTheBill}</code>
+                </dd>
               </dl>
             </li>
           );

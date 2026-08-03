@@ -79,7 +79,8 @@ describe('the real catalogue', () => {
   });
 
   it('cites only AWS-controlled sources', () => {
-    const allowed = /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//;
+    const allowed =
+      /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//;
     for (const service of catalogue.all()) {
       for (const source of service.sources) {
         expect(source, `${service.slug} cites ${source}`).toMatch(allowed);
@@ -123,12 +124,10 @@ describe('the real catalogue', () => {
 
   it('dates every classification, because AWS reprices and a claim needs a timestamp', () => {
     for (const service of catalogue.all()) {
-      expect(service.checked, `${service.slug} has no checked date`).toMatch(
-        /^\d{4}-\d{2}-\d{2}$/
-      );
+      expect(service.checked, `${service.slug} has no checked date`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(
         Number.isNaN(Date.parse(service.checked)),
-        `${service.slug} checked date is unparseable`
+        `${service.slug} checked date is unparseable`,
       ).toBe(false);
     }
   });

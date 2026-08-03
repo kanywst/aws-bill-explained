@@ -6,7 +6,12 @@ import { Service, type CategoryId } from './service';
 const svc = (
   slug: string,
   meters: MeterId[],
-  over: { category?: CategoryId; name?: string; sources?: string[]; confidence?: 'high' | 'medium' } = {}
+  over: {
+    category?: CategoryId;
+    name?: string;
+    sources?: string[];
+    confidence?: 'high' | 'medium';
+  } = {},
 ) =>
   new Service({
     slug,
@@ -24,7 +29,7 @@ const svc = (
 describe('Catalogue', () => {
   it('refuses duplicate slugs rather than silently dropping a service', () => {
     expect(() => Catalogue.from([svc('ec2', ['time']), svc('ec2', ['calls'])])).toThrow(
-      DuplicateServiceError
+      DuplicateServiceError,
     );
   });
 
@@ -62,7 +67,12 @@ describe('Catalogue', () => {
 
   it('treats free services as a first-class group', () => {
     const c = Catalogue.from([svc('iam', []), svc('sts', []), svc('ec2', ['time'])]);
-    expect(c.free().map((s) => s.slug).sort()).toEqual(['iam', 'sts']);
+    expect(
+      c
+        .free()
+        .map((s) => s.slug)
+        .sort(),
+    ).toEqual(['iam', 'sts']);
   });
 
   it('picks out the services that turn all three meters', () => {

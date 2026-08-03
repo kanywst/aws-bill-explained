@@ -18,7 +18,7 @@ what produces the surprise line item, because there are four rings, not one, and
 them cost money to cross.
 
 The rings are nested, and each one is a toll gate in the outward direction only. Traffic
-falling *inward* — a request arriving, a response coming back from a further-out ring — is
+falling _inward_ — a request arriving, a response coming back from a further-out ring — is
 never charged on its own.
 
 <BoundaryMap
@@ -26,7 +26,11 @@ never charged on its own.
   caption="Crossing outward is what costs. The rate depends on how many rings you go through, not how far the packet travels."
   rings={[
     { label: 'Internet', crossing: '$0.09/GB', note: 'first 100 GB/month free, all services' },
-    { label: 'Other region', crossing: 'varies', note: 'rate depends on the source/destination pair' },
+    {
+      label: 'Other region',
+      crossing: 'varies',
+      note: 'rate depends on the source/destination pair',
+    },
     { label: 'Other AZ, same region', crossing: '$0.01/GB', note: 'charged in each direction' },
     { label: 'Same AZ, private IP', crossing: '$0.00', free: true, note: 'the only free ring' },
   ]}
@@ -61,7 +65,7 @@ toll gate, even though no packet touched a public IP or an internet gateway.
 **The device in the middle charges separately from the distance.** Egress is the distance
 fee. NAT Gateways, Transit Gateways, interface endpoints and load balancers each add a
 processing fee per gigabyte on top, and those are billed regardless of direction — inbound
-through a NAT Gateway is *not* free, even though inbound from the internet is.
+through a NAT Gateway is _not_ free, even though inbound from the internet is.
 
 <PathDiagram
   lang="en"

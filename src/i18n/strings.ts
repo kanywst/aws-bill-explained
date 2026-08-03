@@ -75,12 +75,26 @@ interface Strings {
   };
 
   /** Words baked into the diagram components. */
-  diagram: { free: string; noCharge: string; meter: string; idle: string; nothing: string; rings: string };
+  diagram: {
+    free: string;
+    noCharge: string;
+    meter: string;
+    idle: string;
+    nothing: string;
+    rings: string;
+  };
 
   topicsLede: string;
   checked: string;
   categories: Record<
-    'compute' | 'storage' | 'database' | 'networking' | 'security' | 'integration' | 'management' | 'analytics',
+    | 'compute'
+    | 'storage'
+    | 'database'
+    | 'networking'
+    | 'security'
+    | 'integration'
+    | 'management'
+    | 'analytics',
     string
   >;
   services: {
@@ -195,14 +209,18 @@ export const STRINGS: Record<Lang, Strings> = {
     services: {
       title: 'Every service, by meter',
       lede: 'Which meters a service turns, and the one thing people get wrong about each. No rates — those move; the meters do not.',
-      freeNote: 'This service turns no meters of its own. Read the trap below for what it makes you pay for elsewhere.',
+      freeNote:
+        'This service turns no meters of its own. Read the trap below for what it makes you pay for elsewhere.',
       trapHead: 'What gets missed',
       billOnHead: 'Find it on your bill',
-      billOnHint: 'Filter Cost Explorer or your Cost and Usage Report by these usage types. A usage type with no region prefix means us-east-1.',
+      billOnHint:
+        'Filter Cost Explorer or your Cost and Usage Report by these usage types. A usage type with no region prefix means us-east-1.',
       sameShapeHead: 'Bills the same way',
-      sameShapeHint: 'These services turn exactly the same meters, so what you learn here transfers.',
+      sameShapeHint:
+        'These services turn exactly the same meters, so what you learn here transfers.',
       sourcesHead: 'Checked against',
-      mediumConfidence: 'Classified with medium confidence — the meter set could not be fully confirmed from primary AWS documentation. Verify against the sources before acting on it.',
+      mediumConfidence:
+        'Classified with medium confidence — the meter set could not be fully confirmed from primary AWS documentation. Verify against the sources before acting on it.',
       filterAll: 'All',
       filterFree: 'Free',
       count: 'services',
@@ -302,14 +320,17 @@ export const STRINGS: Record<Lang, Strings> = {
     services: {
       title: '全サービスをメーターで引く',
       lede: 'どのメーターが回るか、そしてそのサービスで一番よく間違えられる点。金額は載せない — 動くから。メーターは動かない。',
-      freeNote: 'このサービス自体はメーターを回さない。下の「見落とすところ」に、どこに金が移るかを書いてある。',
+      freeNote:
+        'このサービス自体はメーターを回さない。下の「見落とすところ」に、どこに金が移るかを書いてある。',
       trapHead: '見落とすところ',
       billOnHead: '請求書での探し方',
-      billOnHint: 'Cost Explorer や CUR をこの usage type で絞り込む。リージョン接頭辞がないものは us-east-1 を指す。',
+      billOnHint:
+        'Cost Explorer や CUR をこの usage type で絞り込む。リージョン接頭辞がないものは us-east-1 を指す。',
       sameShapeHead: '同じ回り方をするサービス',
       sameShapeHint: '回るメーターが完全に同じなので、ここで理解したことがそのまま使える。',
       sourcesHead: '裏取りに使った一次情報',
-      mediumConfidence: '確度は中。AWS の一次情報だけではメーターの組み合わせを確定できなかった。判断に使う前に出典を確認してほしい。',
+      mediumConfidence:
+        '確度は中。AWS の一次情報だけではメーターの組み合わせを確定できなかった。判断に使う前に出典を確認してほしい。',
       filterAll: 'すべて',
       filterFree: '無料',
       count: '件',

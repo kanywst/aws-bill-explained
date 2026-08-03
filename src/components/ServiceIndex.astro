@@ -229,8 +229,7 @@ const categories = catalogue.categories();
     for (const item of items) {
       const meters = (item.dataset.meters ?? '').split(' ').filter(Boolean);
       const free = item.dataset.free === 'true';
-      const show =
-        filter === 'all' || (filter === 'free' ? free : meters.includes(filter));
+      const show = filter === 'all' || (filter === 'free' ? free : meters.includes(filter));
       item.hidden = !show;
     }
     // Hide a category heading once everything under it is filtered out.

@@ -30,7 +30,14 @@ EC2 の API には回数課金がない。`RunInstances` も `DescribeInstances`
   ]}
   steps={[
     { from: 'client', to: 'ec2', label: 'GET /video.mp4' },
-    { from: 'ec2', to: 'client', label: '200 OK — 本文 1GB', reply: true, meter: 'egress', charge: '1 GB × $0.09' },
+    {
+      from: 'ec2',
+      to: 'client',
+      label: '200 OK — 本文 1GB',
+      reply: true,
+      meter: 'egress',
+      charge: '1 GB × $0.09',
+    },
   ]}
 />
 

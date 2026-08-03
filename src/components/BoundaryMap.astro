@@ -67,7 +67,11 @@ const geom = rings.map((r, i) => ({
         geom.map((r) => (
           <g class:list={['bm-ring', r.free && 'is-free']}>
             <rect
-              x={r.x} y={r.y} width={r.w} height={r.h} rx="10"
+              x={r.x}
+              y={r.y}
+              width={r.w}
+              height={r.h}
+              rx="10"
               fill={r.free ? 'var(--surface-sunken)' : 'none'}
               stroke={r.colour}
               stroke-width={r.free ? 1.5 : 2}
@@ -81,9 +85,17 @@ const geom = rings.map((r, i) => ({
 
             {/* The toll, inside the bottom edge — you pay on the way out. */}
             <text x={r.x + 16} y={r.y + r.h - 13} class="bm-toll">
-              <tspan class="bm-arrow" fill={r.colour}>↑</tspan>
-              <tspan dx="7" fill={r.colour} class="bm-price">{r.crossing}</tspan>
-              {r.note && <tspan dx="9" class="bm-note">{r.note}</tspan>}
+              <tspan class="bm-arrow" fill={r.colour}>
+                ↑
+              </tspan>
+              <tspan dx="7" fill={r.colour} class="bm-price">
+                {r.crossing}
+              </tspan>
+              {r.note && (
+                <tspan dx="9" class="bm-note">
+                  {r.note}
+                </tspan>
+              )}
             </text>
           </g>
         ))

@@ -1,0 +1,12 @@
+{
+  // Matches the house style: paragraphs are one line, not hard-wrapped.
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD024": false,
+    "MD033": { "allowed_elements": ["picture", "source", "img"] },
+    "MD036": false,
+    "MD041": false,
+  },
+  "globs": ["**/*.md", "!node_modules", "!dist"],
+}

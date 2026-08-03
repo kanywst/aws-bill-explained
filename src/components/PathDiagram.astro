@@ -81,12 +81,26 @@ const lanes = hops.map((hop, i) => {
   <div class="pd-scroll">
     <svg viewBox={`0 0 ${W} ${H}`} width={W} class="pd-svg" role="img" aria-label={caption}>
       <defs>
-        <marker id="pd-head-lit" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7"
-                markerHeight="7" orient="auto-start-reverse">
+        <marker
+          id="pd-head-lit"
+          viewBox="0 0 8 8"
+          refX="7"
+          refY="4"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto-start-reverse"
+        >
           <path d="M0 0 L8 4 L0 8 z" fill="context-stroke"></path>
         </marker>
-        <marker id="pd-head-dim" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6"
-                markerHeight="6" orient="auto-start-reverse">
+        <marker
+          id="pd-head-dim"
+          viewBox="0 0 8 8"
+          refX="7"
+          refY="4"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
           <path d="M0 0 L8 4 L0 8 z" fill="var(--unlit)"></path>
         </marker>
       </defs>
@@ -100,32 +114,54 @@ const lanes = hops.map((hop, i) => {
           return (
             <g class:list={['pd-hop', lit ? 'is-lit' : 'is-dim']} style={`--stroke:${stroke}`}>
               <line
-                x1={hop.x1} y1={hop.y} x2={hop.x2} y2={hop.y}
-                stroke={stroke} stroke-width={lit ? 2.5 : 1.5}
+                x1={hop.x1}
+                y1={hop.y}
+                x2={hop.x2}
+                y2={hop.y}
+                stroke={stroke}
+                stroke-width={lit ? 2.5 : 1.5}
                 marker-end={lit ? 'url(#pd-head-lit)' : 'url(#pd-head-dim)'}
               />
               {lit && (
                 <line
-                  class="pd-flow" x1={hop.x1} y1={hop.y} x2={hop.x2} y2={hop.y}
-                  stroke={stroke} stroke-width="2.5" stroke-linecap="round"
-                  stroke-dasharray="2 14" style={`--dir:${dir * 16}px`}
+                  class="pd-flow"
+                  x1={hop.x1}
+                  y1={hop.y}
+                  x2={hop.x2}
+                  y2={hop.y}
+                  stroke={stroke}
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-dasharray="2 14"
+                  style={`--dir:${dir * 16}px`}
                 />
               )}
               <text
-                x={(hop.x1 + hop.x2) / 2} y={hop.y - 13}
-                text-anchor="middle" class:list={['pd-label', lit && 'is-lit']}
+                x={(hop.x1 + hop.x2) / 2}
+                y={hop.y - 13}
+                text-anchor="middle"
+                class:list={['pd-label', lit && 'is-lit']}
               >
                 {hop.label}
               </text>
               {hop.cost && (
-                <text x={(hop.x1 + hop.x2) / 2} y={hop.forward ? hop.y - 30 : hop.y + 26}
-                      text-anchor="middle" class="pd-cost" fill={stroke}>
+                <text
+                  x={(hop.x1 + hop.x2) / 2}
+                  y={hop.forward ? hop.y - 30 : hop.y + 26}
+                  text-anchor="middle"
+                  class="pd-cost"
+                  fill={stroke}
+                >
                   {hop.cost}
                 </text>
               )}
               {!hop.meter && (
-                <text x={(hop.x1 + hop.x2) / 2} y={hop.forward ? hop.y - 30 : hop.y + 24}
-                      text-anchor="middle" class="pd-free">
+                <text
+                  x={(hop.x1 + hop.x2) / 2}
+                  y={hop.forward ? hop.y - 30 : hop.y + 24}
+                  text-anchor="middle"
+                  class="pd-free"
+                >
                   {s.free}
                 </text>
               )}
@@ -137,8 +173,16 @@ const lanes = hops.map((hop, i) => {
       {
         nodes.map((n, i) => (
           <g class="pd-node">
-            <rect x={x(i)} y={MID - NODE_H / 2} width={NODE_W} height={NODE_H} rx="7"
-                  fill="var(--surface)" stroke="var(--border)" stroke-width="1.5" />
+            <rect
+              x={x(i)}
+              y={MID - NODE_H / 2}
+              width={NODE_W}
+              height={NODE_H}
+              rx="7"
+              fill="var(--surface)"
+              stroke="var(--border)"
+              stroke-width="1.5"
+            />
             <text x={cx(i)} y={n.sub ? MID - 2 : MID + 4} text-anchor="middle" class="pd-name">
               {n.label}
             </text>
@@ -148,8 +192,13 @@ const lanes = hops.map((hop, i) => {
               </text>
             )}
             {n.charges?.map((m, k) => (
-              <circle class="pd-lamp" cx={x(i) + 12 + k * 13} cy={MID - NODE_H / 2 + 12} r="4"
-                      fill={`var(--m-${m})`} />
+              <circle
+                class="pd-lamp"
+                cx={x(i) + 12 + k * 13}
+                cy={MID - NODE_H / 2 + 12}
+                r="4"
+                fill={`var(--m-${m})`}
+              />
             ))}
           </g>
         ))
@@ -168,7 +217,7 @@ const lanes = hops.map((hop, i) => {
           </span>
         ))
       }
-      <span class="pd-key-item is-dim"><i /> {s.noCharge}</span>
+      <span class="pd-key-item is-dim"><i></i> {s.noCharge}</span>
     </span>
   </figcaption>
 </figure>

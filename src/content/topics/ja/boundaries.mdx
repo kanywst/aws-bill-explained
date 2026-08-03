@@ -24,7 +24,12 @@ import PathDiagram from '../../../components/PathDiagram.astro';
     { label: 'インターネット', crossing: '$0.09/GB', note: '全サービス合算で月100GBまで無料' },
     { label: '別リージョン', crossing: '変動', note: 'レートは送信元と宛先の組み合わせ次第' },
     { label: '同一リージョンの別 AZ', crossing: '$0.01/GB', note: '各方向に課金' },
-    { label: '同一 AZ / プライベート IP', crossing: '$0.00', free: true, note: '無料なのはここだけ' },
+    {
+      label: '同一 AZ / プライベート IP',
+      crossing: '$0.00',
+      free: true,
+      note: '無料なのはここだけ',
+    },
   ]}
 />
 

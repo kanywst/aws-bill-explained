@@ -26,11 +26,7 @@ describe('MeterSet', () => {
   });
 
   it('always returns canonical order regardless of input order', () => {
-    expect(MeterSet.of(['calls', 'egress', 'time']).toArray()).toEqual([
-      'time',
-      'egress',
-      'calls',
-    ]);
+    expect(MeterSet.of(['calls', 'egress', 'time']).toArray()).toEqual(['time', 'egress', 'calls']);
   });
 
   it('de-duplicates repeated meters', () => {

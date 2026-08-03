@@ -47,7 +47,7 @@ export function toService(raw: unknown): Service {
   }
   if (!isCategoryId(r.category)) {
     throw new InvalidServiceRecordError(
-      `service "${r.slug}" has unknown category "${String(r.category)}"`
+      `service "${r.slug}" has unknown category "${String(r.category)}"`,
     );
   }
 

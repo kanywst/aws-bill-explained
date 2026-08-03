@@ -10,9 +10,11 @@
     "build": "astro build && node scripts/check-build.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check && vitest run && node scripts/check-build.mjs",
+    "check": "npm run lint && astro check && vitest run && npm run build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "lint": "prettier --check . && markdownlint-cli2"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",
@@ -21,6 +23,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "markdownlint-cli2": "^0.23.2",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   }

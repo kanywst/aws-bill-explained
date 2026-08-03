@@ -52,28 +52,49 @@ const billed = steps.filter((s) => s.meter);
   <div class="sq-scroll">
     <svg viewBox={`0 0 ${W} ${H}`} width={W} class="sq-svg" role="img" aria-label={caption}>
       <defs>
-        <marker id="sq-head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7"
-                orient="auto-start-reverse">
+        <marker
+          id="sq-head"
+          viewBox="0 0 8 8"
+          refX="7"
+          refY="4"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto-start-reverse"
+        >
           <path d="M0 0 L8 4 L0 8 z" fill="context-stroke"></path>
         </marker>
       </defs>
 
       {/* Billing gutter — the column AWS's own diagrams are missing. */}
-      <rect x={LANES_W} y="0" width={GUTTER_W} height={H} fill="var(--surface)" />
-      <line x1={LANES_W} y1="0" x2={LANES_W} y2={H} stroke="var(--border)" stroke-width="1" />
+      <rect x={LANES_W} y="0" width={GUTTER_W} height={H} fill="var(--surface)"></rect>
+      <line x1={LANES_W} y1="0" x2={LANES_W} y2={H} stroke="var(--border)" stroke-width="1"></line>
       <text x={LANES_W + 14} y="24" class="sq-gutter-head">{s.meter}</text>
 
       {
         actors.map((a) => (
           <g>
-            <rect x={laneX(a.id) - COL_W / 2 + 12} y="10" width={COL_W - 24} height={HEAD_H - 14}
-                  rx="6" fill="var(--surface)" stroke="var(--border)"
-                  stroke-width="1.5" />
+            <rect
+              x={laneX(a.id) - COL_W / 2 + 12}
+              y="10"
+              width={COL_W - 24}
+              height={HEAD_H - 14}
+              rx="6"
+              fill="var(--surface)"
+              stroke="var(--border)"
+              stroke-width="1.5"
+            />
             <text x={laneX(a.id)} y={HEAD_H - 12} text-anchor="middle" class="sq-actor">
               {a.label}
             </text>
-            <line x1={laneX(a.id)} y1={HEAD_H} x2={laneX(a.id)} y2={H - 8}
-                  stroke="var(--border-subtle)" stroke-width="1" stroke-dasharray="3 5" />
+            <line
+              x1={laneX(a.id)}
+              y1={HEAD_H}
+              x2={laneX(a.id)}
+              y2={H - 8}
+              stroke="var(--border-subtle)"
+              stroke-width="1"
+              stroke-dasharray="3 5"
+            />
           </g>
         ))
       }
@@ -90,18 +111,34 @@ const billed = steps.filter((s) => s.meter);
           const to = x2 + (forward ? -6 : 6);
           return (
             <g class:list={['sq-step', lit && 'is-lit']} style={`--stroke:${stroke}`}>
-              <line x1={from} y1={y} x2={to} y2={y} stroke={stroke}
-                    stroke-width={lit ? 2.25 : 1.5}
-                    stroke-dasharray={step.reply ? '6 4' : undefined}
-                    marker-end="url(#sq-head)" />
-              <text x={(from + to) / 2} y={y - 9} text-anchor="middle"
-                    class:list={['sq-label', lit && 'is-lit']}>
+              <line
+                x1={from}
+                y1={y}
+                x2={to}
+                y2={y}
+                stroke={stroke}
+                stroke-width={lit ? 2.25 : 1.5}
+                stroke-dasharray={step.reply ? '6 4' : undefined}
+                marker-end="url(#sq-head)"
+              />
+              <text
+                x={(from + to) / 2}
+                y={y - 9}
+                text-anchor="middle"
+                class:list={['sq-label', lit && 'is-lit']}
+              >
                 {step.label}
               </text>
 
               {/* Gutter row */}
-              <line x1={LANES_W} y1={y + 18} x2={W} y2={y + 18} stroke="var(--bg)"
-                    stroke-width="1" />
+              <line
+                x1={LANES_W}
+                y1={y + 18}
+                x2={W}
+                y2={y + 18}
+                stroke="var(--bg)"
+                stroke-width="1"
+              />
               {lit ? (
                 <>
                   <circle cx={LANES_W + 20} cy={y - 3} r="4" fill={stroke} class="sq-lamp" />
@@ -116,9 +153,17 @@ const billed = steps.filter((s) => s.meter);
                 </>
               ) : (
                 <>
-                  <circle cx={LANES_W + 20} cy={y - 3} r="4" fill="none" stroke="var(--unlit)"
-                          stroke-width="1.25" />
-                  <text x={LANES_W + 32} y={y + 1} class="sq-none">{s.idle}</text>
+                  <circle
+                    cx={LANES_W + 20}
+                    cy={y - 3}
+                    r="4"
+                    fill="none"
+                    stroke="var(--unlit)"
+                    stroke-width="1.25"
+                  />
+                  <text x={LANES_W + 32} y={y + 1} class="sq-none">
+                    {s.idle}
+                  </text>
                 </>
               )}
             </g>
@@ -130,11 +175,7 @@ const billed = steps.filter((s) => s.meter);
 
   <figcaption class="sq-cap">
     {caption}
-    {
-      billed.length === 0 && (
-        <strong class="sq-verdict"> {s.nothing}</strong>
-      )
-    }
+    {billed.length === 0 && <strong class="sq-verdict"> {s.nothing}</strong>}
   </figcaption>
 </figure>
 

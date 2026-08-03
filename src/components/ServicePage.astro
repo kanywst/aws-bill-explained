@@ -15,11 +15,12 @@ const s = t(lang);
 const catalogue = loadCatalogue();
 
 // "What else bills like this?" is a Catalogue question, not an array filter.
-const sameShape = catalogue
-  .byBillingShape()
-  .get(service.meters.signature)
-  ?.filter((other) => other.slug !== service.slug)
-  .slice(0, 6) ?? [];
+const sameShape =
+  catalogue
+    .byBillingShape()
+    .get(service.meters.signature)
+    ?.filter((other) => other.slug !== service.slug)
+    .slice(0, 6) ?? [];
 ---
 
 <Base title={`${service.name} — ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
@@ -34,11 +35,7 @@ const sameShape = catalogue
     <section class="sp-one">
       <p class="eyebrow">{s.oneLiner}</p>
       <p class="sp-one-text">{service.oneLiner}</p>
-      {
-        service.isFree && (
-          <p class="sp-free">{s.services.freeNote}</p>
-        )
-      }
+      {service.isFree && <p class="sp-free">{s.services.freeNote}</p>}
     </section>
 
     <section class="sp-block">
@@ -53,7 +50,9 @@ const sameShape = catalogue
           <p class="sp-hint">{s.services.billOnHint}</p>
           <ul class="sp-usage">
             {service.billOn.map((u) => (
-              <li><code>{u}</code></li>
+              <li>
+                <code>{u}</code>
+              </li>
             ))}
           </ul>
         </section>
@@ -79,18 +78,20 @@ const sameShape = catalogue
     <footer class="sp-foot">
       <h2 class="eyebrow sp-head">{s.services.sourcesHead}</h2>
       <ul class="sp-sources">
-        {service.sources.map((src) => (
-          <li><a href={src} rel="nofollow noopener">{src.replace(/^https:\/\//, '')}</a></li>
-        ))}
+        {
+          service.sources.map((src) => (
+            <li>
+              <a href={src} rel="nofollow noopener">
+                {src.replace(/^https:\/\//, '')}
+              </a>
+            </li>
+          ))
+        }
       </ul>
       <p class="sp-checked">
         {s.checked}: <time datetime={service.checked}>{service.checked}</time>
       </p>
-      {
-        service.confidence !== 'high' && (
-          <p class="sp-confidence">{s.services.mediumConfidence}</p>
-        )
-      }
+      {service.confidence !== 'high' && <p class="sp-confidence">{s.services.mediumConfidence}</p>}
     </footer>
   </article>
 </Base>

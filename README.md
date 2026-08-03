@@ -4,11 +4,11 @@ Every AWS bill is three meters. Learn the three and a pricing page stops being a
 
 AWS documents pricing one service at a time, so every new service looks like a new billing model. It isn't. Three meters exist, and a service either has a given meter or it doesn't:
 
-| Meter | The question it answers | What it counts |
-| --- | --- | --- |
-| **Time** | Does the thing exist? | Capacity × duration |
-| **Egress** | Did bytes cross a boundary on the way out? | Gigabytes leaving; inbound is free |
-| **Calls** | Did you invoke the API? | API operations; size and direction are irrelevant |
+| Meter      | The question it answers                    | What it counts                                    |
+| ---------- | ------------------------------------------ | ------------------------------------------------- |
+| **Time**   | Does the thing exist?                      | Capacity × duration                               |
+| **Egress** | Did bytes cross a boundary on the way out? | Gigabytes leaving; inbound is free                |
+| **Calls**  | Did you invoke the API?                    | API operations; size and direction are irrelevant |
 
 This site classifies every AWS service against those three, explains the one thing people get wrong about each, and tells you which usage type to search for on your own bill.
 

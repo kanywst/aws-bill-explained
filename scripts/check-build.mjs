@@ -43,7 +43,9 @@ for (const file of html) {
   }
 
   if (/(?:x|y|width|height|cx|cy)="NaN"/.test(body)) {
-    failures.push(`${where}: NaN in an SVG coordinate — a layout formula divided by something empty`);
+    failures.push(
+      `${where}: NaN in an SVG coordinate — a layout formula divided by something empty`,
+    );
   }
 }
 

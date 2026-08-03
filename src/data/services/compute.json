@@ -3,10 +3,7 @@
     "slug": "ec2",
     "name": "Amazon EC2",
     "category": "compute",
-    "meters": [
-      "time",
-      "egress"
-    ],
+    "meters": ["time", "egress"],
     "oneLiner": "You rent instance-seconds, plus the EBS disks and public IPs attached to them; bytes going out cost extra.",
     "trap": "EBS volumes, snapshots and public IPv4 addresses keep billing after you stop the instance. Cross-AZ traffic is metered on both ends, so one transfer becomes two line items.",
     "billOn": [
@@ -30,18 +27,10 @@
     "slug": "lambda",
     "name": "AWS Lambda",
     "category": "compute",
-    "meters": [
-      "time",
-      "calls",
-      "egress"
-    ],
+    "meters": ["time", "calls", "egress"],
     "oneLiner": "Two meters turn on every function: a fee per request, and GB-seconds of memory multiplied by runtime.",
     "trap": "Provisioned concurrency bills from the moment you enable it until you disable it, whether or not anything ever invokes the function. INIT/cold-start time is billable duration too.",
-    "billOn": [
-      "Lambda-GB-Second",
-      "Request",
-      "Lambda-Streaming-Response-Processed-Bytes"
-    ],
+    "billOn": ["Lambda-GB-Second", "Request", "Lambda-Streaming-Response-Processed-Bytes"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/lambda/pricing/",
@@ -53,27 +42,19 @@
     "slug": "ecs",
     "name": "Amazon ECS",
     "category": "compute",
-    "meters": [
-      "time"
-    ],
+    "meters": ["time"],
     "oneLiner": "The orchestrator is free. You only pay for the EC2 or Fargate capacity your tasks actually land on.",
     "trap": "Free only covers ECS on your own EC2 or on Fargate. ECS Anywhere bills a per-hour fee for each on-prem instance, and ECS Managed Instances add a management fee on top of the EC2 rate.",
-    "billOn": [
-      "ECS-Anywhere-Instance-hours-WithFree"
-    ],
+    "billOn": ["ECS-Anywhere-Instance-hours-WithFree"],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/ecs/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/ecs/pricing/"],
     "checked": "2026-08-04"
   },
   {
     "slug": "eks",
     "name": "Amazon EKS",
     "category": "compute",
-    "meters": [
-      "time"
-    ],
+    "meters": ["time"],
     "oneLiner": "A flat per-cluster hourly fee for the control plane, then everything the nodes use is billed separately.",
     "trap": "The cluster fee runs on a completely empty cluster, and letting a Kubernetes version slide into extended support multiplies it. Cross-AZ pod traffic and NAT are billed by EC2/VPC, not by EKS.",
     "billOn": [],
@@ -88,9 +69,7 @@
     "slug": "fargate",
     "name": "AWS Fargate",
     "category": "compute",
-    "meters": [
-      "time"
-    ],
+    "meters": ["time"],
     "oneLiner": "Per-second billing for the vCPU and memory your task requests, not for what it actually uses.",
     "trap": "The clock starts at image pull, not at app start, and there is a one-minute minimum per task. Windows tasks add a per-vCPU OS license fee and a longer minimum.",
     "billOn": [
@@ -99,9 +78,7 @@
       "SpotUsage-Fargate-vCPU-Hours:perCPU"
     ],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/fargate/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/fargate/pricing/"],
     "checked": "2026-08-04"
   },
   {
@@ -113,24 +90,17 @@
     "trap": "Zero-cost scheduler that can start a lot of EC2 very fast. The real bill is compute environments whose min vCPUs never scale to zero between jobs.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/batch/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/batch/pricing/"],
     "checked": "2026-08-04"
   },
   {
     "slug": "lightsail",
     "name": "Amazon Lightsail",
     "category": "compute",
-    "meters": [
-      "time",
-      "egress"
-    ],
+    "meters": ["time", "egress"],
     "oneLiner": "A flat bundle price per instance with a data-transfer allowance baked in; you pay overage past it.",
     "trap": "A stopped instance still bills the full bundle rate - only deleting it stops the charge. Overage past the allowance is charged on outbound traffic only; inbound to Lightsail is always free.",
-    "billOn": [
-      "BundleUsage"
-    ],
+    "billOn": ["BundleUsage"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/lightsail/pricing/",
@@ -142,16 +112,12 @@
     "slug": "app-runner",
     "name": "AWS App Runner",
     "category": "compute",
-    "meters": [
-      "time"
-    ],
+    "meters": ["time"],
     "oneLiner": "Memory GB-hours to keep it warm, plus vCPU-hours only while it is actually processing requests.",
     "trap": "Despite feeling serverless, there is no per-request charge and no scale-to-zero: provisioned memory bills around the clock until you pause the service. Builds and auto-deploy add their own fees.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/apprunner/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/apprunner/pricing/"],
     "checked": "2026-08-04"
   },
   {
@@ -163,9 +129,7 @@
     "trap": "The service is free, but the CloudWatch alarms and detailed monitoring that drive it are not, and every launch re-triggers the per-instance billing minimum.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/autoscaling/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/autoscaling/pricing/"],
     "checked": "2026-08-04"
   },
   {
@@ -177,41 +141,29 @@
     "trap": "Beanstalk's own line item is always zero, so the cost hides under EC2 and ELB. A forgotten dev environment keeps paying for its load balancer and instances indefinitely.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/elasticbeanstalk/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/elasticbeanstalk/pricing/"],
     "checked": "2026-08-04"
   },
   {
     "slug": "outposts",
     "name": "AWS Outposts",
     "category": "compute",
-    "meters": [
-      "time",
-      "egress"
-    ],
+    "meters": ["time", "egress"],
     "oneLiner": "A 3-year capacity commitment billed upfront and/or monthly, plus hourly fees for AWS services on it.",
     "trap": "Capacity is paid for whether you use it or not, and Enterprise Support is mandatory. Outpost-to-Region and Local Gateway traffic are free, but Region-to-Outpost is charged as normal data transfer out.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/outposts/rack/pricing/"
-    ],
+    "sources": ["https://aws.amazon.com/outposts/rack/pricing/"],
     "checked": "2026-08-04"
   },
   {
     "slug": "ec2-spot",
     "name": "Amazon EC2 Spot",
     "category": "compute",
-    "meters": [
-      "time",
-      "egress"
-    ],
+    "meters": ["time", "egress"],
     "oneLiner": "The same instance-seconds as On-Demand, charged at the current Spot price. The discount is the difference.",
     "trap": "Your max price never changes what you pay - you always pay the Spot price in effect. If AWS interrupts you in the first hour it is free, but if YOU terminate you pay for the seconds used.",
-    "billOn": [
-      "SpotUsage"
-    ],
+    "billOn": ["SpotUsage"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/ec2/spot/pricing/",
@@ -223,9 +175,7 @@
     "slug": "compute-optimizer",
     "name": "AWS Compute Optimizer",
     "category": "compute",
-    "meters": [
-      "time"
-    ],
+    "meters": ["time"],
     "oneLiner": "Recommendations are free; only the optional enhanced infrastructure metrics bill, per resource per hour.",
     "trap": "Free until someone flips on enhanced infrastructure metrics, which then bills per resource-hour - and for Auto Scaling groups it charges per running EC2 instance, not per group.",
     "billOn": [],
