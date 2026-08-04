@@ -23,6 +23,15 @@ updates:
       fonts:
         patterns:
           - '@fontsource-variable/*'
+    ignore:
+      # @astrojs/check pins `typescript@^5.0.0 || ^6.0.0`, and 0.9.10 is the
+      # latest release, so a TypeScript major lands as an unresolvable peer
+      # conflict that fails `npm ci` before any job can run. Reinstate this
+      # once @astrojs/check widens the range; minor and patch updates still
+      # come through.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
     commit-message:
       prefix: chore
       include: scope
