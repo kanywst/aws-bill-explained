@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Odometer from './Odometer.astro';
 import PathDiagram from './PathDiagram.astro';
-import { METER_ORDER } from '../data/meters';
+import { METER_ORDER } from '../domain/meter';
 import { localePath, t, type Lang } from '../i18n/strings';
 
 interface Props {
@@ -104,7 +104,7 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
       ]}
       hops={[
         { from: 'user', to: 'ec2', label: s.reading.hopIn },
-        { from: 'ec2', to: 'user', label: s.reading.hopOut, meter: 'egress', cost: '$0.09/GB' },
+        { from: 'ec2', to: 'user', label: s.reading.hopOut, meter: 'bytes', cost: '$0.09/GB' },
       ]}
     />
 
@@ -353,7 +353,7 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
   }
 
   .index-item:hover .index-title {
-    color: var(--m-egress);
+    color: var(--m-bytes);
   }
 
   .index-title {

@@ -7,7 +7,7 @@
  * here gets clean domain objects or a loud failure; nothing downstream ever
  * sees a raw record.
  */
-import { MeterSet } from '../domain/meter';
+import { MeterSet, type MeterId } from '../domain/meter';
 import { Catalogue } from '../domain/catalogue';
 import { Service, isCategoryId, normaliseSlug, type Confidence } from '../domain/service';
 
@@ -31,6 +31,20 @@ const asStrings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 
 const asConfidence = (value: unknown): Confidence => (value === 'high' ? 'high' : 'medium');
+
+/**
+ * The dataset was researched while the second meter was still called "egress".
+ * Rather than rewrite every record, the boundary translates — which is what an
+ * anti-corruption layer is for, and it means new research can use either name.
+ */
+const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes' };
+
+const asMeters = (value: unknown) =>
+  MeterSet.parse(
+    Array.isArray(value)
+      ? value.map((m) => (typeof m === 'string' ? (METER_ALIASES[m] ?? m) : m))
+      : value,
+  );
 
 /** Validates and normalises one raw record. Throws rather than guessing. */
 export function toService(raw: unknown): Service {
@@ -57,7 +71,7 @@ export function toService(raw: unknown): Service {
     category: r.category,
     // Unknown meter strings are dropped rather than thrown on: a new AWS
     // billing shape should degrade to "we don't know" and not break the build.
-    meters: MeterSet.parse(r.meters),
+    meters: asMeters(r.meters),
     oneLiner: typeof r.oneLiner === 'string' ? r.oneLiner : '',
     trap: typeof r.trap === 'string' ? r.trap : '',
     billOn: asStrings(r.billOn),

@@ -2,9 +2,8 @@
 title: 「外」はどこから外なのか
 short: 境界
 oneLiner: 転送課金はインターネットの話じゃない。どのリングを越えたかの話だ。
-meters: ['egress']
+meters: ['bytes']
 order: 20
-section: model
 checked: 2026-08-04
 ---
 
@@ -60,8 +59,8 @@ import PathDiagram from '../../../components/PathDiagram.astro';
     { id: 'b', label: 'サービス B', sub: 'us-east-1b' },
   ]}
   hops={[
-    { from: 'a', to: 'b', label: 'AZ 跨ぎのリクエスト', meter: 'egress', cost: '$0.01/GB' },
-    { from: 'b', to: 'a', label: 'AZ 跨ぎのレスポンス', meter: 'egress', cost: '$0.01/GB' },
+    { from: 'a', to: 'b', label: 'AZ 跨ぎのリクエスト', meter: 'bytes', cost: '$0.01/GB' },
+    { from: 'b', to: 'a', label: 'AZ 跨ぎのレスポンス', meter: 'bytes', cost: '$0.01/GB' },
   ]}
 />
 

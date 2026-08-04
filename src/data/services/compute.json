@@ -1,5 +1,59 @@
 [
   {
+    "slug": "app-runner",
+    "name": "AWS App Runner",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Memory GB-hours to keep it warm, plus vCPU-hours only while it is actually processing requests.",
+    "trap": "Despite feeling serverless, there is no per-request charge and no scale-to-zero: provisioned memory bills around the clock until you pause the service. Builds and auto-deploy add their own fees.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/apprunner/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "appstream",
+    "name": "Amazon WorkSpaces Applications (AppStream 2.0)",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Always-On fleets bill every running instance hour with nobody streaming, and On-Demand adds a stopped-instance rate.",
+    "trap": "One Windows streaming session makes that user liable for a full month of RDS SAL, counted per Region. Idle On-Demand capacity keeps billing as stopped instances until the fleet actually scales down.",
+    "billOn": ["GeneralPurpose.m7i.2xlarge-fl", "StoppedInstance-fl", "Win-User"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/appstream2/pricing/",
+      "https://docs.aws.amazon.com/appstream2/latest/developerguide/doc-history.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "batch",
+    "name": "AWS Batch",
+    "category": "compute",
+    "meters": [],
+    "oneLiner": "Batch itself is free. The scheduler costs nothing; you pay only for the EC2, Fargate or Lambda it launches.",
+    "trap": "Zero-cost scheduler that can start a lot of EC2 very fast. The real bill is compute environments whose min vCPUs never scale to zero between jobs.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/batch/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "compute-optimizer",
+    "name": "AWS Compute Optimizer",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Recommendations are free; only the optional enhanced infrastructure metrics bill, per resource per hour.",
+    "trap": "Free until someone flips on enhanced infrastructure metrics, which then bills per resource-hour - and for Auto Scaling groups it charges per running EC2 instance, not per group.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/compute-optimizer/pricing/",
+      "https://docs.aws.amazon.com/compute-optimizer/latest/ug/enhanced-infrastructure-metrics.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "ec2",
     "name": "Amazon EC2",
     "category": "compute",
@@ -24,17 +78,59 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "lambda",
-    "name": "AWS Lambda",
+    "slug": "ec2-auto-scaling",
+    "name": "Amazon EC2 Auto Scaling",
     "category": "compute",
-    "meters": ["time", "calls", "egress"],
-    "oneLiner": "Two meters turn on every function: a fee per request, and GB-seconds of memory multiplied by runtime.",
-    "trap": "Provisioned concurrency bills from the moment you enable it until you disable it, whether or not anything ever invokes the function. INIT/cold-start time is billable duration too.",
-    "billOn": ["Lambda-GB-Second", "Request", "Lambda-Streaming-Response-Processed-Bytes"],
+    "meters": [],
+    "oneLiner": "Free. Auto Scaling has no charge of its own - you pay only for the instances it launches.",
+    "trap": "The service is free, but the CloudWatch alarms and detailed monitoring that drive it are not, and every launch re-triggers the per-instance billing minimum.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/autoscaling/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ec2-spot",
+    "name": "Amazon EC2 Spot",
+    "category": "compute",
+    "meters": ["time", "egress"],
+    "oneLiner": "The same instance-seconds as On-Demand, charged at the current Spot price. The discount is the difference.",
+    "trap": "Your max price never changes what you pay - you always pay the Spot price in effect. If AWS interrupts you in the first hour it is free, but if YOU terminate you pay for the seconds used.",
+    "billOn": ["SpotUsage"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/lambda/pricing/",
-      "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+      "https://aws.amazon.com/ec2/spot/pricing/",
+      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/billing-for-interrupted-spot-instances.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ecr",
+    "name": "Amazon Elastic Container Registry",
+    "category": "compute",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Storage per GB-month plus data transfer out. Pulls to EC2, Fargate and Lambda in-Region are free.",
+    "trap": "Cross-Region replication bills data transfer out against the source Region on every copy. Untagged and superseded layers keep accruing storage until a lifecycle policy actually deletes them.",
+    "billOn": ["TimedStorage-ByteHrs", "Retrieval-Archive"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ecr/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ecr-public",
+    "name": "Amazon ECR Public",
+    "category": "compute",
+    "meters": ["time", "egress"],
+    "oneLiner": "Storage past the always-free allowance, and internet bandwidth once the free limits run out.",
+    "trap": "Publishing stays cheap because the puller pays. Past the free allowance, internet data transfer out of a public repo bills the AWS account doing the download, while storage stays on the repo owner.",
+    "billOn": ["TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ecr/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECRPublic/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
   },
@@ -66,6 +162,33 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "eks-anywhere",
+    "name": "Amazon EKS Anywhere",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Free to run on your own hardware. The Enterprise Subscription bills per cluster for a fixed term.",
+    "trap": "Subscription price is flat per cluster and ignores node count, so a three-node edge cluster costs what a large one costs. Past the first 7 days the 1-year or 3-year term cannot be cancelled.",
+    "billOn": ["AmazonEKSAnywhereSubscription-monthly-12month:perCluster"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/eks/eks-anywhere/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEKSAnywhere/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elastic-beanstalk",
+    "name": "AWS Elastic Beanstalk",
+    "category": "compute",
+    "meters": [],
+    "oneLiner": "A free wrapper. The bill is whatever EC2, load balancer and database resources the environment stands up.",
+    "trap": "Beanstalk's own line item is always zero, so the cost hides under EC2 and ELB. A forgotten dev environment keeps paying for its load balancer and instances indefinitely.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/elasticbeanstalk/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "fargate",
     "name": "AWS Fargate",
     "category": "compute",
@@ -82,15 +205,18 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "batch",
-    "name": "AWS Batch",
+    "slug": "lambda",
+    "name": "AWS Lambda",
     "category": "compute",
-    "meters": [],
-    "oneLiner": "Batch itself is free. The scheduler costs nothing; you pay only for the EC2, Fargate or Lambda it launches.",
-    "trap": "Zero-cost scheduler that can start a lot of EC2 very fast. The real bill is compute environments whose min vCPUs never scale to zero between jobs.",
-    "billOn": [],
+    "meters": ["time", "calls", "egress"],
+    "oneLiner": "Two meters turn on every function: a fee per request, and GB-seconds of memory multiplied by runtime.",
+    "trap": "Provisioned concurrency bills from the moment you enable it until you disable it, whether or not anything ever invokes the function. INIT/cold-start time is billable duration too.",
+    "billOn": ["Lambda-GB-Second", "Request", "Lambda-Streaming-Response-Processed-Bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/batch/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/lambda/pricing/",
+      "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -109,42 +235,6 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "app-runner",
-    "name": "AWS App Runner",
-    "category": "compute",
-    "meters": ["time"],
-    "oneLiner": "Memory GB-hours to keep it warm, plus vCPU-hours only while it is actually processing requests.",
-    "trap": "Despite feeling serverless, there is no per-request charge and no scale-to-zero: provisioned memory bills around the clock until you pause the service. Builds and auto-deploy add their own fees.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/apprunner/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "ec2-auto-scaling",
-    "name": "Amazon EC2 Auto Scaling",
-    "category": "compute",
-    "meters": [],
-    "oneLiner": "Free. Auto Scaling has no charge of its own - you pay only for the instances it launches.",
-    "trap": "The service is free, but the CloudWatch alarms and detailed monitoring that drive it are not, and every launch re-triggers the per-instance billing minimum.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/autoscaling/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "elastic-beanstalk",
-    "name": "AWS Elastic Beanstalk",
-    "category": "compute",
-    "meters": [],
-    "oneLiner": "A free wrapper. The bill is whatever EC2, load balancer and database resources the environment stands up.",
-    "trap": "Beanstalk's own line item is always zero, so the cost hides under EC2 and ELB. A forgotten dev environment keeps paying for its load balancer and instances indefinitely.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/elasticbeanstalk/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
     "slug": "outposts",
     "name": "AWS Outposts",
     "category": "compute",
@@ -157,32 +247,47 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "ec2-spot",
-    "name": "Amazon EC2 Spot",
+    "slug": "workdocs",
+    "name": "Amazon WorkDocs",
     "category": "compute",
-    "meters": ["time", "egress"],
-    "oneLiner": "The same instance-seconds as On-Demand, charged at the current Spot price. The discount is the difference.",
-    "trap": "Your max price never changes what you pay - you always pay the Spot price in effect. If AWS interrupts you in the first hour it is free, but if YOU terminate you pay for the seconds used.",
-    "billOn": ["SpotUsage"],
+    "meters": ["time", "calls"],
+    "oneLiner": "Seats and storage by the month, plus a meter on the API traffic itself.",
+    "trap": "Read, write, list, search and delete each get their own API call meter, so a chatty sync client can outgrow the seat charge. New sign-ups and account upgrades are closed, and AWS publishes migration steps instead.",
+    "billOn": ["WorkDocs-UserHrs", "WorkDocs-StorageByteHrs", "WorkDocs-ReadAPICalls"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/ec2/spot/pricing/",
-      "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/billing-for-interrupted-spot-instances.html"
+      "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/business-applications.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkDocs/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "compute-optimizer",
-    "name": "AWS Compute Optimizer",
+    "slug": "workspaces",
+    "name": "Amazon WorkSpaces",
     "category": "compute",
     "meters": ["time"],
-    "oneLiner": "Recommendations are free; only the optional enhanced infrastructure metrics bill, per resource per hour.",
-    "trap": "Free until someone flips on enhanced infrastructure metrics, which then bills per resource-hour - and for Auto Scaling groups it charges per running EC2 instance, not per group.",
-    "billOn": [],
+    "oneLiner": "Monthly bundles bill the whole month once a desktop exists, and hourly bundles still carry a flat monthly fee.",
+    "trap": "AutoStop is not free at zero usage; the per-user AutoStop fee lands every month regardless. Flipping a desktop from AutoStop to AlwaysOn mid-month can overlap both models, so AWS says switch near month end.",
+    "billOn": ["AW-HW-1", "AW-HW-1-AutoStop-Usage", "AW-HW-1-AutoStop-User"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/compute-optimizer/pricing/",
-      "https://docs.aws.amazon.com/compute-optimizer/latest/ug/enhanced-infrastructure-metrics.html"
+      "https://aws.amazon.com/workspaces-family/workspaces/pricing/",
+      "https://repost.aws/knowledge-center/workspace-modify-running-mode"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "workspaces-web",
+    "name": "Amazon WorkSpaces Secure Browser",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Billed per monthly active user, not per running instance.",
+    "trap": "A single sign-in during the calendar month makes that user billable in full; there is no partial MAU. Included streaming hours are granted per MAU, so heavy users tip into hourly overage while idle accounts cost nothing.",
+    "billOn": ["WORKSPACES-WEB-ST", "WORKSPACES-WEB-ST-LARGE"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/workspaces-family/secure-browser/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesWeb/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
   }

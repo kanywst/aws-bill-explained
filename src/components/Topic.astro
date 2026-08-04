@@ -3,6 +3,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import MeterLamps from './MeterLamps.astro';
 import { LANGS, localePath, t, type Lang } from '../i18n/strings';
+import { loadCatalogue } from '../infrastructure/service-repository';
 
 interface Props {
   entry: CollectionEntry<'topics'>;
@@ -17,6 +18,10 @@ const s = t(lang);
 const slug = entry.id.slice(entry.id.indexOf('/') + 1);
 const all = await getCollection('topics');
 const available = LANGS.filter((l) => all.some((e) => e.id === `${l}/${slug}`));
+
+// A deep dive and a catalogue entry can describe the same service. When they
+// share a slug they are two views of one thing, so each should reach the other.
+const service = loadCatalogue().find(slug);
 
 const checked = entry.data.checked.toISOString().slice(0, 10);
 ---
@@ -44,6 +49,16 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
       <Content />
     </div>
 
+    {
+      service && (
+        <aside class="tp-see">
+          <a href={localePath(lang, `/services/${service.slug}/`)}>
+            {s.services.seeEntry.replace('{name}', service.name)}
+          </a>
+        </aside>
+      )
+    }
+
     <footer class="tp-foot">
       <span class="tp-checked">{s.checked}: <time datetime={checked}>{checked}</time></span>
     </footer>
@@ -66,7 +81,7 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
   }
 
   .tp-back:hover {
-    color: var(--m-egress);
+    color: var(--m-bytes);
   }
 
   .tp-title {
@@ -135,6 +150,16 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
   /* Diagrams are the exception to the measure — they get the full column. */
   .tp-body :global(figure) {
     width: min(64rem, calc(100vw - var(--gutter) * 2));
+  }
+
+  .tp-see {
+    margin-top: 3rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    max-width: var(--measure);
+    font-size: 0.9rem;
   }
 
   .tp-foot {

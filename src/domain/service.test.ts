@@ -7,7 +7,7 @@ const build = (over: Partial<ConstructorParameters<typeof Service>[0]> = {}) =>
     slug: 'ec2',
     name: 'Amazon EC2',
     category: 'compute',
-    meters: MeterSet.of(['time', 'egress']),
+    meters: MeterSet.of(['time', 'bytes']),
     oneLiner: 'Instance-seconds and bytes out.',
     trap: 'EBS keeps billing after you stop.',
     billOn: ['BoxUsage'],

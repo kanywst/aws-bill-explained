@@ -46,7 +46,7 @@ interface Strings {
   footerPrices: string;
   footerDisclaimer: string;
 
-  meters: Record<'time' | 'egress' | 'calls', MeterCopy>;
+  meters: Record<'time' | 'bytes' | 'calls', MeterCopy>;
   meterHeads: { counts: string; trap: string; bill: string };
 
   hero: {
@@ -111,6 +111,8 @@ interface Strings {
     filterAll: string;
     filterFree: string;
     count: string;
+    seeTopic: string;
+    seeEntry: string;
   };
   oneLiner: string;
   a11y: { billed: string; notBilled: string };
@@ -138,12 +140,13 @@ export const STRINGS: Record<Lang, Strings> = {
         trap: 'It runs whether or not you use it. Forgetting to delete costs more than forgetting to stop.',
         onTheBill: 'BoxUsage, Hours, GB-Mo',
       },
-      egress: {
-        name: 'Egress',
-        test: 'Did bytes cross a boundary on the way out?',
-        counts: 'Gigabytes leaving. Everything arriving is free.',
-        trap: '"Out" is not only the internet. Crossing an Availability Zone counts, and bills both ways.',
-        onTheBill: 'DataTransfer-Out-Bytes',
+      bytes: {
+        name: 'Bytes',
+        test: 'Is anything counting gigabytes?',
+        counts:
+          'Gigabytes metered. Transfer out of a boundary, and per-GB processing wherever a device sits in the path.',
+        trap: 'Inbound is free only for transfer. A NAT Gateway, endpoint or log pipeline charges per GB in both directions.',
+        onTheBill: 'DataTransfer-Out-Bytes, NatGateway-Bytes',
       },
       calls: {
         name: 'Calls',
@@ -224,6 +227,8 @@ export const STRINGS: Record<Lang, Strings> = {
       filterAll: 'All',
       filterFree: 'Free',
       count: 'services',
+      seeTopic: 'Read the deep dive: {title}',
+      seeEntry: 'See the catalogue entry for {name}',
     },
     a11y: { billed: 'billed', notBilled: 'not billed' },
   },
@@ -249,12 +254,12 @@ export const STRINGS: Record<Lang, Strings> = {
         trap: '使っていなくても回る。止め忘れより「消し忘れ」のほうが高くつく。',
         onTheBill: 'BoxUsage, Hours, GB-Mo',
       },
-      egress: {
-        name: '外向き転送',
-        test: 'バイトが境界を「外に」越えたか？',
-        counts: '出ていったギガバイト。入ってくる分は無料。',
-        trap: '「外」はインターネットだけじゃない。AZ を跨げばそれも境界で、しかも往復で課金される。',
-        onTheBill: 'DataTransfer-Out-Bytes',
+      bytes: {
+        name: 'バイト',
+        test: 'ギガバイトを数えているものがあるか？',
+        counts: '計測されたギガバイト。境界を出ていく転送と、経路上の装置がかける処理 GB の両方。',
+        trap: '「入るのは無料」が効くのは転送だけ。NAT Gateway・エンドポイント・ログ基盤は往復とも GB で取る。',
+        onTheBill: 'DataTransfer-Out-Bytes, NatGateway-Bytes',
       },
       calls: {
         name: 'API 回数',
@@ -334,6 +339,8 @@ export const STRINGS: Record<Lang, Strings> = {
       filterAll: 'すべて',
       filterFree: '無料',
       count: '件',
+      seeTopic: '深掘りを読む: {title}',
+      seeEntry: '{name} のカタログ項目を見る',
     },
     a11y: { billed: '課金される', notBilled: '課金されない' },
   },

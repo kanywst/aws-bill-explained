@@ -2,9 +2,8 @@
 title: What EC2 actually charges for
 short: EC2
 oneLiner: Time and outbound bytes. Calling the API is free.
-meters: ['time', 'egress']
+meters: ['time', 'bytes']
 order: 10
-section: service
 checked: 2026-08-04
 ---
 
@@ -44,7 +43,7 @@ storage and compute revenue for years.
       to: 'client',
       label: '200 OK — 1 GB body',
       reply: true,
-      meter: 'egress',
+      meter: 'bytes',
       charge: '1 GB × $0.09',
     },
   ]}
@@ -86,8 +85,8 @@ different names.
     { id: 'net', label: 'Internet', sub: 'destination' },
   ]}
   hops={[
-    { from: 'ec2', to: 'nat', label: 'Processed by NAT', meter: 'egress', cost: '~$0.045/GB' },
-    { from: 'nat', to: 'net', label: 'Data transfer out', meter: 'egress', cost: '$0.09/GB' },
+    { from: 'ec2', to: 'nat', label: 'Processed by NAT', meter: 'bytes', cost: '~$0.045/GB' },
+    { from: 'nat', to: 'net', label: 'Data transfer out', meter: 'bytes', cost: '$0.09/GB' },
   ]}
 />
 

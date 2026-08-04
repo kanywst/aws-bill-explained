@@ -5,9 +5,15 @@
  * hundreds of usage types, but every one of them turns exactly one of three
  * meters. The domain layer knows nothing about rendering, locales, or Astro —
  * it only knows what a meter is and how to reason about a set of them.
+ *
+ * The second meter is "bytes", not "egress". It was called egress until the
+ * dataset grew enough to contradict it: CloudWatch ingestion, Firehose intake
+ * and NAT Gateway processing all meter gigabytes with no regard for direction.
+ * "Inbound is free" is a rule about data *transfer*, not about the meter, and
+ * pretending otherwise made the model wrong for about a dozen services.
  */
 
-export const METER_IDS = ['time', 'egress', 'calls'] as const;
+export const METER_IDS = ['time', 'bytes', 'calls'] as const;
 
 export type MeterId = (typeof METER_IDS)[number];
 

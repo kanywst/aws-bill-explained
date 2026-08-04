@@ -72,7 +72,9 @@ export class Catalogue {
   }
 
   countByMeter(): Record<MeterId, number> {
-    const counts = { time: 0, egress: 0, calls: 0 } as Record<MeterId, number>;
+    // Derived from METER_ORDER rather than written out, so renaming a meter
+    // cannot leave a stale key behind.
+    const counts = Object.fromEntries(METER_ORDER.map((m) => [m, 0])) as Record<MeterId, number>;
     for (const service of this.bySlug.values()) {
       for (const meter of METER_ORDER) {
         if (service.turns(meter)) counts[meter] += 1;

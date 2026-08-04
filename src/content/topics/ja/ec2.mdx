@@ -2,9 +2,8 @@
 title: EC2 は結局なにに課金しているのか
 short: EC2
 oneLiner: 時間と、出ていったバイト。API を呼ぶのは無料。
-meters: ['time', 'egress']
+meters: ['time', 'bytes']
 order: 10
-section: service
 checked: 2026-08-04
 ---
 
@@ -35,7 +34,7 @@ EC2 の API には回数課金がない。`RunInstances` も `DescribeInstances`
       to: 'client',
       label: '200 OK — 本文 1GB',
       reply: true,
-      meter: 'egress',
+      meter: 'bytes',
       charge: '1 GB × $0.09',
     },
   ]}
@@ -65,8 +64,8 @@ EC2 の API には回数課金がない。`RunInstances` も `DescribeInstances`
     { id: 'net', label: 'インターネット', sub: '宛先' },
   ]}
   hops={[
-    { from: 'ec2', to: 'nat', label: 'NAT の処理', meter: 'egress', cost: '約 $0.045/GB' },
-    { from: 'nat', to: 'net', label: 'データ転送 OUT', meter: 'egress', cost: '$0.09/GB' },
+    { from: 'ec2', to: 'nat', label: 'NAT の処理', meter: 'bytes', cost: '約 $0.045/GB' },
+    { from: 'nat', to: 'net', label: 'データ転送 OUT', meter: 'bytes', cost: '$0.09/GB' },
   ]}
 />
 

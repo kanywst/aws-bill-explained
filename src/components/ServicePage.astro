@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import MeterLamps from './MeterLamps.astro';
 import type { Service } from '../domain/service';
 import { loadCatalogue } from '../infrastructure/service-repository';
+import { getCollection } from 'astro:content';
 import { localePath, t, type Lang } from '../i18n/strings';
 
 interface Props {
@@ -21,6 +22,9 @@ const sameShape =
     .get(service.meters.signature)
     ?.filter((other) => other.slug !== service.slug)
     .slice(0, 6) ?? [];
+
+// The long-form page for this service, if one has been written in this locale.
+const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${service.slug}`);
 ---
 
 <Base title={`${service.name} — ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
@@ -37,6 +41,16 @@ const sameShape =
       <p class="sp-one-text">{service.oneLiner}</p>
       {service.isFree && <p class="sp-free">{s.services.freeNote}</p>}
     </section>
+
+    {
+      topic && (
+        <aside class="sp-see">
+          <a href={localePath(lang, `/topics/${service.slug}/`)}>
+            {s.services.seeTopic.replace('{title}', topic.data.title)}
+          </a>
+        </aside>
+      )
+    }
 
     <section class="sp-block">
       <h2 class="eyebrow sp-head">{s.services.trapHead}</h2>
@@ -111,7 +125,7 @@ const sameShape =
   }
 
   .sp-back:hover {
-    color: var(--m-egress);
+    color: var(--m-bytes);
   }
 
   .sp-cat {
@@ -143,6 +157,15 @@ const sameShape =
     margin: 0.9rem 0 0;
     font-size: 0.86rem;
     color: var(--text-faint);
+  }
+
+  .sp-see {
+    margin: -1.5rem 0 2.5rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--m-time-tint);
+    border-radius: var(--radius);
+    max-width: var(--measure);
+    font-size: 0.9rem;
   }
 
   .sp-block {
@@ -196,8 +219,8 @@ const sameShape =
   }
 
   .sp-related a:hover {
-    border-color: var(--m-egress);
-    color: var(--m-egress);
+    border-color: var(--m-bytes);
+    color: var(--m-bytes);
   }
 
   .sp-foot {

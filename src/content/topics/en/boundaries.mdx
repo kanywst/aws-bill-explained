@@ -2,9 +2,8 @@
 title: Where "out" begins
 short: Boundaries
 oneLiner: Egress is not about the internet. It is about which ring you crossed.
-meters: ['egress']
+meters: ['bytes']
 order: 20
-section: model
 checked: 2026-08-04
 ---
 
@@ -75,8 +74,8 @@ through a NAT Gateway is _not_ free, even though inbound from the internet is.
     { id: 'b', label: 'Service B', sub: 'us-east-1b' },
   ]}
   hops={[
-    { from: 'a', to: 'b', label: 'Request across AZ', meter: 'egress', cost: '$0.01/GB' },
-    { from: 'b', to: 'a', label: 'Response across AZ', meter: 'egress', cost: '$0.01/GB' },
+    { from: 'a', to: 'b', label: 'Request across AZ', meter: 'bytes', cost: '$0.01/GB' },
+    { from: 'b', to: 'a', label: 'Response across AZ', meter: 'bytes', cost: '$0.01/GB' },
   ]}
 />
 

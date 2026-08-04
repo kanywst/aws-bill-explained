@@ -1,20 +1,5 @@
 [
   {
-    "slug": "rds",
-    "name": "Amazon RDS",
-    "category": "database",
-    "meters": ["time", "egress"],
-    "oneLiner": "You rent the instance by the second plus storage and backups, whether it serves a query or sits idle.",
-    "trap": "Multi-AZ replication traffic itself is free, but your app crossing an AZ to reach the DB is not. Multi-AZ still doubles instance and storage cost and doubles write I/O.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/rds/pricing/",
-      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/User_DBInstanceBilling.html"
-    ],
-    "checked": "2026-08-04"
-  },
-  {
     "slug": "aurora",
     "name": "Amazon Aurora",
     "category": "database",
@@ -39,6 +24,30 @@
       "https://aws.amazon.com/rds/aurora/pricing/",
       "https://aws.amazon.com/blogs/database/introducing-scaling-to-0-capacity-with-amazon-aurora-serverless-v2/"
     ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "dms",
+    "name": "AWS Database Migration Service",
+    "category": "database",
+    "meters": ["time", "egress"],
+    "oneLiner": "Replication instances bill by the hour from creation to deletion, whatever the tasks are doing.",
+    "trap": "There is no data transfer charge on the DMS node itself, which lulls people. The instance is the meter and it runs until deleted. Zero-ETL integrations are the exception: priced per GB, CDC far above full load.",
+    "billOn": ["InstanceUsg:dms.c5.large", "DMS:GP2-Storage", "ZETLCDCUsg"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/dms/pricing/", "https://aws.amazon.com/dms/faqs/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "documentdb",
+    "name": "Amazon DocumentDB",
+    "category": "database",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Aurora's billing model in a MongoDB shape: instance-hours, storage, and I/O billed per million.",
+    "trap": "I/O per million is the line people leave out when sizing. Cross-AZ replication for multi-AZ clusters is free, and elastic clusters bill vCPU-minutes instead of instance-hours.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/documentdb/pricing/"],
     "checked": "2026-08-04"
   },
   {
@@ -76,6 +85,18 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "keyspaces",
+    "name": "Amazon Keyspaces",
+    "category": "database",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Cassandra on DynamoDB-shaped billing: RRU/WRU when on-demand, hourly RCU/WCU when provisioned.",
+    "trap": "Consistency level moves the bill: a LOCAL_ONE read costs half an RRU versus LOCAL_QUORUM. TTL deletes bill per KB per row, and multi-Region writes bill WRUs in every Region.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/keyspaces/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "memorydb",
     "name": "Amazon MemoryDB",
     "category": "database",
@@ -85,6 +106,45 @@
     "billOn": [],
     "confidence": "medium",
     "sources": ["https://aws.amazon.com/memorydb/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "neptune",
+    "name": "Amazon Neptune",
+    "category": "database",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Instance-hours or NCU-hours, storage, and I/O per million unless you switch to I/O-Optimized.",
+    "trap": "Neptune Standard bills I/O per million; I/O-Optimized zeroes that meter in exchange for higher instance and storage rates, and you can only switch between them once per 30 days.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/neptune/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "rds",
+    "name": "Amazon RDS",
+    "category": "database",
+    "meters": ["time", "egress"],
+    "oneLiner": "You rent the instance by the second plus storage and backups, whether it serves a query or sits idle.",
+    "trap": "Multi-AZ replication traffic itself is free, but your app crossing an AZ to reach the DB is not. Multi-AZ still doubles instance and storage cost and doubles write I/O.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/pricing/",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/User_DBInstanceBilling.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "rds-proxy",
+    "name": "Amazon RDS Proxy",
+    "category": "database",
+    "meters": ["time"],
+    "oneLiner": "Priced off the size of the database it fronts, not off your traffic. No per-request charge at all.",
+    "trap": "You pay per vCPU-hour of the underlying DB, or per ACU-hour for Aurora Serverless, even at zero connections. Read-only and read-write proxy endpoints add PrivateLink charges on top.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/rds/proxy/pricing/"],
     "checked": "2026-08-04"
   },
   {
@@ -114,27 +174,18 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "documentdb",
-    "name": "Amazon DocumentDB",
+    "slug": "schema-conversion-tool",
+    "name": "AWS Schema Conversion Tool",
     "category": "database",
-    "meters": ["time", "egress", "calls"],
-    "oneLiner": "Aurora's billing model in a MongoDB shape: instance-hours, storage, and I/O billed per million.",
-    "trap": "I/O per million is the line people leave out when sizing. Cross-AZ replication for multi-AZ clusters is free, and elastic clusters bill vCPU-minutes instead of instance-hours.",
+    "meters": [],
+    "oneLiner": "The tool is free. Everything it touches is not.",
+    "trap": "SCT costs nothing to download or run, and managed DMS Schema Conversion is free too beyond the S3 storage it consumes. Real spend lands on EC2 hosts running data extraction agents and on the DMS instance.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/documentdb/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "neptune",
-    "name": "Amazon Neptune",
-    "category": "database",
-    "meters": ["time", "egress", "calls"],
-    "oneLiner": "Instance-hours or NCU-hours, storage, and I/O per million unless you switch to I/O-Optimized.",
-    "trap": "Neptune Standard bills I/O per million; I/O-Optimized zeroes that meter in exchange for higher instance and storage rates, and you can only switch between them once per 30 days.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/neptune/pricing/"],
+    "sources": [
+      "https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html",
+      "https://aws.amazon.com/dms/faqs/"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -150,30 +201,6 @@
       "https://aws.amazon.com/timestream/pricing/",
       "https://docs.aws.amazon.com/timestream/latest/developerguide/AmazonTimestreamForLiveAnalytics-availability-change.html"
     ],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "keyspaces",
-    "name": "Amazon Keyspaces",
-    "category": "database",
-    "meters": ["time", "egress", "calls"],
-    "oneLiner": "Cassandra on DynamoDB-shaped billing: RRU/WRU when on-demand, hourly RCU/WCU when provisioned.",
-    "trap": "Consistency level moves the bill: a LOCAL_ONE read costs half an RRU versus LOCAL_QUORUM. TTL deletes bill per KB per row, and multi-Region writes bill WRUs in every Region.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/keyspaces/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "rds-proxy",
-    "name": "Amazon RDS Proxy",
-    "category": "database",
-    "meters": ["time"],
-    "oneLiner": "Priced off the size of the database it fronts, not off your traffic. No per-request charge at all.",
-    "trap": "You pay per vCPU-hour of the underlying DB, or per ACU-hour for Aurora Serverless, even at zero connections. Read-only and read-write proxy endpoints add PrivateLink charges on top.",
-    "billOn": [],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/rds/proxy/pricing/"],
     "checked": "2026-08-04"
   }
 ]

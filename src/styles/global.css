@@ -36,12 +36,12 @@
    * read as "AWS" and stay distinguishable side by side.
    */
   --m-time: #ff9900;
-  --m-egress: #0972d3;
+  --m-bytes: #0972d3;
   --m-calls: #d13212;
 
   /* Tints for filled backgrounds behind each meter. */
   --m-time-tint: #fef6e7;
-  --m-egress-tint: #f0f8ff;
+  --m-bytes-tint: #f0f8ff;
   --m-calls-tint: #fdf3f1;
 
   /* Unlit. Anything free renders in this and never takes a hue. */
@@ -103,12 +103,12 @@ body {
 }
 
 a {
-  color: var(--m-egress);
+  color: var(--m-bytes);
   text-underline-offset: 0.15em;
 }
 
 :focus-visible {
-  outline: 2px solid var(--m-egress);
+  outline: 2px solid var(--m-bytes);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -130,9 +130,9 @@ code {
   --meter-tint: var(--m-time-tint);
 }
 
-.meter-egress {
-  --meter: var(--m-egress);
-  --meter-tint: var(--m-egress-tint);
+.meter-bytes {
+  --meter: var(--m-bytes);
+  --meter-tint: var(--m-bytes-tint);
 }
 
 .meter-calls {

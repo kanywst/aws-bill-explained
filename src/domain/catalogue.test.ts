@@ -38,7 +38,7 @@ describe('Catalogue', () => {
     expect(empty.size).toBe(0);
     expect(empty.all()).toEqual([]);
     expect(empty.categories()).toEqual([]);
-    expect(empty.countByMeter()).toEqual({ time: 0, egress: 0, calls: 0 });
+    expect(empty.countByMeter()).toEqual({ time: 0, bytes: 0, calls: 0 });
   });
 
   it('finds by slug and returns undefined for a miss', () => {
@@ -57,7 +57,7 @@ describe('Catalogue', () => {
 
   it('selects the services turning a given meter', () => {
     const c = Catalogue.from([
-      svc('ec2', ['time', 'egress']),
+      svc('ec2', ['time', 'bytes']),
       svc('lambda', ['time', 'calls']),
       svc('iam', []),
     ]);
@@ -77,15 +77,15 @@ describe('Catalogue', () => {
 
   it('picks out the services that turn all three meters', () => {
     const c = Catalogue.from([
-      svc('s3', ['time', 'egress', 'calls']),
-      svc('ec2', ['time', 'egress']),
+      svc('s3', ['time', 'bytes', 'calls']),
+      svc('ec2', ['time', 'bytes']),
     ]);
     expect(c.turningAll().map((s) => s.slug)).toEqual(['s3']);
   });
 
   it('reports only categories that have entries, in canonical order', () => {
     const c = Catalogue.from([
-      svc('detective', ['egress'], { category: 'security' }),
+      svc('detective', ['bytes'], { category: 'security' }),
       svc('ec2', ['time'], { category: 'compute' }),
     ]);
     // compute precedes security in CATEGORY_IDS even though security was added first.
@@ -94,21 +94,21 @@ describe('Catalogue', () => {
 
   it('counts each meter independently, not per service', () => {
     const c = Catalogue.from([
-      svc('s3', ['time', 'egress', 'calls']),
-      svc('ec2', ['time', 'egress']),
+      svc('s3', ['time', 'bytes', 'calls']),
+      svc('ec2', ['time', 'bytes']),
       svc('iam', []),
     ]);
-    expect(c.countByMeter()).toEqual({ time: 2, egress: 2, calls: 1 });
+    expect(c.countByMeter()).toEqual({ time: 2, bytes: 2, calls: 1 });
   });
 
   it('groups services that bill the same way', () => {
     const c = Catalogue.from([
-      svc('ec2', ['time', 'egress']),
-      svc('lightsail', ['egress', 'time']),
+      svc('ec2', ['time', 'bytes']),
+      svc('lightsail', ['bytes', 'time']),
       svc('iam', []),
     ]);
     const shapes = c.byBillingShape();
-    expect(shapes.get('time+egress')?.map((s) => s.slug)).toEqual(['ec2', 'lightsail']);
+    expect(shapes.get('time+bytes')?.map((s) => s.slug)).toEqual(['ec2', 'lightsail']);
     expect(shapes.get('free')?.map((s) => s.slug)).toEqual(['iam']);
   });
 

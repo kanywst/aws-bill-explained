@@ -1,8 +1,8 @@
 ---
 import '../styles/global.css';
 import LangSwitch from '../components/LangSwitch.astro';
-import { METER_ORDER } from '../data/meters';
-import { localePath, t, type Lang } from '../i18n/strings';
+import { METER_ORDER } from '../domain/meter';
+import { LANGS, localePath, stripLocale, t, type Lang } from '../i18n/strings';
 
 interface Props {
   title: string;
@@ -15,12 +15,23 @@ interface Props {
 const { title, lang, description, available } = Astro.props;
 const s = t(lang);
 const path = Astro.url.pathname;
+const summary = description ?? s.siteDescription;
 
 const nav = [
   { href: localePath(lang, '/'), label: s.nav.home },
   { href: localePath(lang, '/services/'), label: s.nav.services },
   { href: localePath(lang, '/topics/'), label: s.nav.topics },
 ];
+
+// Absolute URLs, because crawlers and social cards do not resolve relative ones.
+const canonical = new URL(path, Astro.site ?? 'http://localhost/');
+const social = new URL('/og.svg', Astro.site ?? 'http://localhost/');
+
+// Tell search engines about the other translations of this exact page.
+const alternates = (available ?? [...LANGS]).map((l) => ({
+  lang: l,
+  href: new URL(localePath(l, stripLocale(path)), Astro.site ?? 'http://localhost/').href,
+}));
 ---
 
 <!doctype html>
@@ -30,8 +41,21 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
-    <meta name="description" content={description ?? s.siteDescription} />
+    <meta name="description" content={summary} />
     <meta name="generator" content={Astro.generator} />
+
+    <link rel="canonical" href={canonical.href} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={summary} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={social.href} />
+    <meta property="og:site_name" content={s.siteTitle} />
+    <meta property="og:locale" content={lang === 'ja' ? 'ja_JP' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <a class="skip" href="#main">{s.skip}</a>

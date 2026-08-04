@@ -7,7 +7,7 @@ describe('toService', () => {
     slug: 'amazon-s3',
     name: 'Amazon S3',
     category: 'storage',
-    meters: ['time', 'egress', 'calls'],
+    meters: ['time', 'bytes', 'calls'],
     oneLiner: 'x',
     trap: 'y',
     billOn: ['Requests-Tier1'],
@@ -114,12 +114,12 @@ describe('the real catalogue', () => {
 
   it('keeps the reference examples on the meters the site teaches', () => {
     // S3 is the site's example of a service with all three meters.
-    expect(catalogue.find('s3')?.meters.toArray()).toEqual(['time', 'egress', 'calls']);
+    expect(catalogue.find('s3')?.meters.toArray()).toEqual(['time', 'bytes', 'calls']);
     // EC2 is the example of "no per-call charge", which is the whole EC2 page.
     expect(catalogue.find('ec2')?.turns('calls')).toBe(false);
     expect(catalogue.find('ec2')?.turns('time')).toBe(true);
     // NAT Gateway is the example of a device that bills hourly and per GB.
-    expect(catalogue.find('nat-gateway')?.meters.toArray()).toEqual(['time', 'egress']);
+    expect(catalogue.find('nat-gateway')?.meters.toArray()).toEqual(['time', 'bytes']);
   });
 
   it('dates every classification, because AWS reprices and a claim needs a timestamp', () => {

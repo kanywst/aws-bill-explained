@@ -1,5 +1,17 @@
 [
   {
+    "slug": "amazon-q",
+    "name": "Amazon Q",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Named-user seats billed monthly whether anyone uses them, plus index units billed by the hour.",
+    "trap": "Q Business index units bill hourly regardless of query volume, on top of seats you pay for even for dormant users. Q in Connect adds per-message and per-voice-minute charges.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": ["https://aws.amazon.com/q/business/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "athena",
     "name": "Amazon Athena",
     "category": "analytics",
@@ -12,15 +24,60 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "glue",
-    "name": "AWS Glue",
+    "slug": "bedrock",
+    "name": "Amazon Bedrock",
     "category": "analytics",
     "meters": ["time", "calls"],
-    "oneLiner": "Jobs and crawlers bill by DPU-second while they run; the Data Catalog bills for objects and lookups.",
-    "trap": "Crawlers carry a 10-minute minimum per run, so a 5-minute crawl schedule bills nonstop. Over-provisioned DPUs cost the same whether Spark actually uses them or not.",
-    "billOn": ["ETL-DPU-Hour", "GlueInteractiveSession-DPU-Hour"],
+    "oneLiner": "On-demand is per input and output token; Provisioned Throughput is an hourly rental of model units.",
+    "trap": "Provisioned Throughput bills per model unit per hour whether you invoke it or not, on a 1- or 6-month commit. Cache-read and cache-write tokens bill separately from input/output.",
+    "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/glue/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/bedrock/pricing/",
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/cost-mgmt-understanding-cur-data.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudsearch",
+    "name": "Amazon CloudSearch",
+    "category": "analytics",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Closed to new customers; instances bill hourly and index rebuilds bill per GB stored.",
+    "trap": "An IndexDocuments request you trigger yourself is charged against the full size of data already in the domain, so schema tweaks on a big domain hurt. Rebuilds AWS initiates on its own are not charged.",
+    "billOn": ["SearchInstance:search.small", "DocumentBatchUpload", "IndexDocuments"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudsearch/pricing/",
+      "https://docs.aws.amazon.com/cloudsearch/latest/developerguide/what-is-cloudsearch.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "comprehend",
+    "name": "Amazon Comprehend",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Per 100-character unit of text, minimum 3 units a request - unless you run a custom endpoint.",
+    "trap": "Custom sync endpoints bill per inference unit from the moment you start them until you delete them, even with zero documents analyzed. Tiny requests still round up to 300 characters.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/comprehend/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elastic-transcoder",
+    "name": "Amazon Elastic Transcoder",
+    "category": "analytics",
+    "meters": ["calls"],
+    "oneLiner": "Gone since November 13, 2025; MediaConvert is the replacement.",
+    "trap": "AWS discontinued the service on November 13, 2025 and console access went with it. Billing was per minute of output, rounded up to a whole minute per file, SD at half the HD rate, failed transcodes usually free.",
+    "billOn": ["ets-hd-success", "ets-sd-success"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/blogs/media/support-for-amazon-elastic-transcoder-ending-soon/",
+      "https://aws.amazon.com/elastictranscoder/faqs/"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -36,27 +93,105 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "opensearch",
-    "name": "Amazon OpenSearch Service",
+    "slug": "forecast",
+    "name": "Amazon Forecast",
     "category": "analytics",
-    "meters": ["time", "egress"],
-    "oneLiner": "A cluster you rent by the hour plus the disk under it; the searches themselves are free.",
-    "trap": "Nodes bill 24/7 whether anyone searches or not, and Serverless collections hold an OCU floor. Transfer out of the domain is charged; node-to-node inside it is not.",
-    "billOn": ["ESInstance", "ServerlessOCU"],
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Closed to new signups; existing users pay per GB imported, per training hour, per thousand data points.",
+    "trap": "Data points multiply fast. A predictor emits a point for every quantile at every step of the horizon across all series, and explanations multiply that again by the number of attributes explained.",
+    "billOn": ["DataInjection", "TrainingHours", "ForecastDataPoints"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/opensearch-service/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/forecast/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonForecast/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "quicksight",
-    "name": "Amazon QuickSight",
+    "slug": "fraud-detector",
+    "name": "Amazon Fraud Detector",
     "category": "analytics",
     "meters": ["time", "calls"],
-    "oneLiner": "Authors pay a flat monthly seat whether they log in or not; readers can be billed per 30-minute session.",
-    "trap": "Author seats bill monthly even when unused, and SPICE is GB-month on top. Reader sessions are 30-minute blocks with a per-user monthly cap - model seats vs sessions before choosing.",
-    "billOn": [],
+    "oneLiner": "Predictions are cheap per call; the deployed model holds the meter open.",
+    "trap": "Billed training compute hours can exceed elapsed training time, because Fraud Detector picks bigger instances than the baseline spec. A deployed model then bills hourly for hosting until you undeploy it.",
+    "billOn": ["TrainingHrs", "HostingHrs", "FraudPrediction-OnlineFraudInsights"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/fraud-detector/pricing/",
+      "https://docs.aws.amazon.com/frauddetector/latest/ug/frauddetector-pricing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "glue",
+    "name": "AWS Glue",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Jobs and crawlers bill by DPU-second while they run; the Data Catalog bills for objects and lookups.",
+    "trap": "Crawlers carry a 10-minute minimum per run, so a 5-minute crawl schedule bills nonstop. Over-provisioned DPUs cost the same whether Spark actually uses them or not.",
+    "billOn": ["ETL-DPU-Hour", "GlueInteractiveSession-DPU-Hour"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/glue/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ground-truth",
+    "name": "Amazon SageMaker Ground Truth",
+    "category": "analytics",
+    "meters": ["calls"],
+    "oneLiner": "You pay per labeled object, twice over.",
+    "trap": "Two charges land per object: the Ground Truth service fee and the workforce fee. Mechanical Turk tasks price per worker, so raising workers-per-object for label quality multiplies the human half.",
+    "billOn": ["LabeledObject"],
     "confidence": "medium",
-    "sources": ["https://aws.amazon.com/quicksight/pricing/"],
+    "sources": [
+      "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management-public.html",
+      "https://aws.amazon.com/sagemaker-ai/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-analytics",
+    "name": "AWS IoT Analytics",
+    "category": "analytics",
+    "meters": ["time", "egress"],
+    "oneLiner": "Support ended on December 15, 2025.",
+    "trap": "While it ran, the same data got metered three ways: per GB through the pipeline, per TB scanned by dataset SQL, and per GB-month for the raw and processed copies kept side by side. Console and resources are gone now.",
+    "billOn": ["DataProcessing-Bytes", "DataScanned-TB", "RawStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/about-aws/whats-new/2025/05/aws-service-changes/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTAnalytics/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ivs",
+    "name": "Amazon Interactive Video Service (IVS)",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Input hours and viewer output hours, both by the hour; chat adds a per-message charge.",
+    "trap": "Input hours accrue for as long as you push video at a channel, with zero viewers watching. Output hours are a separate meter that scales with audience, so a test stream left broadcasting overnight still bills.",
+    "billOn": ["Input-Standard-Hours", "Output-HD-Hours", "Messaging-Requests"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ivs/pricing/",
+      "https://docs.aws.amazon.com/ivs/latest/LowLatencyUserGuide/what-is.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "kendra",
+    "name": "Amazon Kendra",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "An empty index costs exactly what a busy one costs.",
+    "trap": "AWS states it plainly: once an index exists you pay for it with zero documents and zero queries, and deleting it is the only way to stop the meter. Kendra also closes to new customers on July 30, 2026.",
+    "billOn": ["KendraEnterpriseEdition", "KendraStorageCapacityUnit", "KendraQueryCapacityUnit"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/kendra/pricing/",
+      "https://docs.aws.amazon.com/kendra/latest/dg/adjusting-capacity.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -87,78 +222,90 @@
     "checked": "2026-08-04"
   },
   {
-    "slug": "sagemaker",
-    "name": "Amazon SageMaker AI",
+    "slug": "mediaconvert",
+    "name": "AWS Elemental MediaConvert",
     "category": "analytics",
-    "meters": ["time", "calls"],
-    "oneLiner": "Training stops billing when the job ends; a real-time endpoint bills until you delete it.",
-    "trap": "Endpoints charge per instance-hour from creation to deletion with zero invocations - the top SageMaker surprise. Use serverless or async scale-to-zero for bursty traffic.",
-    "billOn": ["Host:instanceType", "Train:instanceType", "Notebk:instanceType"],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/sagemaker-ai/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "bedrock",
-    "name": "Amazon Bedrock",
-    "category": "analytics",
-    "meters": ["time", "calls"],
-    "oneLiner": "On-demand is per input and output token; Provisioned Throughput is an hourly rental of model units.",
-    "trap": "Provisioned Throughput bills per model unit per hour whether you invoke it or not, on a 1- or 6-month commit. Cache-read and cache-write tokens bill separately from input/output.",
-    "billOn": [],
+    "meters": ["calls", "time"],
+    "oneLiner": "Per minute of output, times a multiplier for every codec, resolution and feature you turn on.",
+    "trap": "Billing counts output minutes rather than source minutes. A 10-minute mezzanine encoded into a six-rung ABR ladder bills 60 minutes, and each rung applies its own resolution and frame-rate multiplier.",
+    "billOn": ["Normalized-Transcode-Minute-Basic", "Normalized-Transcode-Minute-Professional"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/bedrock/pricing/",
-      "https://docs.aws.amazon.com/bedrock/latest/userguide/cost-mgmt-understanding-cur-data.html"
+      "https://aws.amazon.com/mediaconvert/pricing/",
+      "https://docs.aws.amazon.com/mediaconvert/latest/ug/usage-report-understand.html"
     ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "comprehend",
-    "name": "Amazon Comprehend",
+    "slug": "medialive",
+    "name": "AWS Elemental MediaLive",
     "category": "analytics",
-    "meters": ["time", "calls"],
-    "oneLiner": "Per 100-character unit of text, minimum 3 units a request - unless you run a custom endpoint.",
-    "trap": "Custom sync endpoints bill per inference unit from the moment you start them until you delete them, even with zero documents analyzed. Tiny requests still round up to 300 characters.",
-    "billOn": [],
+    "meters": ["time"],
+    "oneLiner": "Every input and output bills by the hour.",
+    "trap": "Stopping a channel does not take it to zero. MediaLive has an explicit idle-channel charge for stopped channels and an idle charge for push inputs; only pull inputs are free while idle. Delete to stop paying.",
+    "billOn": ["OUT-AVC-HD-30-E", "OUT-IDLE", "IN-IDLE"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/comprehend/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/medialive/pricing/",
+      "https://docs.aws.amazon.com/medialive/latest/ug/pricing.html"
+    ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "textract",
-    "name": "Amazon Textract",
+    "slug": "mediapackage",
+    "name": "AWS Elemental MediaPackage",
     "category": "analytics",
-    "meters": ["calls"],
-    "oneLiner": "Per page, per feature - stacking Forms, Tables and Queries on one page multiplies that page's price.",
-    "trap": "Cost scales with pages and with how many features you ask for per page, not with API calls. A 200-page PDF is 200 billable pages, and re-processing it bills again - there is no caching.",
-    "billOn": [],
+    "meters": ["egress"],
+    "oneLiner": "Two per-GB meters: what goes in, and what gets packaged back out.",
+    "trap": "Ingest is metered per GB too, so a high-bitrate contribution feed costs money before a single viewer connects. Origination falls off sharply once a CDN caches segments, which is why AWS pushes CloudFront.",
+    "billOn": ["EMP-ingest-bytes", "EMP-origin-packaging-bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/textract/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/mediapackage/pricing/",
+      "https://docs.aws.amazon.com/mediapackage/latest/ug/pricing-for-emp.html"
+    ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "rekognition",
-    "name": "Amazon Rekognition",
+    "slug": "mediatailor",
+    "name": "AWS Elemental MediaTailor",
     "category": "analytics",
-    "meters": ["time", "calls"],
-    "oneLiner": "Per image for stills, per minute for video - but custom models bill by the hour while hosted.",
-    "trap": "Custom Labels bills per inference hour while the model is running: you keep being charged even if no images are processed. Stored face metadata also bills every month.",
-    "billOn": [],
+    "meters": ["calls", "time", "egress"],
+    "oneLiner": "Ad insertions bill per thousand, but a Channel Assembly channel bills every hour it runs.",
+    "trap": "Two products share one bill. Ad insertion meters per thousand insertions, while Channel Assembly meters per running channel hour, so a linear channel with no audience still accrues hours. Ad delivery is per GB.",
+    "billOn": ["EMT-AdInsertion", "EMT-ChannelHoursBasic", "DataTransfer-Out-Bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/rekognition/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/mediatailor/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSElementalMediaTailor/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
-    "slug": "transcribe",
-    "name": "Amazon Transcribe",
+    "slug": "opensearch",
+    "name": "Amazon OpenSearch Service",
     "category": "analytics",
-    "meters": ["calls"],
-    "oneLiner": "Per second of audio you feed it, with a 15-second floor on every single request.",
-    "trap": "Billing follows audio duration, not request count, and each request rounds up to 15 seconds - chopping a stream into tiny clips inflates the bill. Call Analytics is priced separately.",
-    "billOn": [],
+    "meters": ["time", "egress"],
+    "oneLiner": "A cluster you rent by the hour plus the disk under it; the searches themselves are free.",
+    "trap": "Nodes bill 24/7 whether anyone searches or not, and Serverless collections hold an OCU floor. Transfer out of the domain is charged; node-to-node inside it is not.",
+    "billOn": ["ESInstance", "ServerlessOCU"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/transcribe/pricing/"],
+    "sources": ["https://aws.amazon.com/opensearch-service/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "personalize",
+    "name": "Amazon Personalize",
+    "category": "analytics",
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Ingest bills per GB, training bills per hour, recommendations bill per thousand.",
+    "trap": "Custom solutions only cost you when you train or ask for recommendations. Use-case optimized recommenders behave differently: each active recommender carries an hourly rate that keeps running with no traffic.",
+    "billOn": ["DataIngestion", "TrainingHour", "RealTimeRecommendations"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/personalize/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPersonalize/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -174,6 +321,66 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "quicksight",
+    "name": "Amazon QuickSight",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Authors pay a flat monthly seat whether they log in or not; readers can be billed per 30-minute session.",
+    "trap": "Author seats bill monthly even when unused, and SPICE is GB-month on top. Reader sessions are 30-minute blocks with a per-user monthly cap - model seats vs sessions before choosing.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": ["https://aws.amazon.com/quicksight/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "rekognition",
+    "name": "Amazon Rekognition",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Per image for stills, per minute for video - but custom models bill by the hour while hosted.",
+    "trap": "Custom Labels bills per inference hour while the model is running: you keep being charged even if no images are processed. Stored face metadata also bills every month.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/rekognition/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "sagemaker",
+    "name": "Amazon SageMaker AI",
+    "category": "analytics",
+    "meters": ["time", "calls"],
+    "oneLiner": "Training stops billing when the job ends; a real-time endpoint bills until you delete it.",
+    "trap": "Endpoints charge per instance-hour from creation to deletion with zero invocations - the top SageMaker surprise. Use serverless or async scale-to-zero for bursty traffic.",
+    "billOn": ["Host:instanceType", "Train:instanceType", "Notebk:instanceType"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/sagemaker-ai/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "textract",
+    "name": "Amazon Textract",
+    "category": "analytics",
+    "meters": ["calls"],
+    "oneLiner": "Per page, per feature - stacking Forms, Tables and Queries on one page multiplies that page's price.",
+    "trap": "Cost scales with pages and with how many features you ask for per page, not with API calls. A 200-page PDF is 200 billable pages, and re-processing it bills again - there is no caching.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/textract/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "transcribe",
+    "name": "Amazon Transcribe",
+    "category": "analytics",
+    "meters": ["calls"],
+    "oneLiner": "Per second of audio you feed it, with a 15-second floor on every single request.",
+    "trap": "Billing follows audio duration, not request count, and each request rounds up to 15 seconds - chopping a stream into tiny clips inflates the bill. Call Analytics is priced separately.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/transcribe/pricing/"],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "translate",
     "name": "Amazon Translate",
     "category": "analytics",
@@ -183,18 +390,6 @@
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/translate/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
-    "slug": "amazon-q",
-    "name": "Amazon Q",
-    "category": "analytics",
-    "meters": ["time", "calls"],
-    "oneLiner": "Named-user seats billed monthly whether anyone uses them, plus index units billed by the hour.",
-    "trap": "Q Business index units bill hourly regardless of query volume, on top of seats you pay for even for dormant users. Q in Connect adds per-message and per-voice-minute charges.",
-    "billOn": [],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/q/business/pricing/"],
     "checked": "2026-08-04"
   }
 ]
