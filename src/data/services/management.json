@@ -47,12 +47,15 @@
     "slug": "budgets",
     "name": "AWS Budgets",
     "category": "management",
-    "meters": ["time"],
-    "oneLiner": "Watching and alerting on budgets is free. Only budgets that take automated actions cost anything.",
-    "trap": "Monitoring budgets are unlimited and free; the charge is per action-enabled budget per day past the first two, regardless of how many actions you attach to each one.",
-    "billOn": [],
+    "meters": ["time", "calls"],
+    "oneLiner": "Watching spend is free. Budgets that take automated actions are the paid tier.",
+    "trap": "Monitoring budgets are unlimited. After the first two action-enabled budgets you pay per budget per day, no matter how many actions each one carries, and delivered budget reports bill per report.",
+    "billOn": ["BudgetsUsage", "ActionEnabledBudgetsUsage", "BudgetsReports"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/aws-cost-management/aws-budgets/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/aws-cost-management/aws-budgets/pricing/",
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -60,11 +63,14 @@
     "name": "AWS Cloud Development Kit (CDK)",
     "category": "management",
     "meters": [],
-    "oneLiner": "The framework and CLI cost nothing. It is a compiler that emits CloudFormation, which is also free.",
-    "trap": "CDK is free but everything it synthesizes is not, and cdk bootstrap itself creates a billable S3 bucket, ECR repo and KMS key in every account and Region you deploy to.",
+    "oneLiner": "Framework and CLI are free. It compiles down to CloudFormation, which is also free.",
+    "trap": "cdk bootstrap provisions an S3 bucket, an ECR repository and IAM roles in every account and Region you deploy to. The bucket and any images pushed to it keep billing long after the project goes quiet.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cloudformation/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/cloudformation/pricing/",
+      "https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -101,22 +107,25 @@
     "slug": "cloudformation",
     "name": "AWS CloudFormation",
     "category": "management",
-    "meters": [],
-    "oneLiner": "Free for AWS:: and Alexa:: resources. Only third-party extensions and Hooks bill, per handler operation.",
-    "trap": "The service is free but the stack is not - you pay full price for every EC2 instance, NAT gateway and load balancer it creates, and orphaned resources keep billing after a failed delete.",
-    "billOn": [],
+    "meters": ["time", "calls"],
+    "oneLiner": "Free for AWS:: and Alexa:: types. Third-party extensions and Hooks bill per handler operation.",
+    "trap": "Handler operations get a monthly free allowance per account per Region, then bill per operation plus per second beyond thirty. The stack contents are the real cost, and orphans outlive a failed delete.",
+    "billOn": ["Resource-Invocation-Count", "Resource-Processing-Time", "Hook-Invocation-Count"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cloudformation/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/cloudformation/pricing/",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/registry.html"
+    ],
     "checked": "2026-08-04"
   },
   {
     "slug": "cloudtrail",
     "name": "AWS CloudTrail",
     "category": "management",
-    "meters": ["time", "calls"],
-    "oneLiner": "Your first trail of management events is free. Data events and every extra copy are where the bill comes from.",
-    "trap": "First copy of management events is free per Region; a second trail duplicating them is charged. Data events (S3 object, Lambda invoke) always cost, and you also pay S3 for the log files.",
-    "billOn": ["FreeEventsRecorded", "PaidEventsRecorded", "DataEventsRecorded"],
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "One free copy of management events per Region. Data events, extra trails and Lake are where the bill comes from.",
+    "trap": "A second trail logging the same management events in a Region is charged in full. Data events bill per event, CloudTrail Lake bills per GB ingested and retained, and S3 charges for the log files.",
+    "billOn": ["FreeEventsRecorded", "PaidEventsRecorded", "DataEventsRecorded", "Ingestion-Bytes"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/cloudtrail/pricing/",
@@ -129,11 +138,18 @@
     "name": "Amazon CloudWatch Alarms",
     "category": "management",
     "meters": ["time"],
-    "oneLiner": "Every alarm is a small monthly rent, whether or not it ever fires or has any data.",
-    "trap": "You are billed per alarm-metric, not per alarm. A metric-math or Metrics Insights alarm watching many metrics costs more, and alarms stuck in INSUFFICIENT_DATA still bill.",
-    "billOn": ["AlarmMonitorUsage", "HighResAlarmMonitorUsage", "CompositeAlarmMonitorUsage"],
+    "oneLiner": "Each alarm metric is a small monthly rent.",
+    "trap": "The unit is the alarm metric, so a metric-math alarm referencing ten metrics costs ten times a plain one. Composite alarms bill per alarm. Sitting in INSUFFICIENT_DATA changes nothing.",
+    "billOn": [
+      "CW:AlarmMonitorUsage",
+      "CW:HighResAlarmMonitorUsage",
+      "CW:CompositeAlarmMonitorUsage"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cloudwatch/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -141,20 +157,23 @@
     "name": "Amazon CloudWatch Dashboards",
     "category": "management",
     "meters": ["time", "calls"],
-    "oneLiner": "Dashboards rent by the month per dashboard. Auto-generated ones are free; the ones you build are not.",
-    "trap": "Free tier covers a few dashboards of up to 50 metrics each; go past 50 metrics and it moves to a pricier usage type. Embedding widgets via GetMetricWidgetImage is always a charged API call.",
-    "billOn": ["DashboardsUsageHour-Basic", "DashboardsUsageHour"],
+    "oneLiner": "Custom dashboards rent by the month, prorated hourly. Automatic dashboards are free.",
+    "trap": "Free tier is three custom dashboards of up to 50 metrics each. Past that you pay per dashboard, and GetMetricWidgetImage, which embedded widgets call, is never covered by the free request tier.",
+    "billOn": ["DashboardsUsageHour", "DashboardsUsageHour-Basic", "CW:GMWI-Metrics"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cloudwatch/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html"
+    ],
     "checked": "2026-08-04"
   },
   {
     "slug": "cloudwatch-logs",
     "name": "Amazon CloudWatch Logs",
     "category": "management",
-    "meters": ["time", "egress", "calls"],
-    "oneLiner": "You pay to put logs in, to keep them there, and again every time you query them. Three separate bills.",
-    "trap": "Ingestion, retention and query are billed separately. Setting a short retention cuts only the storage line - you already paid full price to ingest, and every Logs Insights scan re-charges.",
+    "meters": ["time", "egress"],
+    "oneLiner": "Ingest, store, query. Each one is its own per-GB charge, and ingestion is far the largest of the three.",
+    "trap": "Shortening retention only trims the storage line. The gigabytes you ingested are already paid for, and every Logs Insights run charges again for the data it scans.",
     "billOn": [
       "DataProcessing-Bytes",
       "TimedStorage-ByteHrs",
@@ -173,9 +192,9 @@
     "name": "Amazon CloudWatch Metrics",
     "category": "management",
     "meters": ["time", "calls"],
-    "oneLiner": "AWS default metrics are free. Anything you publish yourself is a monthly rental, plus a charge to write and read it.",
-    "trap": "A custom metric is every unique dimension combination, not every metric name. One high-cardinality dimension quietly mints thousands of billable metrics, and GetMetricData is charged from request one.",
-    "billOn": ["MetricMonitorUsage", "GMD-Metrics", "MetricStreamUsage"],
+    "oneLiner": "AWS-published metrics are free. Metrics you publish rent monthly, and the bulk read APIs bill on top.",
+    "trap": "Billing counts every unique dimension combination as its own custom metric, so one high-cardinality dimension mints thousands. GetMetricData sits outside the free request tier entirely.",
+    "billOn": ["CW:MetricMonitorUsage", "CW:GMD-Metrics", "CW:Requests", "CW:MetricStreamUsage"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/cloudwatch/pricing/",
@@ -278,9 +297,9 @@
     "name": "AWS Config",
     "category": "management",
     "meters": ["calls"],
-    "oneLiner": "Charged per configuration item recorded and per rule evaluation - so churny resources cost the most.",
-    "trap": "Recording all resource types means every change to noisy resources bills a configuration item. Conformance packs bill per resource per rule, so one pack across many accounts multiplies fast.",
-    "billOn": ["ConfigurationItemRecorded"],
+    "oneLiner": "Configuration items recorded and rule evaluations run. Churny resources dominate.",
+    "trap": "Recording all resource types bills a configuration item on every change to noisy resources. Conformance packs bill per resource per rule, so one pack rolled out org-wide multiplies fast.",
+    "billOn": ["ConfigurationItemRecorded", "ConfigRuleEvaluations", "ConformancePackEvaluations"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/config/pricing/",
@@ -293,11 +312,14 @@
     "name": "AWS Control Tower",
     "category": "management",
     "meters": [],
-    "oneLiner": "No charge for Control Tower itself - but the landing zone it builds is genuinely expensive.",
-    "trap": "Free service, real bill: it turns on AWS Config recorders and a CloudTrail org trail in every enrolled account and Region, plus S3 log archive. Config is usually the single biggest line.",
+    "oneLiner": "Control Tower adds nothing to the bill. Its landing zone does.",
+    "trap": "Enrolling accounts turns on Config recorders and an organization CloudTrail in every account and Region, plus the S3 log archive, SNS and Service Catalog. Config is usually the biggest line.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/controltower/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/controltower/pricing/",
+      "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -320,13 +342,13 @@
     "name": "AWS Cost Explorer",
     "category": "management",
     "meters": ["time", "calls"],
-    "oneLiner": "The console is free. The API charges per request, and hourly granularity charges daily per record.",
-    "trap": "Every paginated page of a Cost Explorer API response counts as a separate billable request, so a naive daily cost-report script can cost more than the resources it reports on.",
-    "billOn": [],
+    "oneLiner": "Console browsing is free. The API bills per request.",
+    "trap": "Pagination counts: every page of a Cost Explorer API response is a separate billable request, so an unbounded reporting script can outcost what it reports on. Hourly granularity bills daily per usage record.",
+    "billOn": ["APIRequest", "CostDataStorage", "AdditionalSourceViews"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/pricing/",
-      "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-hourly-granularity.html"
+      "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/faqs/"
     ],
     "checked": "2026-08-04"
   },
@@ -350,11 +372,14 @@
     "name": "AWS Health Dashboard",
     "category": "management",
     "meters": [],
-    "oneLiner": "Free to look at. Both the public service health page and your account-specific events cost nothing.",
-    "trap": "The dashboard is free but the AWS Health API is not open to everyone - calling it without Business+, Enterprise or Unified Operations Support returns SubscriptionRequiredException.",
+    "oneLiner": "Free to read, both the public status page and your own account events.",
+    "trap": "The API is the gated part. Calling it from an account without Business, Enterprise On-Ramp or Enterprise Support returns SubscriptionRequiredException, so automation on Basic support cannot use it.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://docs.aws.amazon.com/health/latest/APIReference/Welcome.html"],
+    "sources": [
+      "https://docs.aws.amazon.com/health/latest/APIReference/Welcome.html",
+      "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -362,23 +387,31 @@
     "name": "Amazon Managed Grafana",
     "category": "management",
     "meters": ["time"],
-    "oneLiner": "Priced per active user per month, split into viewer and editor/admin tiers. No workspace fee.",
-    "trap": "Active means logged in or made an API call even once that month, and API keys and service accounts each count as a billable user. Every workspace needs at least one editor licence.",
-    "billOn": [],
+    "oneLiner": "Per active user per month, split into viewer and editor/admin licences. No workspace fee.",
+    "trap": "One login or one API request in a billing cycle makes a user active for the whole month. API keys and service accounts each consume a licence, and every workspace needs at least one editor.",
+    "billOn": ["Grafana:EditorUser", "Grafana:ViewerUser", "Grafana:EnterprisePluginsUser"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/grafana/pricing/"],
+    "sources": ["https://aws.amazon.com/grafana/pricing/", "https://aws.amazon.com/grafana/faqs/"],
     "checked": "2026-08-04"
   },
   {
     "slug": "managed-service-prometheus",
     "name": "Amazon Managed Service for Prometheus",
     "category": "management",
-    "meters": ["time", "calls"],
-    "oneLiner": "Pay for samples ingested, GB stored, and samples processed by queries. Ingestion usually dominates.",
-    "trap": "Ingestion, storage and query samples processed are three separate charges. Alerting and recording rules run as queries, so a busy rule set bills on every evaluation. No data-in charge.",
-    "billOn": [],
+    "meters": ["time", "egress", "calls"],
+    "oneLiner": "Samples ingested, GB stored, samples processed by queries. Ingestion usually dominates.",
+    "trap": "Alerting and recording rules run as queries, so a busy rule set bills query samples on every evaluation. AWS managed collectors add an hourly charge. There is no data-transfer-in charge.",
+    "billOn": [
+      "AMP:MetricSampleCount",
+      "AMP:MetricStorageByteHrs",
+      "AMP:QuerySamplesProcessed",
+      "AMP:CollectorHours"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/prometheus/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/prometheus/pricing/",
+      "https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-what-is.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -386,11 +419,14 @@
     "name": "AWS Organizations",
     "category": "management",
     "meters": [],
-    "oneLiner": "Completely free. Accounts, OUs, SCPs and consolidated billing cost nothing at all.",
-    "trap": "Free itself, but it is the gateway drug: enabling org-wide CloudTrail, Config or GuardDuty across every member account is where the money actually goes.",
+    "oneLiner": "No charge. Accounts, OUs, SCPs and consolidated billing are all free.",
+    "trap": "What costs money is what Organizations makes easy to switch on everywhere. Org-wide CloudTrail, Config recorders and GuardDuty land in every member account at once.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://docs.aws.amazon.com/organizations/latest/userguide/pricing.html"],
+    "sources": [
+      "https://docs.aws.amazon.com/organizations/latest/userguide/pricing.html",
+      "https://aws.amazon.com/organizations/faqs/"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -413,11 +449,14 @@
     "name": "AWS Resource Explorer",
     "category": "management",
     "meters": [],
-    "oneLiner": "Offered at no additional charge - no setup fee, no per-search cost, no index cost.",
-    "trap": "Free itself, but it leans on other services: AWS Config usage and List/Describe API calls it makes against services that charge for those operations still show up on your bill.",
+    "oneLiner": "Nothing to pay for indexes, views or searches.",
+    "trap": "Its dependencies still bill. AWS Config usage and the List/Describe calls it makes against services that charge for those operations show up on your bill as normal.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/resourceexplorer/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/resourceexplorer/pricing/",
+      "https://docs.aws.amazon.com/resource-explorer/latest/userguide/welcome.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -440,11 +479,14 @@
     "name": "AWS Service Catalog",
     "category": "management",
     "meters": ["calls"],
-    "oneLiner": "Billed purely on API calls to Service Catalog, with a free allowance per account per Region each month.",
-    "trap": "You are charged per API call, not per provisioned product - so polling or automation that lists portfolios repeatedly costs more than the products themselves. Provisioned resources bill separately.",
-    "billOn": [],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/servicecatalog/pricing/"],
+    "oneLiner": "Priced on API calls to Service Catalog, with a monthly free allowance per account per Region.",
+    "trap": "API calls are the meter. Automation that lists portfolios in a loop can outcost the products it manages, and anything Service Catalog provisions bills separately on its own services.",
+    "billOn": ["SC-API-Calls", "AR-App-API-Calls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/servicecatalog/pricing/",
+      "https://aws.amazon.com/servicecatalog/faqs/"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -467,11 +509,14 @@
     "name": "AWS Systems Manager",
     "category": "management",
     "meters": ["time", "egress", "calls"],
-    "oneLiner": "Most of it is free on EC2 - Session Manager, Run Command, Patch Manager. The add-ons are what bill.",
-    "trap": "Free on EC2, not everywhere: hybrid, on-prem and multicloud nodes bill per session and per invocation. Advanced Parameter Store parameters and higher-throughput mode are also opt-in charges.",
-    "billOn": [],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/systems-manager/pricing/"],
+    "oneLiner": "On EC2 the core capabilities cost nothing. Everything that bills sits around the edges.",
+    "trap": "Hybrid, on-premises and multicloud nodes bill through the advanced-instances tier by the hour, moving to per-session and per-invocation pricing on 30 September 2026. Advanced parameters bill monthly each.",
+    "billOn": ["MI-AdvInstances-Hrs", "PS-Advanced-Param-Tier1", "OC-OpsItems-Tier1"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/systems-manager/pricing/",
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -479,11 +524,14 @@
     "name": "AWS Trusted Advisor",
     "category": "management",
     "meters": [],
-    "oneLiner": "Not metered at all. A core set of checks is free; the rest comes bundled with your Support plan.",
-    "trap": "There is no per-use charge, so it never appears as a line item - access is gated by Support tier instead. The full check set and Priority require Business+ or Enterprise Support.",
+    "oneLiner": "Never a line item. Your Support plan decides how much of it you can see.",
+    "trap": "A core set of checks is open to every account. The full check set, the Trusted Advisor API and Priority need Business, Enterprise On-Ramp or Enterprise Support, which is billed as part of that plan.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/premiumsupport/technology/trusted-advisor/"],
+    "sources": [
+      "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/",
+      "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -505,12 +553,15 @@
     "slug": "x-ray",
     "name": "AWS X-Ray",
     "category": "management",
-    "meters": ["time", "calls"],
-    "oneLiner": "You pay to record traces and again to look at them. Sampling rate is the only real cost lever.",
-    "trap": "Cost is set at the moment the trace is forwarded - deleting traces later saves nothing. Retrieval and scanning are billed on top of recording, and X-Ray now bills through the CloudWatch pricing page.",
-    "billOn": [],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/cloudwatch/pricing/"],
+    "meters": ["calls"],
+    "oneLiner": "Traces cost when they are recorded, and again when something reads them.",
+    "trap": "Sampling is the only real lever, because the charge lands the moment a trace is forwarded. Deleting traces later refunds nothing. X-Ray is now priced on the CloudWatch pricing page.",
+    "billOn": ["XRay-TracesStored", "XRay-TracesAccessed", "XRay-InsightsTracesStored"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html"
+    ],
     "checked": "2026-08-04"
   }
 ]
