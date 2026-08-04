@@ -105,7 +105,10 @@ describe('the real catalogue', () => {
   });
 
   it('keeps the services we know are free actually free', () => {
-    for (const slug of ['iam', 'sts', 'organizations', 'cloudformation', 'vpc']) {
+    // CloudFormation is deliberately absent: third-party extensions and Hooks
+    // bill per handler operation, so "CloudFormation is free" is only true of
+    // AWS:: and Alexa:: resource types.
+    for (const slug of ['iam', 'sts', 'organizations', 'vpc', 'ram']) {
       const service = catalogue.find(slug);
       expect(service, `${slug} missing from catalogue`).toBeDefined();
       expect(service?.isFree, `${slug} should have no meters of its own`).toBe(true);
