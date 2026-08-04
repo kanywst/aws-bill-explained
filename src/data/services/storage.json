@@ -259,7 +259,7 @@
     "name": "AWS Storage Gateway",
     "category": "storage",
     "meters": ["egress"],
-    "oneLiner": "Two separate meters point opposite ways: the gateway fee counts data written up, network transfer counts data pulled down.",
+    "oneLiner": "Two meters pointing opposite ways: the gateway fee counts data written up, transfer counts data pulled down.",
     "trap": "The service fee meters GB written to AWS and caps per gateway per month. Network transfer is the ordinary rule: uploads free, downloads to your gateway charged. The S3 or EBS behind it bills on its own.",
     "billOn": ["Uploaded-Bytes", "Retrieval-Bytes", "Gateway-Hrs"],
     "confidence": "medium",
