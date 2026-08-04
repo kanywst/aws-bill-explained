@@ -1,23 +1,11 @@
 [
   {
-    "slug": "amazon-mq",
-    "name": "Amazon MQ",
-    "category": "integration",
-    "meters": ["time", "egress"],
-    "oneLiner": "The odd one out: you rent brokers by the hour and pay for storage - the messages themselves are free.",
-    "trap": "There is no per-message or per-API charge at all, so an idle broker costs exactly what a saturated one costs. Active/standby and 3-node cluster deployments multiply the instance hours.",
-    "billOn": ["Single-AZUsage", "TimedStorage-ByteHrs"],
-    "confidence": "high",
-    "sources": ["https://aws.amazon.com/amazon-mq/pricing/"],
-    "checked": "2026-08-04"
-  },
-  {
     "slug": "api-gateway",
     "name": "Amazon API Gateway",
     "category": "integration",
     "meters": ["calls", "time", "egress"],
-    "oneLiner": "REST and HTTP bill per request; WebSocket bills per message plus every minute a socket stays open.",
-    "trap": "HTTP APIs meter in 512KB increments and WebSocket in 32KB increments, so one big payload is several billed units. WebSocket connection minutes accrue on idle sockets with zero traffic.",
+    "oneLiner": "REST and HTTP bill per request. WebSocket bills per message and per minute a socket stays open.",
+    "trap": "HTTP API requests meter in 512KB increments and WebSocket messages in 32KB, so one fat payload becomes several billed units. Connection minutes accrue on idle sockets carrying no traffic at all.",
     "billOn": [
       "ApiGatewayRequest",
       "ApiGatewayHttpRequest",
@@ -25,7 +13,10 @@
       "ApiGatewayMinute"
     ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/api-gateway/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/api-gateway/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -33,11 +24,14 @@
     "name": "AWS AppFlow",
     "category": "integration",
     "meters": ["calls", "egress"],
-    "oneLiner": "A flat charge per flow run plus a charge per GB moved - your schedule frequency drives the bill.",
-    "trap": "Billed per flow run, so cadence dominates: a 1-minute schedule is roughly 43k runs a month. Accelerated transfers count each concurrent process as an additional flow run.",
-    "billOn": ["FlowRun", "DataProcDestAWS-Bytes"],
+    "oneLiner": "A flat charge per flow run, plus per GB moved. Schedule frequency is what drives the total.",
+    "trap": "Cost follows cadence rather than data size for most flows: a one-minute schedule is roughly 43,000 runs a month. Data landing at a destination outside AWS is charged at a higher per-GB rate.",
+    "billOn": ["FlowRun", "DataProcDestAWS-Bytes", "DataProcDestExt-Bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/appflow/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/appflow/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AppFlow/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -45,11 +39,14 @@
     "name": "AWS AppSync",
     "category": "integration",
     "meters": ["calls", "time", "egress"],
-    "oneLiner": "Pay per GraphQL operation, per real-time update pushed, and per minute clients stay subscribed.",
-    "trap": "Real-time messages meter per 5KB of payload, not per message - an 8KB update bills as two. Connection minutes tick while a subscriber sits idle, entirely separate from the updates.",
+    "oneLiner": "Three meters: per GraphQL operation, per real-time update pushed, and per minute a client stays subscribed.",
+    "trap": "Real-time updates meter per 5KB of payload, so an 8KB push bills as two messages. Connection minutes tick while a subscriber sits idle and are entirely independent of how many updates you send.",
     "billOn": ["GraphQLInvocation", "GraphQLNotification", "ConnectionDuration"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/appsync/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/appsync/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAppSync/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -87,11 +84,14 @@
     "name": "Amazon Data Firehose",
     "category": "integration",
     "meters": ["egress", "time"],
-    "oneLiner": "Billed on the bytes you push in, not the bytes delivered out - no shards and no hourly base charge.",
-    "trap": "On Direct PUT each record rounds up to 5KB before billing, so a million 1KB records bill as 5GB, not 1GB. Format conversion and dynamic partitioning each add their own per-GB charge.",
+    "oneLiner": "Billed on bytes ingested rather than bytes delivered, with no shards to provision.",
+    "trap": "Direct PUT rounds every record up to 5KB before billing, so a million 1KB records bill as 5GB. Format conversion, dynamic partitioning and VPC delivery each add their own charge on top.",
     "billOn": ["BilledBytes", "DPBytesDelivered", "Firehose-VpcDelivery-Hours"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/firehose/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/firehose/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesisFirehose/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -99,11 +99,19 @@
     "name": "Amazon EventBridge",
     "category": "integration",
     "meters": ["calls"],
-    "oneLiner": "Custom events cost you on ingestion; AWS's own service events ride the default bus for free.",
-    "trap": "Only custom and partner events bill - AWS management events ingest free. But a 200KB event is 4 billed events, since each 64KB chunk counts as one (8KB for Schema Discovery).",
-    "billOn": ["Event-64K-Chunks", "Invocation-64K-Chunks", "ScheduledInvocation"],
+    "oneLiner": "Custom and partner events bill on ingestion. AWS service events land on the default bus for free.",
+    "trap": "A 200KB event is four billed events because each 64KB chunk counts as one, and Schema Discovery slices at 8KB. API destinations, Pipes and Scheduler invocations each carry their own per-million rate.",
+    "billOn": [
+      "Event-64K-Chunks",
+      "Invocation-64K-Chunks",
+      "ScheduledInvocation",
+      "ArchivedEvents-Bytes"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/eventbridge/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/eventbridge/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEvents/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -201,8 +209,8 @@
     "name": "Amazon Kinesis Data Streams",
     "category": "integration",
     "meters": ["time", "calls", "egress"],
-    "oneLiner": "Provisioned pays shard-hours plus 25KB PUT units; on-demand pays a stream-hour plus GB in and out.",
-    "trap": "The modes meter differently. Provisioned counts 25KB PUT payload units, so a 1KB record still bills as one full unit. On-demand bills per GB written - inbound is NOT free in this one.",
+    "oneLiner": "Provisioned charges shard-hours plus 25KB PUT payload units. On-demand charges a stream-hour plus GB in and out.",
+    "trap": "The two modes meter differently. Provisioned rounds each record up to a 25KB payload unit, so a 1KB record is a full unit. On-demand charges per GB written, so ingress is not free here.",
     "billOn": [
       "Storage-ShardHour",
       "PutRequestPayloadUnits",
@@ -210,7 +218,10 @@
       "OnDemand-BilledIncomingBytes"
     ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/kinesis/data-streams/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/kinesis/data-streams/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesis/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -229,15 +240,38 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "mq",
+    "name": "Amazon MQ",
+    "category": "integration",
+    "meters": ["time", "egress"],
+    "oneLiner": "Broker hours and storage, nothing per message.",
+    "trap": "No per-message or per-API charge exists in either engine, so throughput barely moves the bill. Active/standby doubles the instance hours and a three-node RabbitMQ cluster triples them.",
+    "billOn": ["Single-AZUsage:mq.m5.large", "Multi-AZUsage:mq.m5.large", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/amazon-mq/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMQ/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
     "slug": "msk",
     "name": "Amazon Managed Streaming for Apache Kafka",
     "category": "integration",
     "meters": ["time", "egress"],
-    "oneLiner": "Kafka brokers by the hour plus storage; serverless swaps that for cluster-hours and partition-hours.",
-    "trap": "Neither mode charges per message or per API call. Serverless bills every partition per hour, so an over-partitioned idle topic costs real money. Express brokers add a per-GB-written charge.",
-    "billOn": ["Kafka.m7g.large", "Kafka.Storage.GP2", "KafkaServerless-PartitionHours"],
+    "oneLiner": "Kafka brokers by the hour plus storage. Serverless swaps that for cluster-hours and partition-hours.",
+    "trap": "Neither mode charges per message or per API call. Serverless bills every partition every hour, so an over-partitioned idle topic costs real money, and Express brokers add a per-GB-written fee.",
+    "billOn": [
+      "Kafka.m7g.large",
+      "Kafka.Storage.GP2",
+      "KafkaServerless-PartitionHours",
+      "Express.In-Bytes"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/msk/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/msk/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMSK/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -245,11 +279,14 @@
     "name": "Amazon Pinpoint",
     "category": "integration",
     "meters": ["calls", "time"],
-    "oneLiner": "You pay per endpoint targeted each month, plus per message on whichever channel actually sends.",
-    "trap": "Monthly Targeted Audience bills every endpoint a campaign or journey touches, deliverable or not. AWS ends Pinpoint support on 30 Oct 2026 - SMS, voice and push move to End User Messaging.",
-    "billOn": ["Pinpoint_MonthlyTargetedAudience", "EventsRecorded"],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/pinpoint/pricing/"],
+    "oneLiner": "Per endpoint targeted each month, plus per message on whichever channel does the sending.",
+    "trap": "Monthly Targeted Audience counts every endpoint a campaign or journey touches, deliverable or not. Support ends 30 October 2026; SMS, voice, push and OTP move to AWS End User Messaging.",
+    "billOn": ["MonthlyTargetedAudience", "EventsRecorded", "Email_Sends"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/pinpoint/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPinpoint/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -257,13 +294,13 @@
     "name": "Amazon SES",
     "category": "integration",
     "meters": ["calls", "egress", "time"],
-    "oneLiner": "Outbound bills per recipient, not per message - a single blast to 50 addresses is 50 charges.",
-    "trap": "One send to 50 recipients bills 50 times. Attachment bytes cost extra per GB, and inbound bills per email PLUS per 256KB received chunk, so a big attachment hits you twice on receive.",
-    "billOn": ["Recipients", "AttachmentsSize-Bytes", "ReceivedChunk"],
+    "oneLiner": "Outbound meters per recipient. One send to fifty addresses is fifty charges.",
+    "trap": "Attachment bytes bill per GB on top of the recipient count. Receiving bills per email and again per 256KB chunk, so one big attachment hits twice. Pro and Enterprise plans add a fixed monthly fee.",
+    "billOn": ["Recipients", "AttachmentsSize-Bytes", "ReceivedChunk", "Pro-Plan-Hours"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/ses/pricing/",
-      "https://docs.aws.amazon.com/ses/latest/dg/receiving-email.html"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSES/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
   },
@@ -272,11 +309,19 @@
     "name": "Amazon SNS",
     "category": "integration",
     "meters": ["calls", "egress"],
-    "oneLiner": "You pay to publish, then pay again for every delivery - one message to 10 subscribers is 11 charges.",
-    "trap": "Fan-out double-charges: publish and each delivery bill separately, both chunked per 64KB. Deliveries to SQS and Lambda are free; HTTP/S, SMS and Firehose are not.",
-    "billOn": ["Requests-Tier1", "DeliveryAttempts-HTTP", "DeliveryAttempts-SMS"],
+    "oneLiner": "Publishing costs money. So does delivery, but only to certain endpoint types.",
+    "trap": "SQS and Lambda deliveries are free. HTTP/S, mobile push and Firehose all bill per notification, and email is the priciest of the lot by a wide margin. SMS bills through AWS End User Messaging.",
+    "billOn": [
+      "Requests-Tier1",
+      "DeliveryAttempts-HTTP",
+      "DeliveryAttempts-SMTP",
+      "DeliveryAttempts-FIREHOSE"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/sns/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/sns/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSNS/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -284,14 +329,11 @@
     "name": "Amazon SQS",
     "category": "integration",
     "meters": ["calls"],
-    "oneLiner": "Every API action is a request - sends, receives, deletes, and empty polls all cost the same.",
-    "trap": "Empty ReceiveMessage polls that return nothing still bill as requests, and payloads chunk: one 1 MiB call bills as 16 requests, not 1. Long polling is the fix.",
-    "billOn": ["Requests-RBP", "Requests-FIFO-RBP"],
+    "oneLiner": "Every API action counts as a request. Sends, receives, deletes and empty polls all bill the same.",
+    "trap": "A ReceiveMessage that returns nothing still bills, and payload chunks: a 1 MiB call bills as sixteen requests. Standard queue calls carrying a message group ID are charged fair-queue rates on top.",
+    "billOn": ["Requests-RBP", "Requests-FIFO-RBP", "Requests-Fair-RBP"],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/sqs/pricing/",
-      "https://repost.aws/knowledge-center/sqs-high-charges"
-    ],
+    "sources": ["https://aws.amazon.com/sqs/pricing/", "https://aws.amazon.com/sqs/features/"],
     "checked": "2026-08-04"
   },
   {
@@ -299,11 +341,14 @@
     "name": "AWS Step Functions",
     "category": "integration",
     "meters": ["calls", "time"],
-    "oneLiner": "Standard bills per state transition; Express drops that and bills per start plus memory-seconds.",
-    "trap": "Standard counts every transition including retries and each Map iteration - loops are not free. Express bills duration x memory instead, so a workflow that sits waiting burns GB-seconds.",
+    "oneLiner": "Standard bills per state transition. Express swaps that for a per-start charge plus memory-seconds.",
+    "trap": "Standard counts every transition, retries and Map iterations included, so loops are never free. Express bills duration times memory instead, so a workflow parked on a wait burns GB-seconds.",
     "billOn": ["StateTransition", "StepFunctions-Request", "StepFunctions-GB-Second"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/step-functions/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/step-functions/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {

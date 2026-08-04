@@ -3,12 +3,19 @@
     "slug": "certificate-manager",
     "name": "AWS Certificate Manager (ACM)",
     "category": "security",
-    "meters": ["time", "calls"],
-    "oneLiner": "Public certs are free if you terminate them on AWS. Exporting one, or ACME issuance, is not free.",
-    "trap": "\"ACM is free\" only holds for certs attached to integrated AWS services. Exportable public certs bill per domain at issuance and each renewal, and private certs bill through AWS Private CA.",
-    "billOn": ["PrivateCertificatesIssued"],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/certificate-manager/pricing/"],
+    "meters": ["calls"],
+    "oneLiner": "Certificates you terminate on AWS are free. Exporting one, or issuing over ACME, is not.",
+    "trap": "The free tier of ACM covers non-exportable public certs bound to integrated AWS services. Exportable and ACME certs bill per domain name at issuance and at every renewal, wildcards far higher than plain names.",
+    "billOn": [
+      "IssueExportablePublicCertificateDomain",
+      "IssueACMEPublicCertificateDomain",
+      "ExportPublicCertificate"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/certificate-manager/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/ACM/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -16,11 +23,14 @@
     "name": "AWS CloudHSM",
     "category": "security",
     "meters": ["time"],
-    "oneLiner": "Pure rental: you pay per HSM per hour, and the crypto operations you run on it are unmetered.",
-    "trap": "The mirror image of KMS - no per-call charge, but a production HA cluster needs two or more HSMs, so the hourly meter multiplies. The clock runs until you delete the HSM, idle or not.",
-    "billOn": ["CloudHSMv2Usage"],
+    "oneLiner": "Rent an HSM by the hour. Whatever crypto you run on it is unmetered.",
+    "trap": "No per-operation charge exists, so the only lever is HSM count and uptime. A production HA cluster needs at least two, and the clock keeps running on an idle HSM until you delete it.",
+    "billOn": ["CloudHSMv2Usage", "CloudHSMv2Usage-hsm2m.m"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cloudhsm/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/cloudhsm/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudHSM/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -28,11 +38,19 @@
     "name": "Amazon Cognito",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "You pay per monthly active user, and machine-to-machine tokens are billed separately per request.",
-    "trap": "Identity pools are free; user pools are not. M2M client_credentials never counts as an MAU - it bills per token request and per app client. Moving Lite to Essentials or Plus reprices every user.",
-    "billOn": ["CognitoEssentialsMAU", "CognitoPlusMAU", "CUPM2MTokenRequestsFull"],
+    "oneLiner": "User pools bill per monthly active user. Machine-to-machine tokens sit on a separate per-request meter.",
+    "trap": "Identity pools are free; user pools are not. A client_credentials token request never counts as an MAU and there is no longer any per-app-client fee. Moving Lite to Essentials or Plus reprices every user.",
+    "billOn": [
+      "CognitoLiteMAU",
+      "CognitoEssentialsMAU",
+      "CognitoPlusMAU",
+      "CUPM2MTokenRequestsFull"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/cognito/pricing/", "https://aws.amazon.com/cognito/faqs/"],
+    "sources": [
+      "https://aws.amazon.com/cognito/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCognito/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -40,11 +58,14 @@
     "name": "Amazon Detective",
     "category": "security",
     "meters": ["egress"],
-    "oneLiner": "One meter only: per GB of logs and findings ingested, per account per Region per month.",
-    "trap": "There is no per-account or per-graph fee, so cost tracks GuardDuty and VPC flow log volume - widen GuardDuty coverage and Detective quietly grows too. The 30-day free trial hides the real number.",
+    "oneLiner": "One meter. GB of log and finding data ingested, per account, per Region, per month.",
+    "trap": "There is no per-account or per-graph fee, so the bill tracks GuardDuty and VPC flow log volume. Widen GuardDuty coverage and Detective grows with it. A free trial hides the real number for a month.",
     "billOn": ["PaidDataAnalyzed-Bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/detective/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/detective/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDetective/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -67,11 +88,14 @@
     "name": "AWS Firewall Manager",
     "category": "security",
     "meters": ["time"],
-    "oneLiner": "A flat monthly fee per policy per Region - everything it actually deploys is billed on top.",
-    "trap": "You pay Firewall Manager per policy AND full price for the WAF ACLs, Network Firewall endpoints and Config rules it rolls out. Shield Advanced subscribers get the policy fee itself waived.",
+    "oneLiner": "Per policy, per Region, per month. Whatever the policy deploys bills separately at full price.",
+    "trap": "You pay the policy fee and full price for the WAF ACLs, Network Firewall endpoints and Config rules it rolls out. Shield Advanced subscribers get the policy fee waived but still pay for Config.",
     "billOn": ["Policy", "Policy-WAF", "Policy-Network-Firewall"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/firewall-manager/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/firewall-manager/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSFMS/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -79,13 +103,13 @@
     "name": "Amazon GuardDuty",
     "category": "security",
     "meters": ["time", "egress", "calls"],
-    "oneLiner": "Priced on what it reads: per million CloudTrail events, per GB of logs, per vCPU-hour of runtime agent.",
-    "trap": "The per-GB meter is log volume analyzed, not data transferred, so keeping traffic internal saves nothing. You do not enable or pay for those flow and DNS logs separately - GuardDuty reads them itself.",
+    "oneLiner": "Priced on what it reads: per CloudTrail event, per GB of log data analyzed, per vCPU-month of runtime agent.",
+    "trap": "The per-GB meter counts log volume analyzed, so keeping traffic inside the VPC saves nothing. You never enable or pay for those VPC flow and DNS logs yourself; GuardDuty consumes them directly.",
     "billOn": ["PaidEventsAnalyzed", "PaidEventsAnalyzed-Bytes", "PaidEC2vCPUMonitored"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/guardduty/pricing/",
-      "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty-pricing.html"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonGuardDuty/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
   },
@@ -94,11 +118,14 @@
     "name": "AWS Identity and Access Management (IAM)",
     "category": "security",
     "meters": [],
-    "oneLiner": "Free. Users, roles, policies, MFA - none of it costs a cent; you only pay for what the identities touch.",
-    "trap": "IAM is free but IAM Access Analyzer is not. External-access analyzers are free, while unused-access and internal-access analyzers bill per IAM resource per month.",
-    "billOn": [],
+    "oneLiner": "Free. Users, roles, policies, MFA, all of it.",
+    "trap": "Access Analyzer is the part that bills. External-access analyzers cost nothing, but unused-access analyzers charge per IAM role or user monitored and internal-access analyzers charge per AWS resource, monthly.",
+    "billOn": ["AccessFinding-Monitored-IAM-Resources", "AccessFinding-Monitored-AWS-Resources"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/iam/faqs/"],
+    "sources": [
+      "https://aws.amazon.com/iam/faqs/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIAMAccessAnalyzer/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -106,11 +133,14 @@
     "name": "AWS IAM Identity Center",
     "category": "security",
     "meters": [],
-    "oneLiner": "Free. Permission sets, the access portal and SSO into your accounts cost nothing on their own.",
-    "trap": "Identity Center is free, but its identity source may not be: AWS Managed Microsoft AD bills hourly under Directory Service. An external IdP or the built-in directory keeps it free.",
+    "oneLiner": "Permission sets, the access portal and SSO into your accounts are all free. The identity source behind them may not be.",
+    "trap": "AWS Managed Microsoft AD as the identity source bills per domain controller hour, and a managed directory runs two of them. An external IdP or the built-in directory keeps the whole path at zero.",
     "billOn": [],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/iam/identity-center/faqs/"],
+    "sources": [
+      "https://aws.amazon.com/iam/identity-center/faqs/",
+      "https://aws.amazon.com/directoryservice/pricing/"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -118,10 +148,10 @@
     "name": "AWS IAM Roles Anywhere",
     "category": "security",
     "meters": [],
-    "oneLiner": "The service itself is free - but the private CA it has to trust usually is not.",
-    "trap": "IAM Roles Anywhere charges nothing. If your trust anchor is AWS Private CA you pay per CA per month plus per certificate issued. Point it at your own PKI and the whole path is free.",
+    "oneLiner": "No charge for the service. The CA it trusts is usually the expensive half.",
+    "trap": "With AWS Private CA as the trust anchor you rent the CA monthly and pay again per certificate issued. Registering a CA from your own PKI as the trust anchor costs nothing anywhere along the path.",
     "billOn": [],
-    "confidence": "high",
+    "confidence": "medium",
     "sources": [
       "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html",
       "https://aws.amazon.com/private-ca/pricing/"
@@ -133,8 +163,8 @@
     "name": "Amazon Inspector",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "Per resource per month for EC2 and Lambda, but per individual scan for container images and code.",
-    "trap": "ECR is billed per scan, not per month, so a CI pipeline pushing images all day pays for every initial scan and every rescan. EC2 and Lambda charges are prorated by hours of actual coverage.",
+    "oneLiner": "EC2 and Lambda meter by the hour of coverage. Container images and code repos meter per scan.",
+    "trap": "ECR bills per assessment, so a CI pipeline pushing all day pays for every initial scan and every rescan of every image. EC2 and Lambda coverage prorates by instance-hour, so short-lived hosts cost little.",
     "billOn": [
       "EC2-Scanning",
       "Lambda-Standard-Scanning",
@@ -142,7 +172,10 @@
       "container-image-re-scan"
     ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/inspector/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/inspector/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonInspectorV2/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -150,8 +183,8 @@
     "name": "AWS Key Management Service (KMS)",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "Both meters at once: a monthly fee per customer-managed key, plus a charge on every crypto API call.",
-    "trap": "AWS managed keys are free to store but their requests still bill you. The first and second rotation each add another key-month. Cross-account, the calling account pays, not the key owner.",
+    "oneLiner": "Two meters running together. A monthly fee per customer-managed key, and a charge on every cryptographic call.",
+    "trap": "AWS managed keys cost nothing to store, but requests against them still bill. Rotation adds a key-month for the first and second rotation only. Cross-account, the caller pays, not the key owner.",
     "billOn": ["KMS-Keys", "KMS-Requests", "KMS-Requests-Asymmetric"],
     "confidence": "high",
     "sources": [
@@ -180,11 +213,18 @@
     "name": "Amazon Macie",
     "category": "security",
     "meters": ["time", "egress"],
-    "oneLiner": "A monthly fee per S3 bucket just to keep an inventory, plus per GB whenever it inspects objects.",
-    "trap": "Bucket inventory is cheap; the per-GB inspection is what hurts. One targeted discovery job over a big bucket can outcost a year of monitoring, and that GB is data scanned, not data transferred.",
-    "billOn": ["PaidDataInventoryEvaluation", "SensitiveDataDiscovery"],
+    "oneLiner": "A small daily charge per S3 bucket to keep the inventory, then per GB whenever objects get inspected.",
+    "trap": "Inventory is cheap and sensitive data discovery is not. One targeted job over a large bucket can outrun a year of monitoring, and the GB counted is data scanned inside S3, nothing to do with transfer.",
+    "billOn": [
+      "PaidDataInventoryEvaluation",
+      "SensitiveDataDiscovery",
+      "PaidAutomatedObjectMonitoring"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/macie/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/macie/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMacie/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -192,11 +232,14 @@
     "name": "AWS Network Firewall",
     "category": "security",
     "meters": ["time", "egress"],
-    "oneLiner": "Per endpoint per hour in every AZ you deploy into, plus per GB of traffic it inspects.",
-    "trap": "Endpoints are per AZ, so a three-AZ VPC pays three hourly meters before a single byte flows. The per-GB fee covers inbound traffic too - unlike egress, direction does not save you here.",
-    "billOn": ["Endpoint-Hour", "Traffic-GB-Processed"],
+    "oneLiner": "An hourly fee for each firewall endpoint in each AZ, plus a per-GB charge on inspected traffic.",
+    "trap": "Endpoints are billed per AZ, so a three-AZ VPC runs three hourly meters before any traffic flows. The per-GB fee is on traffic processed by the firewall, which includes traffic that never leaves AWS.",
+    "billOn": ["Endpoint-Hour", "Secondary-Endpoint-Hour", "Traffic-GB-Processed"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/network-firewall/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/network-firewall/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSNetworkFirewall/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -204,11 +247,19 @@
     "name": "AWS Private Certificate Authority",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "You rent the CA by the month whether it issues anything or not, then pay again per certificate.",
-    "trap": "The CA fee starts at creation, not first use - an idle CA still bills monthly. Delete it and restore inside the 30-day window and you are charged for the gap. Short-lived mode costs far less.",
-    "billOn": ["PaidPrivateCA", "PrivateCertificatesIssued", "OCSPPerQuery"],
+    "oneLiner": "You rent the CA by the month even when it issues nothing, and pay again per certificate.",
+    "trap": "The monthly CA fee starts at creation. Delete a CA and restore it inside the 7-to-30-day window and you are billed for the gap. Short-lived certificate mode costs a fraction of general-purpose mode.",
+    "billOn": [
+      "PaidPrivateCA",
+      "PrivateCertificatesIssued",
+      "ShortLivedCertificatesIssued",
+      "OCSPPerQuery"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/private-ca/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/private-ca/pricing/",
+      "https://docs.aws.amazon.com/privateca/latest/userguide/PCARestoreCA.html"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -231,11 +282,14 @@
     "name": "AWS Secrets Manager",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "Both meters: a flat monthly fee per stored secret, plus a per-API-call charge every time you read it.",
-    "trap": "Calling GetSecretValue on every request instead of caching is the classic blowup. Secrets marked for deletion stop billing; rotation Lambdas and customer-managed KMS keys bill separately.",
+    "oneLiner": "Storing a secret costs a flat monthly fee. Reading it costs a little more each time.",
+    "trap": "Uncached GetSecretValue on every request is the usual blowup. Rotation Lambdas and any customer-managed KMS key bill on their own meters, and the per-secret fee runs whether the secret is read or not.",
     "billOn": ["AWSSecretsManager-Secrets", "AWSSecretsManagerAPIRequest"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/secrets-manager/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/secrets-manager/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -243,11 +297,14 @@
     "name": "AWS Security Hub",
     "category": "security",
     "meters": ["time", "egress", "calls"],
-    "oneLiner": "Now priced per monitored resource per month, with optional add-ons metered on events and log volume.",
-    "trap": "Pricing moved off per-check and per-finding onto resource units, and resources weigh very differently - one EC2 instance counts far more than one IAM role. Threat Analytics is a metered add-on.",
-    "billOn": ["MonitoredEC2", "PaidComplianceCheck", "LogsAnalyzedBytes"],
-    "confidence": "medium",
-    "sources": ["https://aws.amazon.com/security-hub/pricing/"],
+    "oneLiner": "Charged per monitored resource per month. Threat Analytics meters separately on events and log volume.",
+    "trap": "Resource units are weighted very unevenly. One EC2 instance is a whole unit while it takes roughly a dozen Lambda functions or over a hundred IAM identities to reach the same unit.",
+    "billOn": ["MonitoredEC2", "MonitoredFunction", "EventsAnalyzed", "LogsAnalyzedBytes"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/security-hub/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityHub/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -255,11 +312,14 @@
     "name": "AWS Shield (Standard and Advanced)",
     "category": "security",
     "meters": ["time", "egress"],
-    "oneLiner": "Standard is free and always on. Advanced is a big monthly subscription plus per-GB data transfer out.",
-    "trap": "Shield Advanced is a 1-year commitment billed once per payer account for the whole org, not per account - and on top of the subscription you pay per GB out of every protected resource.",
+    "oneLiner": "Standard is free and always on. Advanced is a subscription plus per-GB data transfer out of protected resources.",
+    "trap": "Advanced needs a one-year commitment and bills once per payer account covering the whole organization. Data transfer out of CloudFront, ELB, EC2 and Global Accelerator then meters on top of the subscription.",
     "billOn": ["DataTransfer-Shield-Bytes"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/shield/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/shield/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSShield/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -267,10 +327,10 @@
     "name": "AWS Security Token Service (STS)",
     "category": "security",
     "meters": [],
-    "oneLiner": "Free. AssumeRole, GetCallerIdentity, GetSessionToken - call them all day, the bill stays zero.",
-    "trap": "STS calls cost nothing, but every one is a CloudTrail management event. A chatty AssumeRole loop is free at STS and expensive in GuardDuty and in any extra CloudTrail trails.",
+    "oneLiner": "Call AssumeRole and GetCallerIdentity as hard as you like. The STS line on your bill stays at zero.",
+    "trap": "Every STS call is a CloudTrail management event. A tight AssumeRole loop costs nothing at STS and shows up as real money in GuardDuty event analysis and in any trail beyond your first.",
     "billOn": [],
-    "confidence": "high",
+    "confidence": "medium",
     "sources": [
       "https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html",
       "https://aws.amazon.com/iam/faqs/"
@@ -282,11 +342,18 @@
     "name": "AWS Verified Access",
     "category": "security",
     "meters": ["time", "egress"],
-    "oneLiner": "An hourly fee per application endpoint, plus a per-GB charge on the traffic passing through it.",
-    "trap": "The hourly fee is per application, not per Verified Access instance, so 50 apps means 50 meters. Its per-GB data processing covers both directions, and normal AWS data transfer is charged on top.",
-    "billOn": ["VerifiedAccess-App-Hours", "VerifiedAccess-DataProcess-Bytes"],
+    "oneLiner": "Each application endpoint runs an hourly meter, and the traffic through it bills per GB.",
+    "trap": "The hourly fee attaches to each application, not to the Verified Access instance, so fifty apps means fifty meters. Normal AWS data transfer charges land on top of the data-processing fee.",
+    "billOn": [
+      "VerifiedAccess-App-Hours",
+      "VerifiedAccess-DataProcess-Bytes",
+      "VerifiedAccess-ConnectionHours"
+    ],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/verified-access/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/verified-access/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   },
   {
@@ -294,11 +361,14 @@
     "name": "AWS WAF",
     "category": "security",
     "meters": ["time", "calls"],
-    "oneLiner": "A monthly fee for each web ACL and each rule, plus a per-request charge on everything inspected.",
-    "trap": "Rules bill per web ACL, so the same managed rule group across five ACLs bills five times. Blocked requests still count. Bot Control and ATP add a subscription plus their own per-request fee.",
-    "billOn": ["WebACLV2", "RuleV2", "RequestV2-Tier1"],
+    "oneLiner": "Monthly per web ACL and per rule, plus a per-request charge on everything the ACL inspects.",
+    "trap": "Rules are counted per web ACL, so one managed rule group attached to five ACLs bills five times. Bot Control and ATP add a monthly subscription each plus a per-request rate. Shield Advanced zeroes most of it.",
+    "billOn": ["WebACLV2", "RuleV2", "RequestV2-Tier1", "AMR-BotControl"],
     "confidence": "high",
-    "sources": ["https://aws.amazon.com/waf/pricing/"],
+    "sources": [
+      "https://aws.amazon.com/waf/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/current/us-east-1/index.json"
+    ],
     "checked": "2026-08-04"
   }
 ]
