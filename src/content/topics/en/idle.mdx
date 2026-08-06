@@ -1,0 +1,166 @@
+---
+title: Paying for time when nothing is running
+short: Idle
+oneLiner: The Time meter measures existence, not activity. Only deleting stops it, and "stopped" rarely means deleted.
+meters: ['time']
+order: 15
+checked: 2026-08-06
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+
+## Why it works that way
+
+The Time meter has exactly one test, and it is not the one people apply. The test is
+_does the thing exist_. It is never _is the thing doing anything_.
+
+This is the most repeated surprise in AWS billing and AWS has never written it down as a
+rule. It gets restated one service at a time, in each service's own vocabulary — an
+_endpoint_, an _index_, a _subnet association_, a _provisioned model unit_, a _minimum
+ACU_. Read the pricing pages one by one and you collect forty footnotes. They are all the
+same footnote.
+
+The mechanism is not mysterious. When you provision something, AWS reserves capacity for
+you and stops offering it to anyone else. That reservation _is_ the product. Sending work
+to it is a separate act, and the meter has no reason to care whether you did. This is why
+the Time meter is the one that dominates a bill nobody is using: the other two meters,
+Bytes and Units, need you to do something. Time only needs you to have done something once.
+
+The giveaway is a service that publishes an hourly or monthly rate _alongside_ a
+per-request rate. DynamoDB shows both halves inside one product: in provisioned capacity
+mode the RCU and WCU you configured bill every hour at zero traffic, and the meter is Time;
+flip the same table to on-demand and the identical queries bill per request, and the meter
+is Units. Same data, same access pattern, different meter — because you changed what you
+bought, not what you did.
+
+That leaves three verbs that people treat as synonyms and AWS does not:
+
+- **Stop** usually silences one meter and leaves the others running. It is the weakest of
+  the three and the one everybody reaches for first.
+- **Pause** is real, but only where a service explicitly implements it, and only for some
+  of its charges.
+- **Delete** is the only verb that works everywhere — except for the case at the end of
+  this page, where nothing exists to delete.
+
+<PathDiagram
+  lang="en"
+  caption="A week with no traffic. Both hops are free because nothing moved. The bill is entirely the two boxes existing."
+  nodes={[
+    { id: 'client', label: 'Clients', sub: 'none, all week' },
+    { id: 'alb', label: 'ALB', sub: '$0.0225/hour', charges: ['time'] },
+    { id: 'ep', label: 'SageMaker endpoint', sub: 'instance-hours', charges: ['time'] },
+  ]}
+  hops={[
+    { from: 'client', to: 'alb', label: 'No requests' },
+    { from: 'alb', to: 'ep', label: 'Nothing forwarded' },
+  ]}
+/>
+
+## What it costs
+
+Every figure below is us-east-1 on-demand, and every one of them accrues at zero requests.
+The monthly numbers assume a 730-hour month.
+
+- **Lambda provisioned concurrency.** $0.015 per GB-hour. AWS's pricing page is unusually
+  direct about the window: it is "calculated from the time you enable it on your function
+  until it is disabled, rounded up to the nearest five minutes." Invocations are not part
+  of that sentence. Ten units of concurrency on a 1 GB function is about **$110 a month**
+  with nothing calling it. The Lambda free tier does not apply to provisioned concurrency
+  at all.
+- **Bedrock Provisioned Throughput.** You buy model units, and the API reference states
+  flatly that "billing occurs hourly and is discounted for longer commitment terms."
+  Commitment is the word doing the work: a 1-month or 6-month term is a block of hours you
+  have already agreed to buy, so there is no idle state to escape to. No-commitment
+  Provisioned Throughput exists for some base models, and that one you can release.
+- **App Runner.** Memory is $0.007 per GB-hour and vCPU is $0.064 per vCPU-hour, and they
+  are not billed on the same trigger. "When your application is deployed, you pay for the
+  memory provisioned in each container instance"; vCPU only joins in when the service is
+  actually processing requests. A 2 GB service that serves nobody for a month is about
+  **$10** — small, but it never reaches zero, because App Runner has no scale-to-zero.
+  Its `PauseService` API is the lever: it "reduces compute capacity for the service to zero."
+- **Aurora Serverless v2.** $0.12 per ACU-hour, billed per second against your _minimum_
+  ACU setting whether or not a query ever arrives. A floor of 0.5 ACU is about **$44 a
+  month** for an empty database. Setting the minimum to 0 is not a rounding change, it is a
+  feature switch: only then does `SecondsUntilAutoPause` appear, and the cluster pauses
+  after an idle window you pick between 300 seconds and one day. The RDS API reference is
+  explicit that this property "is only shown when the minimum capacity for the cluster is
+  set to 0 ACUs."
+- **Client VPN.** "You are charged for each endpoint association and each VPN connection on
+  an hourly basis." The association half is $0.10 per hour per associated subnet and has
+  nothing to do with users. AWS's own worked example prices two subnets around the clock at
+  **$144 a month** before a single person connects. The endpoint's elastic network
+  interfaces also draw in-use public IPv4 charges.
+- **Public IPv4.** $0.005 per address-hour, in use or idle, since 1 February 2024 — the VPC
+  pricing page lists the identical rate under both names. The distinction that matters is
+  what happens on stop: EC2 "release[s] the public IP address when the instance is stopped,
+  hibernated, or terminated," so an auto-assigned address stops billing. An Elastic IP is
+  allocated to your account, not your instance, so it keeps billing at the same $0.005 until
+  you release it. About **$3.65 a month** per forgotten address.
+- **EBS.** "Volume storage for all EBS volume types is charged by the amount of GB you
+  provision per month until you release the storage." Provisioned, not used, and the volume
+  left behind by a stopped instance is the canonical case: EC2's own API docs note that when
+  an instance is stopped "your root partition Amazon EBS volume remains… and you are charged
+  for Amazon EBS volume usage." A 500 GB gp3 volume at $0.08 per GB-month is **$40 a month**
+  attached to an instance that has been off since March.
+- **Kendra.** The clearest sentence AWS has written on this subject: "Once an index is
+  created you will incur charges for it regardless of whether you have utilized any storage
+  or query capacity within that index," followed by "You can delete the index to stop the
+  charges." The GenAI Enterprise base index is $0.32/hour, about **$234 a month** for an
+  index holding nothing.
+- **SageMaker real-time endpoints.** Billed by time deployed, from creation to deletion.
+  The SageMaker developer guide warns in a box: "Your endpoint continues to incur charges
+  even when not processing requests. To stop all charges, you must delete your endpoint."
+  There is no stop button — asynchronous and serverless inference are the variants that
+  scale to zero.
+- **EMR and OpenSearch clusters.** EMR's documentation says long-running clusters "continue
+  to run, accept work, and accrue charges until you take action to shut them down," and that
+  a cluster left in `WAITING` "must be terminated or it runs indefinitely, generating charges
+  to your account." OpenSearch bills "for each hour your instance is running in an available
+  state," with partial hours billed as full hours. Neither meter reads query volume.
+- **ALB and NAT Gateway.** $0.0225 per load balancer hour and $0.045 per NAT Gateway hour,
+  before a byte moves — about **$16** and **$33** a month respectively. Both then add
+  capacity or per-GB charges on top. A copy of a dev environment nobody deploys to any more
+  is usually these two.
+- **CodeBuild reserved fleets.** Instance time is "calculated in minutes, from the time you
+  submit a request for a new instance until your instance is terminated," with a 60-minute
+  minimum per instance. Billing starts at provisioning, not at the first build, which is the
+  entire trade you made when you chose reserved capacity over on-demand.
+
+## Traps
+
+**"Stopped" is a per-service word, and some services mean nothing by it.** EC2 stop turns
+off the instance meter and leaves EBS and any Elastic IP running. Transfer Family says it in
+the API reference: "Stopping the server does not reduce or impact your file transfer protocol
+endpoint billing; you must delete the server to stop being billed." MediaLive goes further
+and gives idleness its own price — the user guide describes an explicit "idle channel charge
+for each channel that isn't running" and an idle charge for push inputs, with only pull
+inputs free while idle. Three services, three different meanings of the same button.
+
+**The zero that works is a configured floor, not a button.** The services that genuinely
+reach zero do it because you set a minimum of zero and told them how long to wait: Aurora
+Serverless v2 at `MinCapacity=0`, SageMaker asynchronous inference at a minimum capacity of
+0, OpenSearch NextGen serverless collections which scale to zero after ten idle minutes.
+Classic OpenSearch Serverless collections floor at 2 OCUs and cannot. Look for the floor
+setting before you look for the off switch.
+
+**The shapes that give it away.** You can find most of this without understanding any of the
+services. Scan a pricing page or a Cost Explorer breakdown for these words: _per hour_,
+_per month_, _provisioned_, _reserved_, _minimum_, _floor_, _capacity_, _association_,
+_endpoint_, _cluster_, _subscription_. In usage types, look for anything ending in `-Hours`,
+`Usage`, or `GB-Mo`. Then ask the one question that catches all of them:
+
+> If I sent no traffic for a week, what would still bill?
+
+Anything you cannot immediately answer "nothing" for is on the Time meter, and the follow-up
+is always the same — what exactly do I have to delete, and does anything short of deleting
+work?
+
+**Sometimes the answer is that deleting does not work.** This is the honest edge of the
+principle. Shield Advanced is a $3,000 monthly fee that "requires a 1-year subscription
+commitment," billed per payer account across an organization; EKS Anywhere Enterprise
+Subscription is $24,000 per cluster on a 1-year term, cancellable at no charge only "within
+the first 7 days of purchase." Terminating every protected resource or every cluster changes
+neither bill. The Time meter is still measuring existence — it is just that what exists is a
+contract, and contracts do not have a delete button. When you buy one of these, you are
+buying months of the Time meter up front, and the only lever that ever existed was the
+decision to sign.

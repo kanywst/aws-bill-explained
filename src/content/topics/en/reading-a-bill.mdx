@@ -1,0 +1,221 @@
+---
+title: How to read a line item
+short: The bill
+oneLiner: A line item is a usage type, an operation, and a charge type. Learn that grammar and the bill decodes.
+meters: []
+order: 5
+checked: 2026-08-06
+---
+
+## Why it works that way
+
+Nothing on your bill was written for a human to read. Every charge is a record emitted by a
+metering system, and the fields on that record carry the metering system's own vocabulary:
+which meter ran, in which Region, against which API call, under which pricing rule. So
+`USW2-BoxUsage:m2.2xlarge` is not obscurity for its own sake. It is several facts jammed into
+one string, and AWS translates that exact example as "an M2 High Memory Double Extra Large
+instance in the US West (Oregon) Region."
+
+Read it as fields instead of as a name and it decodes on sight.
+
+### The anatomy of a usage type
+
+A usage type is a Region prefix, then a family, then an optional variant. The order is fixed.
+
+| Piece         | Example       | What it tells you                                          |
+| ------------- | ------------- | ---------------------------------------------------------- |
+| Region prefix | `USW2-`       | Where the meter ran. Always first, when present.           |
+| Family        | `BoxUsage`    | Which meter. Instance-hours, stored byte-hours, requests.  |
+| Variant       | `:m2.2xlarge` | Which flavour. Instance type, storage class, request tier. |
+
+**The Region prefix is a short code, and you cannot derive it from the Region name.** AWS
+publishes the full mapping in the Regions and Availability Zones guide. A sample, including
+the ones that will trip you:
+
+| Short code | Region                                           |
+| ---------- | ------------------------------------------------ |
+| `USE1`     | `us-east-1`, N. Virginia                         |
+| `USE2`     | `us-east-2`, Ohio                                |
+| `USW2`     | `us-west-2`, Oregon                              |
+| `EU`       | `eu-west-1`, Ireland — no digit, the oldest code |
+| `EUC1`     | `eu-central-1`, Frankfurt                        |
+| `APN1`     | `ap-northeast-1`, Tokyo                          |
+| `APS1`     | `ap-southeast-1`, Singapore                      |
+| `APS3`     | `ap-south-1`, Mumbai — _not_ `ap-southeast-3`    |
+| `APS4`     | `ap-southeast-3`, Jakarta                        |
+
+`USE2-DataTransfer-Out-Bytes` is Ohio to the internet. `EUC1-EBS:VolumeUsage.gp3` is gp3
+volume storage in Frankfurt. `USW2-EBS:SnapshotUsage` is snapshot storage in Oregon.
+
+**A missing prefix means us-east-1.** AWS states this explicitly for S3: for the US East (N.
+Virginia) Region the prefix is omitted, so you see `TimedStorage-ByteHrs` rather than
+`USE1-TimedStorage-ByteHrs`. This is the single most useful decoding rule on this page,
+because a bare `Requests-Tier1` looks Region-less and is in fact your busiest Region hiding in
+plain sight.
+
+Two prefixes means two Regions, source first. `APE1-USE1-AWS-In-Bytes` is accelerated transfer
+into Hong Kong from N. Virginia. Anything global — `PublicIPv4:IdleAddress`,
+`Global-Bucket-Hrs` — carries no Region because the meter genuinely has none.
+
+### Usage type is not operation
+
+They are two columns and they answer two different questions.
+
+- **Usage type** answers _which meter turned_. It is the thing that has a rate attached.
+- **Operation** answers _what you did to turn it_. AWS defines it as "the specific AWS
+  operation covered by this line item," and it usually reads like an API name:
+  `RunInstances`, `PutObject`, `ListBucket`.
+
+One usage type routinely carries several operations, because several unrelated things feed the
+same meter. Public IPv4 is the cleanest example — the usage type
+`PublicIPv4:InUseAddress` fans out across operations that identify _what kind of thing_ holds
+the address:
+
+| Operation                   | What is holding the address              |
+| --------------------------- | ---------------------------------------- |
+| `RunInstances`              | An EC2 public IPv4 address in a VPC      |
+| `AssociateAddressVPC`       | An Elastic IP with a resource attached   |
+| `AllocateAddressVPC`        | An idle Elastic IP with nothing attached |
+| `DescribeNetworkInterfaces` | A service-managed public IPv4 address    |
+| `CreateVpnConnection`       | A Site-to-Site VPN endpoint              |
+| `CreateAccelerator`         | Global Accelerator                       |
+
+Same rate, same usage type, six completely different remediations. Group by usage type and you
+learn _how much_; group by operation and you learn _which team to talk to_.
+
+It runs the other way too. On EC2 the operation carries the software licence, so the operation
+string is what separates one instance rate from another: `RunInstances` is Linux,
+`RunInstances:0002` is license-included Windows, `RunInstances:0800` is Windows BYOL, and
+`RunInstances:0006` is Windows plus license-included SQL Server Standard. Filter on the usage
+type alone and you have merged four different prices into one bucket.
+
+## What it costs
+
+For this article, what it costs is what the fields actually say. There are two places to read
+them, and they are not the same product.
+
+|                   | Cost Explorer                                 | Cost and Usage Report                            |
+| ----------------- | --------------------------------------------- | ------------------------------------------------ |
+| Lives             | Console and API                               | CSV or Parquet delivered to an S3 bucket you own |
+| Grain             | Daily and monthly for 14 months by default    | Hourly, daily, or monthly line items             |
+| Depth             | Filter and group by a fixed set of dimensions | Every column AWS has, including resource IDs     |
+| Reach for it when | "What went up last week?"                     | "Which bucket, which hour, which operation?"     |
+
+Cost Explorer's extras are opt-in and metered: multi-year data at monthly grain goes back 38
+months, hourly granularity covers the last 14 days and is billed at $0.01 per 1,000 usage
+records per month, and resource-level daily data has to be enabled per service. The CUR is
+delivered at least once a day and is meant to be queried — Athena, Redshift, QuickSight — not
+read.
+
+### The fields worth knowing
+
+| Field                          | What it holds                                                                                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lineItem/UsageType`           | The decoded string above. Your primary key for "what is this."                                                                                                              |
+| `lineItem/Operation`           | The specific AWS operation this line covers.                                                                                                                                |
+| `lineItem/LineItemType`        | The charge type. See below — this is the one people skip.                                                                                                                   |
+| `lineItem/LineItemDescription` | Prose. The only place credits and refunds explain themselves.                                                                                                               |
+| `lineItem/ProductCode`         | The service, e.g. `AmazonEC2`.                                                                                                                                              |
+| `lineItem/ResourceId`          | The instance, bucket, volume, or function — **if you enabled it**.                                                                                                          |
+| `lineItem/UsageAmount`         | The quantity the rate multiplies.                                                                                                                                           |
+| `lineItem/UnblendedCost`       | Rate times amount. The number you actually paid.                                                                                                                            |
+| `lineItem/UsageAccountId`      | Which member account incurred it.                                                                                                                                           |
+| `product/*`                    | Metadata: `product/region`, `product/instanceType`, `product/servicecode`, `product/ProductName`, `product/operation`. Present only when the month generated data for them. |
+| `bill/BillingEntity`           | `AWS` or `AWS Marketplace`.                                                                                                                                                 |
+| `bill/InvoicingEntity`         | Which AWS legal entity issued the invoice.                                                                                                                                  |
+
+Two caveats on those names. `lineItem/ResourceId` is blank for usage types that have no
+instantiated resource behind them — data transfer, API requests — and blank for discounts,
+credits and taxes, by design. And CUR 2.0 renames every column to snake case:
+`lineItem/UsageType` becomes `line_item_usage_type`, `product/instanceType` becomes
+`product_instance_type`. Same data, different spelling, and query code written against one
+will not run against the other.
+
+### Charge types, because a bill is not only usage
+
+`lineItem/LineItemType` is the field that explains why your total does not equal the sum of the
+meters. AWS documents these values:
+
+| Value                                               | What it is                                                                |
+| --------------------------------------------------- | ------------------------------------------------------------------------- |
+| `Usage`                                             | Metered usage at On-Demand rates. The three meters live here.             |
+| `Tax`                                               | VAT, US sales tax, and the like. Added on top; no meter turned.           |
+| `Credit`                                            | Credits AWS applied. Negative. Read the description column for why.       |
+| `Refund`                                            | Money AWS gave back. Negative.                                            |
+| `Fee`                                               | An upfront annual fee — an All Upfront or Partial Upfront reservation.    |
+| `RIFee`                                             | The _monthly recurring_ fee for a reservation. Posted even when it is $0. |
+| `DiscountedUsage`                                   | Usage that a Reserved Instance covered. Its `UnblendedRate` is zero.      |
+| `SavingsPlanCoveredUsage`                           | On-Demand cost that a Savings Plan absorbed.                              |
+| `SavingsPlanNegation`                               | The matching negative line that cancels it out.                           |
+| `SavingsPlanUpfrontFee` / `SavingsPlanRecurringFee` | What you actually paid for the plan.                                      |
+| `BundledDiscount`, `Discount`                       | Usage-based and negotiated discounts. Negative.                           |
+
+The Bills console uses friendlier names for the same idea — `DiscountedUsage` shows up as
+"Reservation applied usage", `RIFee` as "Recurring reservation fee" — and the console also
+uses a **Subscription** charge type for out-of-cycle one-time and recurring fees, which has no
+identically-named counterpart in the CUR. Expect the vocabulary to shift as you move between
+the console, Cost Explorer's `RECORD_TYPE`, and the report.
+
+Three consequences follow, and they are the reason a naive `SUM()` misleads:
+
+1. **Savings Plans double-post.** Covered usage appears at its full On-Demand cost, then a
+   `SavingsPlanNegation` line removes it. Filter to `Usage` only and you will miss both, and
+   your Savings Plan spend as well.
+2. **Reservations bill on the calendar, not on the workload.** An upfront `Fee` lands the day
+   you buy, and `RIFee` lands on the first of each period. Neither is proportional to anything
+   that ran that day.
+3. **Tax is not usage.** It has no usage type and no meter. It arrives at the end.
+
+Cost Explorer's amortized view exists precisely to undo point 2: it spreads upfront commitments
+across the term, so a $365 one-year All Upfront Savings Plan shows as $1 of amortized cost per
+day rather than $365 on one day.
+
+## Traps
+
+**Blended cost is not what you paid.** Unblended cost is your account's own usage at your
+account's own rate — the cash number. Blended cost is that same usage priced at the
+organization-wide average rate, allocated back to you. AWS's own worked example: an
+organization stores 95 TB of S3 Standard across four accounts, pays $6,720 because tiering
+applies once across the whole org, and every account is then shown a blended rate of
+$0.070737/GB — a rate no member account ever paid, because no member account bought at that
+tier. (Those tier prices are AWS's illustration, not a current rate card.) AWS shows member
+accounts unblended costs by default. If a "blended" annotation appears on a line, treat it as
+informational and go back to `lineItem/UnblendedCost`.
+
+**Consolidated billing means your account has no free tier of its own.** For billing purposes
+AWS treats every account in an organization as a single account. Member accounts do not reach
+tier thresholds individually — usage is aggregated org-wide before tiers are applied, and AWS
+applies the free tier to total usage across all accounts rather than to each account. This is
+good news at the org level and confusing at the account level: spin up a brand-new sandbox
+account inside a mature organization and it starts paying for egress on its first gigabyte,
+because the org burned the free allowance on the first of the month. Nothing is wrong. The
+tier was never yours.
+
+**Some charges were not priced by AWS.** Check `bill/BillingEntity`: `AWS Marketplace` means a
+third party set that amount and AWS is collecting it. Marketplace pay-as-you-go accumulates
+into a monthly usage invoice, but one-time fees, recurring fees and payment schedules are
+invoiced _out of cycle_ — a separate invoice on its own date, appearing in the console under a
+Subscription charge type. `bill/InvoicingEntity` may also name a different AWS legal entity
+than you expect: AWS Inc., AWS India Private Limited, AWS South Africa, and others each issue
+their own invoices. A bill that "arrived on the wrong day for the wrong amount from the wrong
+company" is usually all three of these at once, and entirely normal.
+
+**Resource IDs are off until you turn them on.** The CUR only carries
+`lineItem/ResourceId` if you selected "Include resource IDs" when you created the report, and
+Cost Explorer only shows resource-level data for services you explicitly enabled, for the last
+14 days. Neither is retroactive. The month you need it is the month you did not have it.
+
+---
+
+Once a line item resolves into fields, the rest of this site becomes usable. The family part of
+the usage type usually names the unit, and the unit names the meter: `-Hrs` and `-Hours` and
+`BoxUsage` are **time**, `-Bytes` and `-ByteHrs` and `-Scanned` are **bytes**, `Requests-` and
+`-Units` are **units**. It is a heuristic, not a rule — `TimedStorage-ByteHrs` is bytes held
+over time and bills as a GB-month, and plenty of names carry no unit at all — so when a string
+resists, look it up on the service page rather than guessing.
+
+The point of getting there is that the meter names the lever. Time falls when the thing stops
+existing. Bytes fall when the boundary moves or the path loses a box. Units fall when you ask
+fewer times. Everything else on the bill — tax, credits, reservation fees, someone else's
+software — is arithmetic layered on top of those three, and none of it is a lever you can pull
+with code.

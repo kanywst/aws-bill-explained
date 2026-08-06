@@ -1,0 +1,142 @@
+---
+title: 請求書の1行の読み方
+short: 請求書
+oneLiner: 1行は usage type と operation と charge type でできている。文法を知れば読める。
+meters: []
+order: 5
+checked: 2026-08-06
+---
+
+## なぜそうなるのか
+
+請求書のどの行も、人間に読ませるために書かれていない。あれは計測システムが吐いたレコードで、フィールドの中身は計測システム側の語彙だ。どのメーターが回ったのか、どのリージョンで、どの API 呼び出しに対して、どの価格ルールで。だから `USW2-BoxUsage:m2.2xlarge` は意地悪で難読にしてあるわけではない。複数の事実を1本の文字列に詰めただけで、AWS 自身がこの例を「US West (Oregon) リージョンの M2 High Memory Double Extra Large インスタンス」と訳している。
+
+名前ではなくフィールドの並びとして見る。それだけで一目で解ける。
+
+### usage type の構造
+
+usage type は「リージョン接頭辞 + ファミリ + 任意のバリアント」。順番は固定。
+
+| 部品             | 例            | 意味                                                                             |
+| ---------------- | ------------- | -------------------------------------------------------------------------------- |
+| リージョン接頭辞 | `USW2-`       | どこでメーターが回ったか。あるときは必ず先頭。                                   |
+| ファミリ         | `BoxUsage`    | どのメーターか。インスタンス時間、保管バイト時間、リクエスト。                   |
+| バリアント       | `:m2.2xlarge` | そのメーターのどの種類か。インスタンスタイプ、ストレージクラス、リクエスト階層。 |
+
+**リージョン接頭辞は短縮コードで、リージョン名から機械的に導出できない。**完全な対応表は Regions and Availability Zones のガイドにある。よく見るものと、罠になるものを抜粋する。
+
+| 短縮コード | リージョン                                            |
+| ---------- | ----------------------------------------------------- |
+| `USE1`     | `us-east-1` バージニア北部                            |
+| `USE2`     | `us-east-2` オハイオ                                  |
+| `USW2`     | `us-west-2` オレゴン                                  |
+| `EU`       | `eu-west-1` アイルランド — 数字なし。一番古いコード   |
+| `EUC1`     | `eu-central-1` フランクフルト                         |
+| `APN1`     | `ap-northeast-1` 東京                                 |
+| `APS1`     | `ap-southeast-1` シンガポール                         |
+| `APS3`     | `ap-south-1` ムンバイ — `ap-southeast-3` **ではない** |
+| `APS4`     | `ap-southeast-3` ジャカルタ                           |
+
+`USE2-DataTransfer-Out-Bytes` はオハイオからインターネットへ。`EUC1-EBS:VolumeUsage.gp3` はフランクフルトの gp3 ボリューム。`USW2-EBS:SnapshotUsage` はオレゴンのスナップショット保管。
+
+**接頭辞がない = us-east-1。** AWS は S3 のドキュメントでこれを明記している。バージニア北部だけは接頭辞が省略されるので、`USE1-TimedStorage-ByteHrs` ではなく `TimedStorage-ByteHrs` と出る。このページで一番使える復号ルールがこれだ。素の `Requests-Tier1` は一見リージョン非依存に見えるが、実体は「一番使っているリージョンが名前を隠しているだけ」なので。
+
+接頭辞が2つ並んでいたらリージョンが2つ、送信元が先。`APE1-USE1-AWS-In-Bytes` はバージニア北部から香港への高速転送。`PublicIPv4:IdleAddress` や `Global-Bucket-Hrs` のようにグローバルなものには接頭辞が付かない。メーター自体にリージョンの概念がないからだ。
+
+### usage type と operation は別物
+
+列が2つあるのは、答える質問が2つ違うから。
+
+- **usage type** は「どのメーターが回ったか」に答える。レートが紐づいているのはこっち。
+- **operation** は「何をしてそれを回したか」に答える。AWS の定義は「この行が対象とする具体的な AWS のオペレーション」で、たいてい API 名の形をしている。`RunInstances`、`PutObject`、`ListBucket`。
+
+**1つの usage type が複数の operation を抱えるのが普通だ。**無関係な複数の経路が同じメーターに合流するから。一番わかりやすいのがパブリック IPv4 で、usage type `PublicIPv4:InUseAddress` は「そのアドレスを何が握っているか」で operation が枝分かれする。
+
+| operation                   | アドレスを握っているもの          |
+| --------------------------- | --------------------------------- |
+| `RunInstances`              | VPC 内の EC2 のパブリック IPv4    |
+| `AssociateAddressVPC`       | リソースが紐づいている Elastic IP |
+| `AllocateAddressVPC`        | 何も紐づいていない遊休 Elastic IP |
+| `DescribeNetworkInterfaces` | サービス管理のパブリック IPv4     |
+| `CreateVpnConnection`       | Site-to-Site VPN のエンドポイント |
+| `CreateAccelerator`         | Global Accelerator                |
+
+レートも usage type も同じ。なのに打つ手は6通り全部違う。usage type で束ねると **いくらか** がわかり、operation で束ねると **誰に話をしに行くか** がわかる。
+
+逆方向もある。EC2 では operation 側がソフトウェアライセンスを持っているので、同じ `BoxUsage` でも operation 文字列が単価を分ける。`RunInstances` は Linux、`RunInstances:0002` はライセンス込み Windows、`RunInstances:0800` は Windows の BYOL、`RunInstances:0006` は Windows + ライセンス込み SQL Server Standard。usage type だけでフィルタすると、4つの違う値段を1つのバケツに混ぜたことになる。
+
+## で、いくらなの
+
+この記事に限っては「いくら」ではなく「フィールドが実際に何と言っているか」。読む場所は2つあり、この2つは別製品だ。
+
+|            | Cost Explorer                        | Cost and Usage Report                       |
+| ---------- | ------------------------------------ | ------------------------------------------- |
+| 置き場所   | コンソールと API                     | 自分の S3 バケットに届く CSV / Parquet      |
+| 粒度       | 既定で14か月分の日次・月次           | 時間単位・日次・月次の行                    |
+| 深さ       | 決まった次元でのフィルタとグループ化 | AWS が持つ全カラム。リソース ID を含む      |
+| 使いどころ | 「先週何が上がった?」                | 「どのバケットの、何時の、どの operation?」 |
+
+Cost Explorer の追加分はオプトインかつ従量だ。月次粒度の多年データは38か月まで遡れ、時間単位の粒度は直近14日分で使用レコード1,000件あたり月 $0.01、日次のリソースレベルデータはサービスごとに有効化がいる。CUR のほうは1日1回以上配信され、そもそも読むものではなく **クエリするもの** として設計されている（Athena、Redshift、QuickSight）。
+
+### 覚えておく価値のあるフィールド
+
+| フィールド                     | 中身                                                                                                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lineItem/UsageType`           | 上で分解した文字列。「これは何なのか」の主キー。                                                                                                                |
+| `lineItem/Operation`           | この行が対象とする具体的なオペレーション。                                                                                                                      |
+| `lineItem/LineItemType`        | charge type。みんなが飛ばすのがここ。                                                                                                                           |
+| `lineItem/LineItemDescription` | 散文。クレジットや返金が自分で説明してくれる唯一の列。                                                                                                          |
+| `lineItem/ProductCode`         | サービス。`AmazonEC2` など。                                                                                                                                    |
+| `lineItem/ResourceId`          | インスタンス / バケット / ボリューム / 関数。**有効化していれば。**                                                                                             |
+| `lineItem/UsageAmount`         | レートを掛ける数量。                                                                                                                                            |
+| `lineItem/UnblendedCost`       | レート × 数量。実際に払った額。                                                                                                                                 |
+| `lineItem/UsageAccountId`      | どのメンバーアカウントが使ったか。                                                                                                                              |
+| `product/*`                    | メタデータ。`product/region`、`product/instanceType`、`product/servicecode`、`product/ProductName`、`product/operation`。その月にデータが出たときだけ存在する。 |
+| `bill/BillingEntity`           | `AWS` か `AWS Marketplace` か。                                                                                                                                 |
+| `bill/InvoicingEntity`         | 請求書を発行した AWS の法人。                                                                                                                                   |
+
+注意が2つ。`lineItem/ResourceId` は、実体を持たない usage type（データ転送、API リクエスト）では空になる。割引・クレジット・税も仕様として空だ。もう1つ、CUR 2.0 は全カラム名をスネークケースに改名した。`lineItem/UsageType` は `line_item_usage_type`、`product/instanceType` は `product_instance_type`。データは同じで綴りが違う。片方向けに書いたクエリはもう片方では動かない。
+
+### 請求書は使用量だけではない — charge type
+
+合計がメーターの総和にならない理由を説明しているのが `lineItem/LineItemType` だ。AWS が定義している値。
+
+| 値                                                  | 何か                                                                          |
+| --------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `Usage`                                             | オンデマンドレートで計測された使用量。3つのメーターが住んでいるのはここだけ。 |
+| `Tax`                                               | VAT や売上税。上に乗るだけで、メーターは回っていない。                        |
+| `Credit`                                            | AWS が適用したクレジット。マイナス。理由は description 列を読む。             |
+| `Refund`                                            | 返金。マイナス。                                                              |
+| `Fee`                                               | 前払いの年間費用。All Upfront / Partial Upfront のリザーブドなど。            |
+| `RIFee`                                             | リザーブドの **月次の** 経常費用。$0 のときも行だけは立つ。                   |
+| `DiscountedUsage`                                   | リザーブドインスタンスが吸収した使用量。`UnblendedRate` はゼロ。              |
+| `SavingsPlanCoveredUsage`                           | Savings Plans が吸収したオンデマンド費用。                                    |
+| `SavingsPlanNegation`                               | それを打ち消す対の負の行。                                                    |
+| `SavingsPlanUpfrontFee` / `SavingsPlanRecurringFee` | Savings Plans に実際に払った額。                                              |
+| `BundledDiscount` / `Discount`                      | 使用量連動の割引と交渉済み割引。マイナス。                                    |
+
+Bills コンソールは同じものを別の名前で呼ぶ。`DiscountedUsage` は「Reservation applied usage」、`RIFee` は「Recurring reservation fee」。さらにコンソールには **Subscription** という charge type があり、これはサイクル外の一時金・経常費用に付くもので、CUR 側に同名の対応物がない。コンソールと Cost Explorer の `RECORD_TYPE` と CUR を行き来すると語彙がずれる、と思っておくのが正しい。
+
+ここから3つの帰結が出る。素朴に `SUM()` すると外すのはこのせいだ。
+
+1. **Savings Plans は二重に立つ。** カバーされた使用量はフルのオンデマンド価格で1行立ち、`SavingsPlanNegation` の行がそれを消す。`Usage` だけに絞ると両方とも見落とし、ついでに Savings Plans 本体の支払いも見落とす。
+2. **リザーブドはワークロードではなくカレンダーで請求される。** 前払いの `Fee` は買った日に落ち、`RIFee` は各期間の初日に落ちる。どちらもその日に動いたものと比例していない。
+3. **税は使用量ではない。** usage type もメーターも持たない。最後に足されるだけ。
+
+Cost Explorer の amortized ビューは 2 を打ち消すために存在する。前払いのコミットメントを期間全体に均すので、1年 All Upfront の $365 の Savings Plans は「ある1日に $365」ではなく「1日 $1」として見える。
+
+## 例外と罠
+
+**blended cost は払った額ではない。** unblended cost は「自分のアカウントの使用量 × 自分のアカウントのレート」で、これが現金の数字。blended cost は同じ使用量を **組織全体の平均レート** で値付けして按分し直したものだ。AWS 自身の計算例がわかりやすい。4アカウントの組織が S3 Standard に合計 95TB を置くと、階層が組織単位で一度だけ適用されるので支払いは $6,720 になる。そして各アカウントには blended rate $0.070737/GB が表示される — どのメンバーアカウントも一度も払っていないレートだ。その階層で買ったアカウントが存在しないので。（この階層単価は AWS のドキュメント上の例であって、現在の価格表ではない。）AWS は既定でメンバーアカウントに unblended を見せる。行に "blended" の注記が付いていたら参考値として扱い、`lineItem/UnblendedCost` に戻ること。
+
+**一括請求下では、自分のアカウントに無料枠は存在しない。** 請求上、AWS は組織内の全アカウントを1つのアカウントとして扱う。メンバーアカウントが単独で階層のしきい値に到達することはなく、使用量は組織全体で合算されてから階層が適用される。無料枠も各アカウントではなく組織の合計に対して適用される。組織レベルでは得をしていて、アカウントレベルでは混乱する。成熟した組織の中に真っさらなサンドボックスアカウントを1つ作ると、そのアカウントは **最初の 1GB から** 転送料を払い始める。組織が月初に無料枠を焼き切っているからだ。壊れてはいない。その枠は最初から自分のものではなかった。
+
+**AWS が値段を決めていない行がある。** `bill/BillingEntity` を見る。`AWS Marketplace` なら金額を決めたのは第三者で、AWS は集金しているだけだ。Marketplace の従量課金は月次の usage invoice に積み上がるが、一時金・経常費用・支払スケジュールは **サイクル外** で請求される。独立した日付の独立した請求書で、コンソールでは Subscription という charge type で出る。`bill/InvoicingEntity` が想定と違う AWS 法人を指していることもある。AWS Inc.、AWS India Private Limited、AWS South Africa などがそれぞれ自分の名前で請求書を発行する。「変な日に、変な金額で、変な会社から請求書が来た」はたいていこの3つが同時に起きているだけで、完全に正常。
+
+**リソース ID は有効化するまで付かない。** CUR にリソース ID が載るのは、レポート作成時に「Include resource IDs」を選んだ場合だけ。Cost Explorer のリソースレベルデータも、明示的に有効化したサービスの直近14日分だけ。どちらも遡及しない。必要になる月は、たいてい有効化していなかった月だ。
+
+---
+
+1行がフィールドに分解できるようになると、このサイトの残りが使えるようになる。usage type のファミリ部分はたいてい単位を名乗っていて、単位はメーターを名乗っている。`-Hrs` / `-Hours` / `BoxUsage` は **時間**、`-Bytes` / `-ByteHrs` / `-Scanned` は **バイト**、`Requests-` / `-Units` は **個数**。ただしこれは経験則であってルールではない。`TimedStorage-ByteHrs` はバイトを時間で保持して GB-month で課金されるし、単位を名乗らない名前も山ほどある。読めない文字列に当たったら推測せずサービスページを引くこと。
+
+そこまで辿り着く意味は、メーターがそのままレバーの名前になっている点にある。時間は、その物が存在しなくなったときに落ちる。バイトは、境界を動かすか経路から装置を1つ減らしたときに落ちる。個数は、頼む回数を減らしたときに落ちる。請求書のそれ以外 — 税、クレジット、リザーブドの費用、他人のソフトウェア — はこの3つの上に乗った算術であって、コードで引けるレバーではない。
