@@ -38,6 +38,15 @@ export type Confidence = 'high' | 'medium';
 export const MAX_ONE_LINER = 120;
 export const MAX_TRAP = 220;
 
+/**
+ * Sources must be AWS's own words. The site's entire claim is that each
+ * classification is backed by a primary page, so this belongs in the model
+ * rather than in a test over the committed data — a test only catches a bad
+ * record after somebody has written it down.
+ */
+const AWS_SOURCE =
+  /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//;
+
 export class InvalidServiceError extends Error {
   constructor(slug: string, reason: string) {
     super(`Service "${slug}": ${reason}`);
@@ -57,6 +66,11 @@ export interface ServiceProps {
   sources: readonly string[];
   /** ISO date the classification was last checked against AWS documentation. */
   checked: string;
+  /**
+   * True when the source data named meters this model does not recognise, so
+   * the meter set below is incomplete rather than empty.
+   */
+  unclassified?: boolean;
 }
 
 export class Service {
@@ -70,6 +84,7 @@ export class Service {
   readonly confidence: Confidence;
   readonly sources: readonly string[];
   readonly checked: string;
+  readonly unclassified: boolean;
 
   constructor(props: ServiceProps) {
     const id = props.slug.value;
@@ -110,6 +125,14 @@ export class Service {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(props.checked) || Number.isNaN(Date.parse(props.checked))) {
       throw new InvalidServiceError(id, `checked date "${props.checked}" is not an ISO date`);
     }
+    if (props.sources.length === 0) {
+      throw new InvalidServiceError(id, 'has no source');
+    }
+    for (const source of props.sources) {
+      if (!AWS_SOURCE.test(source)) {
+        throw new InvalidServiceError(id, `source "${source}" is not an AWS-controlled page`);
+      }
+    }
 
     this.slug = props.slug;
     this.name = props.name;
@@ -121,10 +144,22 @@ export class Service {
     this.confidence = props.confidence;
     this.sources = props.sources;
     this.checked = props.checked;
+    this.unclassified = props.unclassified ?? false;
   }
 
+  /**
+   * Free means "turns no meters", which is a claim. An empty meter set can
+   * also mean the parser threw away meter names it did not recognise, and
+   * announcing that as free is the most expensive thing this site could get
+   * wrong — so an unclassified service is never free.
+   */
   get isFree(): boolean {
-    return this.meters.isFree;
+    return !this.unclassified && this.meters.isFree;
+  }
+
+  /** The honest third state: we do not know what this one turns. */
+  get isUnclassified(): boolean {
+    return this.unclassified;
   }
 
   turns(meter: MeterId): boolean {

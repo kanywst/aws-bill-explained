@@ -20,14 +20,15 @@ So the number of times you _ask EC2 to do something_ never appears on your bill.
 
 What does appear is time — every second an instance exists — and bytes that leave.
 
-The asymmetry in that second meter has a physical cause, not just a commercial one.
-Transit and peering links are full duplex, and they are billed on the busier direction
-(typically the 95th percentile of the larger of in and out). Cloud providers are
-overwhelmingly egress-heavy: requests arriving are small, responses leaving are large. The
-inbound direction on those links is capacity AWS has already paid for and is not using, so
-giving it away costs close to nothing. The commercial motive sits on top of that: cheap
-ingress removes the barrier to moving data in, and data that has moved in generates
-storage and compute revenue for years.
+AWS publishes the rates but never explains the asymmetry, so what follows is the standard
+industry account rather than anything AWS has stated. Transit and peering links are full
+duplex and are conventionally billed on the busier direction, and a cloud provider is
+overwhelmingly egress-heavy — requests arriving are small, responses leaving are large.
+On that reading the inbound direction is capacity already paid for and not being used, so
+giving it away costs close to nothing. The commercial motive needs no speculation: cheap
+ingress removes the barrier to moving data in, and data that has moved in earns storage
+and compute revenue for years. Treat the first half as a plausible mechanism and the
+second half as the part you can rely on.
 
 <SequenceDiagram
   lang="en"
@@ -51,16 +52,16 @@ storage and compute revenue for years.
 
 ## What it costs
 
-Three lines show up for a plain instance, and only one of them is the instance:
+Four lines show up for a plain instance, and only one of them is the instance:
 
 - **Instance time.** Per second with a 60-second minimum on Amazon Linux, Windows, RHEL,
   Ubuntu and Ubuntu Pro. Other operating systems — SUSE among them — still bill each
   partial hour as a full hour, so the granularity depends on the AMI you chose.
 - **EBS.** Provisioned GB-month, plus IOPS and throughput on the volume types that
   charge for them. This bills on the size you asked for, not the size you used.
-- **Public IPv4.** $0.005 per address-hour since 1 February 2024, charged whether or not
-  the address is attached to anything. Look for `PublicIPv4:InUseAddress` and
-  `PublicIPv4:IdleAddress` in the usage report.
+- **Public IPv4.** $0.005 per address-hour since 1 February 2024. An auto-assigned public
+  address is released when you stop the instance, so that charge does stop; an Elastic IP
+  does not, and keeps billing as `PublicIPv4:IdleAddress` until you release it.
 - **Data transfer out.** The first 100 GB per month across all AWS services is free;
   beyond that, roughly $0.09/GB to the internet on the first tier.
 

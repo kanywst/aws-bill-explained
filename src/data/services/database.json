@@ -132,7 +132,7 @@
     "category": "database",
     "meters": ["time", "egress", "calls"],
     "oneLiner": "Instance-hours or NCU-seconds on Serverless, plus storage and per-million I/O.",
-    "trap": "The 30-day limit runs one way. You can move a cluster to I/O-Optimized once every 30 days, then drop back to Standard whenever you like. I/O-Optimized trades the I/O meter for higher instance and storage rates.",
+    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. You can switch between them only once per 30 days, in either direction — unlike Aurora.",
     "billOn": [
       "InstanceUsage",
       "InstanceUsageIOOptimized",
@@ -152,7 +152,7 @@
     "category": "database",
     "meters": ["time", "egress"],
     "oneLiner": "The instance clock runs from create to delete, with storage and backups alongside. I/O only meters on magnetic.",
-    "trap": "Multi-AZ replication traffic between AZs is free. Your app crossing an AZ to reach the DB is not, and that transfer bills on both ends. Multi-AZ also doubles the instance and storage lines.",
+    "trap": "RDS does not charge on its own side of a cross-AZ hop, so an app reaching the DB across an AZ pays the EC2 side twice and the RDS side not at all. Multi-AZ still doubles the instance and storage lines.",
     "billOn": ["InstanceUsage", "Multi-AZUsage", "RDS:GP3-Storage", "RDS:ChargedBackupUsage"],
     "confidence": "high",
     "sources": [

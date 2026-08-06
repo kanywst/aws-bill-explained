@@ -5,7 +5,7 @@
     "category": "storage",
     "meters": ["time", "egress", "calls"],
     "oneLiner": "Stored backups bill per GB-month, restores bill per GB, and cold storage ties data up for three months.",
-    "trap": "Restoring is its own per-GB charge, and the cold-tier restore rate is higher than the warm one. Cold recovery points must be kept 90 days; delete early and you still pay the balance. Item-level restores bill per request.",
+    "trap": "Warm-storage restores are free for EBS, RDS, Aurora and Redshift snapshots, but billed per GB for EFS, DynamoDB, S3 and all cold restores. Cold points carry a 90-day minimum; delete early and you pay the balance.",
     "billOn": [
       "WarmStorage-ByteHrs-EFS",
       "ColdStorage-ByteHrs-EFS",
@@ -59,8 +59,8 @@
     "name": "Amazon Elastic File System (EFS)",
     "category": "storage",
     "meters": ["time", "egress"],
-    "oneLiner": "Storage is only half of it. Under Elastic throughput every GB you read or write gets metered as well.",
-    "trap": "Elastic throughput meters data moving in both directions, not just reads. IA and Archive add a per-GB access fee on reads and on lifecycle transitions, and they round every file up to 128 KiB.",
+    "oneLiner": "Storage is half of it. Under Elastic throughput every GB you read or write is metered too.",
+    "trap": "Elastic throughput meters data both directions, not just reads. IA and Archive add a per-GB access fee, and files under 128 KiB bill as 128 KiB — a floor on small files, not a rounding rule.",
     "billOn": [
       "TimedStorage-ByteHrs",
       "IATimedStorage-ByteHrs",
@@ -220,8 +220,8 @@
     "name": "Amazon S3 Glacier",
     "category": "storage",
     "meters": ["time", "egress", "calls"],
-    "oneLiner": "Parking data is cheap. Getting it back costs a per-GB retrieval fee plus a fee on the restore request.",
-    "trap": "Expedited, Standard and Bulk each move both the per-request and the per-GB rate, and Bulk out of Glacier Flexible Retrieval is free. Delete inside 90 days, or 180 for Deep Archive, and you owe the rest anyway.",
+    "oneLiner": "Cheap to park. Getting it back usually costs per GB and per request — but not always.",
+    "trap": "Bulk retrieval from Glacier Flexible Retrieval is free on both counts, making it the cheapest way out. Expedited and Standard both bill. Delete inside 90 days (180 for Deep Archive) and you owe the balance.",
     "billOn": [
       "TimedStorage-GlacierByteHrs",
       "Standard-Retrieval-Bytes",
@@ -258,9 +258,9 @@
     "slug": "storage-gateway",
     "name": "AWS Storage Gateway",
     "category": "storage",
-    "meters": ["egress"],
-    "oneLiner": "Two meters pointing opposite ways: the gateway fee counts data written up, transfer counts data pulled down.",
-    "trap": "The service fee meters GB written to AWS and caps per gateway per month. Network transfer is the ordinary rule: uploads free, downloads to your gateway charged. The S3 or EBS behind it bills on its own.",
+    "meters": ["time", "egress"],
+    "oneLiner": "Two meters facing opposite ways, plus an hourly fee on the FSx File Gateway type.",
+    "trap": "The gateway fee counts gigabytes written up to AWS. Downloads back to an EC2-hosted gateway in the same Region are free. FSx File Gateway adds a per-hour charge the other types lack.",
     "billOn": ["Uploaded-Bytes", "Retrieval-Bytes", "Gateway-Hrs"],
     "confidence": "medium",
     "sources": [

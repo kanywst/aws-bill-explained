@@ -62,7 +62,7 @@
     "category": "compute",
     "meters": ["time", "egress"],
     "oneLiner": "Instance-seconds are the headline. EBS volumes and public IPv4 addresses ride along, and outbound bytes meter too.",
-    "trap": "Stopping an instance does not stop its EBS or public IPv4 charges; only deleting them does. Cross-AZ traffic is metered on the sender and on the receiver, so one copy shows up as two line items.",
+    "trap": "An auto-assigned public IPv4 is released when you stop the instance, so that charge stops; an Elastic IP keeps billing until released. The EBS volume bills either way. Cross-AZ traffic is metered on both ends.",
     "billOn": [
       "BoxUsage",
       "EBS:VolumeUsage.gp3",
@@ -267,8 +267,8 @@
     "name": "Amazon WorkDocs",
     "category": "compute",
     "meters": ["time", "calls"],
-    "oneLiner": "Seats and storage by the month, plus a meter on the API traffic itself.",
-    "trap": "Read, write, list, search and delete each get their own API call meter, so a chatty sync client can outgrow the seat charge. New sign-ups and account upgrades are closed, and AWS publishes migration steps instead.",
+    "oneLiner": "Shut down. WorkDocs reached end of support on 25 April 2025 and the service is gone.",
+    "trap": "The user guide has been withdrawn and the pricing offer is frozen at 2022. While it ran it billed per user-month, per GB stored and per API call — though deletes were rated at zero. Nothing to migrate to inside AWS.",
     "billOn": ["WorkDocs-UserHrs", "WorkDocs-StorageByteHrs", "WorkDocs-ReadAPICalls"],
     "confidence": "high",
     "sources": [

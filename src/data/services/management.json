@@ -109,7 +109,7 @@
     "category": "management",
     "meters": ["time", "calls"],
     "oneLiner": "Free for AWS:: and Alexa:: types. Third-party extensions and Hooks bill per handler operation.",
-    "trap": "Handler operations get a monthly free allowance per account per Region, then bill per operation plus per second beyond thirty. The stack contents are the real cost, and orphans outlive a failed delete.",
+    "trap": "Handler operations get 1,000 free per account per month, then bill per operation plus per second beyond thirty. The stack contents are the real cost, and orphans outlive a failed delete.",
     "billOn": ["Resource-Invocation-Count", "Resource-Processing-Time", "Hook-Invocation-Count"],
     "confidence": "high",
     "sources": [
@@ -192,8 +192,8 @@
     "name": "Amazon CloudWatch Metrics",
     "category": "management",
     "meters": ["time", "calls"],
-    "oneLiner": "AWS-published metrics are free. Metrics you publish rent monthly, and the bulk read APIs bill on top.",
-    "trap": "Billing counts every unique dimension combination as its own custom metric, so one high-cardinality dimension mints thousands. GetMetricData sits outside the free request tier entirely.",
+    "oneLiner": "Basic AWS metrics are free. Detailed monitoring and anything you publish yourself rent monthly.",
+    "trap": "Billing counts every unique dimension combination as its own metric, so one high-cardinality dimension mints thousands. EC2 detailed monitoring is AWS-published and still billed.",
     "billOn": ["CW:MetricMonitorUsage", "CW:GMD-Metrics", "CW:Requests", "CW:MetricStreamUsage"],
     "confidence": "high",
     "sources": [
@@ -509,9 +509,9 @@
     "name": "AWS Systems Manager",
     "category": "management",
     "meters": ["time", "egress", "calls"],
-    "oneLiner": "On EC2 the core capabilities cost nothing. Everything that bills sits around the edges.",
-    "trap": "Hybrid, on-premises and multicloud nodes bill through the advanced-instances tier by the hour, moving to per-session and per-invocation pricing on 30 September 2026. Advanced parameters bill monthly each.",
-    "billOn": ["MI-AdvInstances-Hrs", "PS-Advanced-Param-Tier1", "OC-OpsItems-Tier1"],
+    "oneLiner": "Free on EC2, and free on hybrid nodes too since AWS dropped the Advanced Instances Tier.",
+    "trap": "The per-instance charge for on-premises and multicloud nodes ended on 30 June 2026, and Session Manager on them is unbilled until 30 September 2026. Advanced parameters still bill monthly.",
+    "billOn": ["PS-Advanced-Param-Tier1", "OC-OpsItems-Tier1"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/systems-manager/pricing/",

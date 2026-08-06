@@ -42,16 +42,20 @@ const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes' };
 
 /**
  * Defensive parsing lives here rather than in MeterSet, because tolerating junk
- * is a property of the untrusted source, not of the model. Unknown meter
- * strings are dropped so a new AWS billing shape degrades to "we don't know"
- * instead of failing a build.
+ * is a property of the untrusted source, not of the model.
+ *
+ * Dropping an unrecognised meter used to leave an empty set, which the domain
+ * reads as "free" — so a new AWS billing shape degraded not to "we don't know"
+ * but to a confident claim that the service costs nothing. The drop is now
+ * reported alongside the set so the model can tell those two apart.
  */
-const asMeters = (value: unknown): MeterSet => {
-  if (!Array.isArray(value)) return MeterSet.none();
-  const ids = value
-    .map((m) => (typeof m === 'string' ? (METER_ALIASES[m] ?? m) : m))
-    .filter(isMeterId);
-  return MeterSet.of(ids);
+const asMeters = (value: unknown): { meters: MeterSet; dropped: boolean } => {
+  if (!Array.isArray(value)) return { meters: MeterSet.none(), dropped: false };
+
+  const named = value.map((m) => (typeof m === 'string' ? (METER_ALIASES[m] ?? m) : m));
+  const ids = named.filter(isMeterId);
+
+  return { meters: MeterSet.of(ids), dropped: ids.length < named.length };
 };
 
 /** Validates and normalises one raw record. Throws rather than guessing. */
@@ -76,13 +80,16 @@ export function toService(raw: unknown): Service {
     );
   }
 
+  const { meters, dropped } = asMeters(r.meters);
+
   return new Service({
     slug,
     name: r.name,
     category: r.category as CategoryId,
     // Unknown meter strings are dropped rather than thrown on: a new AWS
     // billing shape should degrade to "we don't know" and not break the build.
-    meters: asMeters(r.meters),
+    meters,
+    unclassified: dropped,
     oneLiner: typeof r.oneLiner === 'string' ? r.oneLiner : '',
     trap: typeof r.trap === 'string' ? r.trap : '',
     billOn: asStrings(r.billOn),

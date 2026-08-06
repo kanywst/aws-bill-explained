@@ -114,9 +114,11 @@ describe('Catalogue', () => {
   });
 
   describe('editorial guards', () => {
-    it('surfaces services with no source behind their claims', () => {
-      const c = Catalogue.from([svc('ec2', ['time']), svc('mystery', ['time'], { sources: [] })]);
-      expect(c.unsourced().map((s) => s.slug.value)).toEqual(['mystery']);
+    it('reports no unsourced services, because the model refuses to build one', () => {
+      // Kept as a regression guard: if Service ever stops enforcing sources,
+      // this is the query that has to catch it again.
+      const c = Catalogue.from([svc('ec2', ['time']), svc('lambda', ['calls'])]);
+      expect(c.unsourced()).toEqual([]);
     });
 
     it('surfaces services we are not confident about', () => {

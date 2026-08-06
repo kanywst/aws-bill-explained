@@ -142,7 +142,7 @@
     "category": "networking",
     "meters": ["egress"],
     "oneLiner": "The gateway is free. Egress through it is not.",
-    "trap": "No line item says internet gateway. Outbound lands on DataTransfer-Out-Bytes against the sending service. Inbound really is free, unlike NAT gateway processing, and egress-only IGW carries no fee at all.",
+    "trap": "No line item says internet gateway; outbound lands on DataTransfer-Out-Bytes against the sender. Inbound really is free. An egress-only gateway is free, but IPv6 through it still bills.",
     "billOn": ["DataTransfer-Out-Bytes"],
     "confidence": "high",
     "sources": [
@@ -272,9 +272,9 @@
     "slug": "vpc",
     "name": "Amazon Virtual Private Cloud (VPC)",
     "category": "networking",
-    "meters": [],
-    "oneLiner": "Nothing bills for the VPC itself. Every charge you trace back to it belongs to something you attached.",
-    "trap": "People search for a VPC line item and find none. The spend is NAT gateways, interface endpoints, public IPv4 hours and cross-AZ transfer, each metered under its own usage type.",
+    "meters": ["time"],
+    "oneLiner": "Almost nothing bills for the VPC itself; nearly every charge belongs to something you attached.",
+    "trap": "The exception is Encryption Controls, billed per hour per non-empty VPC — and incurred on any VPC attached to an encryption-capable Transit Gateway whether or not you turned it on.",
     "billOn": [],
     "confidence": "high",
     "sources": [
@@ -289,7 +289,7 @@
     "category": "networking",
     "meters": ["egress"],
     "oneLiner": "Creating the peering costs nothing. Bytes that cross an AZ or a Region boundary do.",
-    "trap": "Traffic staying inside one AZ is free even across accounts. Cross-AZ is metered on both sides, so one GB shows up twice. AWS split those out under VpcPeering usage types in early 2025. Cross-Region bills the sender.",
+    "trap": "Same-AZ peering is free even across accounts. Cross-AZ is metered on both sides, and since April 2025 lands on VpcPeering-In/Out-Bytes rather than DataTransfer-Regional-Bytes.",
     "billOn": ["VpcPeering-In-Bytes", "VpcPeering-Out-Bytes", "DataTransfer-Regional-Bytes"],
     "confidence": "high",
     "sources": [

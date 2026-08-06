@@ -85,7 +85,7 @@
     "category": "integration",
     "meters": ["egress", "time"],
     "oneLiner": "Billed on bytes ingested rather than bytes delivered, with no shards to provision.",
-    "trap": "Direct PUT rounds every record up to 5KB before billing, so a million 1KB records bill as 5GB. Format conversion, dynamic partitioning and VPC delivery each add their own charge on top.",
+    "trap": "Direct PUT rounds each record up to the next 5KB multiple, so a 12KB record bills as 15KB and a million 1KB records bill as 5GB. MSK and vended logs as sources skip the rounding entirely.",
     "billOn": ["BilledBytes", "DPBytesDelivered", "Firehose-VpcDelivery-Hours"],
     "confidence": "high",
     "sources": [
@@ -148,9 +148,9 @@
     "slug": "iot-events",
     "name": "AWS IoT Events",
     "category": "integration",
-    "meters": ["time", "calls"],
-    "oneLiner": "Active alarms bill by the month; inbound messages bill by evaluation.",
-    "trap": "An alarm counts as active and bills for the month even if it never trips once, separate from the per-evaluation message charge. AWS has announced end of support for IoT Events, so nothing new should land here.",
+    "meters": [],
+    "oneLiner": "Gone. Full shutdown on 20 May 2026; new customers were blocked a year earlier.",
+    "trap": "Not merely deprecated: AWS lists it under full shutdown, so it is gone from the portfolio and its pricing page redirects. While it ran, alarms billed monthly and messages per evaluation.",
     "billOn": ["Alarms", "Messages"],
     "confidence": "high",
     "sources": [
@@ -342,7 +342,7 @@
     "category": "integration",
     "meters": ["calls", "time"],
     "oneLiner": "Standard bills per state transition. Express swaps that for a per-start charge plus memory-seconds.",
-    "trap": "Standard counts every transition, retries and Map iterations included, so loops are never free. Express bills duration times memory instead, so a workflow parked on a wait burns GB-seconds.",
+    "trap": "Standard counts every transition, retries included. Distributed Map bills one per iteration, an Inline Map none — so not every loop costs. Express bills duration times memory instead.",
     "billOn": ["StateTransition", "StepFunctions-Request", "StepFunctions-GB-Second"],
     "confidence": "high",
     "sources": [

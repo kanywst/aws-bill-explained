@@ -40,10 +40,50 @@ describe('toService', () => {
     expect(toService({ ...valid, confidence: undefined }).confidence).toBe('medium');
   });
 
+  /**
+   * The bug this guards: dropping every unrecognised meter left an empty set,
+   * and the domain reads an empty set as "free". A new AWS billing shape
+   * therefore degraded not to "we don't know" but to a confident, unsourced
+   * claim that a service costs nothing.
+   */
+  it('does not call a service free just because it could not read its meters', () => {
+    const unknown = toService({ ...valid, meters: ['quantum-flux'] });
+    expect(unknown.isUnclassified).toBe(true);
+    expect(unknown.isFree).toBe(false);
+
+    const genuinelyFree = toService({ ...valid, meters: [] });
+    expect(genuinelyFree.isUnclassified).toBe(false);
+    expect(genuinelyFree.isFree).toBe(true);
+  });
+
+  it('keeps the meters it does recognise while flagging the ones it dropped', () => {
+    const partial = toService({ ...valid, meters: ['time', 'quantum-flux'] });
+    expect(partial.meters.toArray()).toEqual(['time']);
+    expect(partial.isUnclassified).toBe(true);
+    expect(partial.isFree).toBe(false);
+  });
+
+  it('translates the legacy egress spelling without flagging it as dropped', () => {
+    const legacy = toService({ ...valid, meters: ['time', 'egress'] });
+    expect(legacy.meters.toArray()).toEqual(['time', 'bytes']);
+    expect(legacy.isUnclassified).toBe(false);
+  });
+
+  it('refuses a record with no source, since the model now owns that rule', () => {
+    expect(() => toService({ ...valid, sources: [] })).toThrow(/has no source/);
+    expect(() => toService({ ...valid, sources: ['https://evil.example/'] })).toThrow(
+      /not an AWS-controlled page/,
+    );
+  });
+
   it('filters non-string entries out of string arrays', () => {
-    const s = toService({ ...valid, billOn: ['ok', 42, null], sources: [{}, 'https://a'] });
+    const s = toService({
+      ...valid,
+      billOn: ['ok', 42, null],
+      sources: [{}, 'https://aws.amazon.com/x/'],
+    });
     expect(s.billOn).toEqual(['ok']);
-    expect(s.sources).toEqual(['https://a']);
+    expect(s.sources).toEqual(['https://aws.amazon.com/x/']);
   });
 });
 
@@ -108,10 +148,11 @@ describe('the real catalogue', () => {
   });
 
   it('keeps the services we know are free actually free', () => {
-    // CloudFormation is deliberately absent: third-party extensions and Hooks
-    // bill per handler operation, so "CloudFormation is free" is only true of
-    // AWS:: and Alexa:: resource types.
-    for (const slug of ['iam', 'sts', 'organizations', 'vpc', 'ram']) {
+    // Deliberately absent: CloudFormation, because third-party extensions and
+    // Hooks bill per handler operation; and VPC, because Encryption Controls
+    // bills per hour per non-empty VPC and can be incurred without opting in.
+    // Both were on this list until a verification pass showed otherwise.
+    for (const slug of ['iam', 'sts', 'organizations', 'ram', 'gateway-vpc-endpoint']) {
       const service = catalogue.find(slug);
       expect(service, `${slug} missing from catalogue`).toBeDefined();
       expect(service?.isFree, `${slug} should have no meters of its own`).toBe(true);

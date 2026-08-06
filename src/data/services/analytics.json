@@ -17,7 +17,7 @@
     "category": "analytics",
     "meters": ["time", "calls"],
     "oneLiner": "On-demand meters input and output tokens. Provisioned Throughput rents model units by the hour.",
-    "trap": "Provisioned Throughput bills every hour of a one- or six-month commitment with zero invocations. Cache-read and cache-write tokens meter separately from ordinary input, and batch runs at a discount.",
+    "trap": "Provisioned Throughput bills per model unit per hour with zero invocations, with or without a 1- or 6-month commitment. Cache-read and cache-write tokens meter separately; batch runs at a discount.",
     "billOn": [
       "input-tokens",
       "output-tokens",
@@ -199,8 +199,8 @@
     "category": "analytics",
     "meters": ["egress", "calls"],
     "oneLiner": "Permissions and LF-Tags are free. Data filtering and storage optimization are not.",
-    "trap": "Queries routed through the Lake Formation Storage API bill per byte scanned with a 10 MB floor, and the storage optimizer bills bytes processed. Glue, S3 and the query engines bill as usual underneath.",
-    "billOn": ["Scanned-Bytes", "Bytes-Processed", "Metadata-Objects", "API-Requests"],
+    "trap": "Permissions and LF-Tags cost nothing. The storage optimizer belonged to Governed Tables, shut down at the end of 2024, so optimization now bills through the Glue Data Catalog instead.",
+    "billOn": [],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/lake-formation/pricing/",
@@ -259,7 +259,7 @@
     "category": "analytics",
     "meters": ["egress"],
     "oneLiner": "Two per-GB meters: what goes in, and what gets packaged back out.",
-    "trap": "Ingest is metered per GB too, so a high-bitrate contribution feed costs money before a single viewer connects. Origination falls off sharply once a CDN caches segments, which is why AWS pushes CloudFront.",
+    "trap": "Live ingest is metered per GB, so a high-bitrate contribution feed costs money before a viewer connects. VOD has no ingest charge at all — only packaging on the way out.",
     "billOn": ["EMP-ingest-bytes", "EMP-origin-packaging-bytes"],
     "confidence": "high",
     "sources": [

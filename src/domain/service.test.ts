@@ -94,9 +94,18 @@ describe('Service', () => {
     expect(service.turns('calls')).toBe(false);
   });
 
-  it('knows when it has no source behind its claims', () => {
+  it('cannot be built without an AWS source behind its claims', () => {
     expect(build().isSourced).toBe(true);
-    expect(build({ sources: [] }).isSourced).toBe(false);
+    expect(() => build({ sources: [] })).toThrow(/has no source/);
+    expect(() => build({ sources: ['https://blog.example/aws-costs'] })).toThrow(
+      /not an AWS-controlled page/,
+    );
+  });
+
+  it('separates "turns no meters" from "we could not read the meters"', () => {
+    expect(build({ meters: MeterSet.none() }).isFree).toBe(true);
+    expect(build({ meters: MeterSet.none(), unclassified: true }).isFree).toBe(false);
+    expect(build({ meters: MeterSet.none(), unclassified: true }).isUnclassified).toBe(true);
   });
 
   describe('ageInDays', () => {

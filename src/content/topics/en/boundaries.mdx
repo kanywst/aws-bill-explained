@@ -16,9 +16,12 @@ Almost everyone pictures one boundary: inside AWS, and the internet. That mental
 what produces the surprise line item, because there are four rings, not one, and three of
 them cost money to cross.
 
-The rings are nested, and each one is a toll gate in the outward direction only. Traffic
-falling _inward_ — a request arriving, a response coming back from a further-out ring — is
-never charged on its own.
+The rings are nested, and crossing one costs something. Direction matters at the outer
+rings and stops mattering at the inner ones, which is the part that catches people:
+arriving from the internet is free, but crossing an Availability Zone is charged at the
+same rate each way. Anything you put in the middle of the path — a NAT Gateway, an
+interface endpoint — charges for handling the bytes regardless of which way they were
+going.
 
 <BoundaryMap
   lang="en"
@@ -30,7 +33,11 @@ never charged on its own.
       crossing: 'varies',
       note: 'rate depends on the source/destination pair',
     },
-    { label: 'Other AZ, same region', crossing: '$0.01/GB', note: 'charged in each direction' },
+    {
+      label: 'Other AZ, same region',
+      crossing: '$0.01/GB',
+      note: 'each way, so a round trip pays twice',
+    },
     { label: 'Same AZ, private IP', crossing: '$0.00', free: true, note: 'the only free ring' },
   ]}
 />
@@ -50,10 +57,14 @@ because the usage type is what you can actually search for in Cost Explorer:
 - `<Region>-DataTransfer-Out-Bytes` — leaving for the internet. `USE2-DataTransfer-Out-Bytes`
   is Ohio to the internet. A usage type with no region prefix means us-east-1.
 - `<Region>-DataTransfer-Regional-Bytes` — between AZs inside one region. Expect two of
-  these per transfer, one for each side.
+  these per transfer, one for the sender and one for the receiver.
+- `<Region>-VpcPeering-In-Bytes` and `-Out-Bytes` — cross-AZ traffic over a peering
+  connection, split out under their own names since April 2025. Before that it landed on
+  `DataTransfer-Regional-Bytes`, which matters if you are reconciling an older bill.
 
-There is no usage type for data arriving from the internet, because there is no charge for
-it.
+`DataTransfer-In-Bytes` exists too, and it is rated at $0.00 per GB. Inbound from the
+internet is metered and then charged nothing, so you will find the line and it will be
+zero — worth knowing before you go looking for a usage type that "should not be there".
 
 ## Traps
 
@@ -61,10 +72,14 @@ it.
 private subnet in `us-east-1a` talking to a private subnet in `us-east-1b` has crossed a
 toll gate, even though no packet touched a public IP or an internet gateway.
 
-**The device in the middle charges separately from the distance.** Egress is the distance
-fee. NAT Gateways, Transit Gateways, interface endpoints and load balancers each add a
-processing fee per gigabyte on top, and those are billed regardless of direction — inbound
-through a NAT Gateway is _not_ free, even though inbound from the internet is.
+**A box in the path charges on top of the crossing, and not all of them charge alike.**
+A NAT Gateway and an interface endpoint bill per gigabyte processed regardless of
+direction, so inbound through a NAT Gateway is _not_ free even though inbound from the
+internet is. Transit Gateway also bills per gigabyte, but only against whoever sent the
+traffic in, and not at all for traffic arriving from a peering attachment. Load balancers
+are different again: an ALB or NLB has no per-GB fee, only an hourly rate plus capacity
+units, and processed bytes is just one dimension of those — you are billed on whichever
+dimension ran highest, so a chatty low-byte API never touches the byte one.
 
 <PathDiagram
   lang="en"
@@ -80,6 +95,6 @@ through a NAT Gateway is _not_ free, even though inbound from the internet is.
 />
 
 **Free tiers hide the first symptom.** The 100 GB per month of free internet egress is
-aggregated across every AWS service and every region. It is generous enough that a small
+aggregated across all AWS services and regions except China and GovCloud. It is generous enough that a small
 workload never sees a transfer charge, and abrupt enough that the first month you cross it,
 the bill looks like something broke.
