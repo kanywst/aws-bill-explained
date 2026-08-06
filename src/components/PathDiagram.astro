@@ -1,6 +1,16 @@
 ---
 import type { MeterId } from '../domain/meter';
 import { t, type Lang } from '../i18n/strings';
+import {
+  NODE_HEIGHT,
+  NODE_WIDTH,
+  PATH_MID_Y,
+  chipY,
+  layoutHop,
+  nodeX,
+  pathCanvasHeight,
+  pathCanvasWidth,
+} from '../lib/diagram-layout';
 
 /**
  * A network path, drawn so that money is visible before words are read.
@@ -40,41 +50,29 @@ const { nodes, hops, caption, lang = 'en' } = Astro.props;
 const s = t(lang).diagram;
 const meterName = (m: MeterId) => t(lang).meters[m].name;
 
-const NODE_W = 132;
-const NODE_H = 68;
-const GAP = 104;
-const PAD_X = 12;
-const TOP = 74; // lane for left→right
-const BOT = 190; // lane for right→left
-const MID = 128;
+// All geometry comes from src/lib/diagram-layout.ts so it is unit-tested;
+// this file only resolves node ids to indices.
+const NODE_W = NODE_WIDTH;
+const NODE_H = NODE_HEIGHT;
+const MID = PATH_MID_Y;
 
-const x = (i: number) => PAD_X + i * (NODE_W + GAP);
-const cx = (i: number) => x(i) + NODE_W / 2;
+const x = nodeX;
+const cx = (i: number) => nodeX(i) + NODE_W / 2;
 const idx = (id: string) => {
   const i = nodes.findIndex((n) => n.id === id);
-  // Fail the build rather than drawing the hop off-canvas, which is what a -1
-  // index used to do: silently, with no error, in a diagram about money.
   if (i < 0) throw new Error(`PathDiagram: hop references unknown node id "${id}"`);
   return i;
 };
 
-const W = PAD_X * 2 + nodes.length * NODE_W + (nodes.length - 1) * GAP;
-
-// Only reserve the return lane when something actually flows back, otherwise a
-// one-directional diagram carries 90px of dead space under it.
+const W = pathCanvasWidth(nodes.length);
 const hasReturn = hops.some((h) => idx(h.to) < idx(h.from));
-const H = hasReturn ? 250 : 178;
+const H = pathCanvasHeight(hasReturn);
 
-const lanes = hops.map((hop, i) => {
-  const a = idx(hop.from);
-  const b = idx(hop.to);
-  const forward = b > a;
-  const y = forward ? TOP : BOT;
-  // Start and end at the node edges, not the centres.
-  const x1 = forward ? x(a) + NODE_W : x(a);
-  const x2 = forward ? x(b) : x(b) + NODE_W;
-  return { ...hop, key: `${hop.from}-${hop.to}-${i}`, y, x1, x2, forward };
-});
+const lanes = hops.map((hop, i) => ({
+  ...hop,
+  key: `${hop.from}-${hop.to}-${i}`,
+  ...layoutHop(idx(hop.from), idx(hop.to)),
+}));
 ---
 
 <figure class="pd">
@@ -147,7 +145,7 @@ const lanes = hops.map((hop, i) => {
               {hop.cost && (
                 <text
                   x={(hop.x1 + hop.x2) / 2}
-                  y={hop.forward ? hop.y - 30 : hop.y + 26}
+                  y={chipY(hop)}
                   text-anchor="middle"
                   class="pd-cost"
                   fill={stroke}
@@ -156,12 +154,7 @@ const lanes = hops.map((hop, i) => {
                 </text>
               )}
               {!hop.meter && (
-                <text
-                  x={(hop.x1 + hop.x2) / 2}
-                  y={hop.forward ? hop.y - 30 : hop.y + 24}
-                  text-anchor="middle"
-                  class="pd-free"
-                >
+                <text x={(hop.x1 + hop.x2) / 2} y={chipY(hop)} text-anchor="middle" class="pd-free">
                   {s.free}
                 </text>
               )}

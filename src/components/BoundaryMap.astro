@@ -1,5 +1,6 @@
 ---
 import { t, type Lang } from '../i18n/strings';
+import { layoutRings } from '../lib/diagram-layout';
 
 /**
  * Concentric billing boundaries.
@@ -35,27 +36,17 @@ interface Props {
 const { rings, caption, lang = 'en' } = Astro.props;
 const s = t(lang).diagram;
 
-const W = 700;
-const STEP_X = 68;
-const STEP_Y = 48;
-const INNER_H = 62; // height of the innermost ring
-const MARGIN_X = 16;
-const MARGIN_TOP = 14;
-const LEGEND_H = 30;
-
-const n = rings.length;
-// Derive the canvas from the innermost ring outward, so the centre is always a
-// real box. Deriving it the other way round is what collapses inner rings to a
-// negative height once the ring count grows.
-const ringsH = INNER_H + 2 * STEP_Y * (n - 1);
-const H = MARGIN_TOP + ringsH + LEGEND_H;
+// Geometry comes from src/lib/diagram-layout.ts so it is unit-tested.
+const { canvas, rings: boxes } = layoutRings(rings.length);
+const W = canvas.width;
+const H = canvas.height;
 
 const geom = rings.map((r, i) => ({
   ...r,
-  x: MARGIN_X + i * STEP_X,
-  y: MARGIN_TOP + i * STEP_Y,
-  w: W - MARGIN_X * 2 - i * STEP_X * 2,
-  h: ringsH - i * STEP_Y * 2,
+  x: boxes[i]!.x,
+  y: boxes[i]!.y,
+  w: boxes[i]!.width,
+  h: boxes[i]!.height,
   colour: r.free ? 'var(--unlit)' : 'var(--m-bytes)',
 }));
 ---
