@@ -20,7 +20,7 @@ const { active, size = 'sm', lang = 'en' } = Astro.props;
 const copy = t(lang);
 ---
 
-<ul class:list={['lamps', `is-${size}`]}>
+<ul class:list={['lamps', `is-${size}`]} aria-label={copy.a11y.metersLabel}>
   {
     METER_ORDER.map((id) => {
       const on = active.includes(id);
@@ -69,13 +69,13 @@ const copy = t(lang);
   }
 
   .lamp.is-on {
-    color: var(--meter);
+    color: var(--meter-ink);
     border-color: color-mix(in oklab, var(--meter) 40%, var(--border));
   }
 
   .lamp.is-on i {
     background: var(--meter);
-    border-color: var(--meter);
+    border-color: var(--meter-ink);
     box-shadow: none;
   }
 

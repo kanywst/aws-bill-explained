@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { METER_ORDER } from '../domain/meter';
 import { loadCatalogue } from '../infrastructure/service-repository';
+import type { Service } from '../domain/service';
 import { localePath, t, type Lang } from '../i18n/strings';
 
 interface Props {
@@ -14,6 +15,17 @@ const catalogue = loadCatalogue();
 
 const counts = catalogue.countByMeter();
 const categories = catalogue.categories();
+
+/** The lamps are aria-hidden, so the classification must exist as text too. */
+const meterSummary = (service: Service) => {
+  if (service.isFree) return s.a11y.freeService;
+  const name = (m: (typeof METER_ORDER)[number]) => s.meters[m].name;
+  const billed = METER_ORDER.filter((m) => service.turns(m)).map(name);
+  const unbilled = METER_ORDER.filter((m) => !service.turns(m)).map(name);
+  const parts = [s.a11y.billedOn.replace('{billed}', billed.join(', '))];
+  if (unbilled.length) parts.push(s.a11y.notBilledOn.replace('{unbilled}', unbilled.join(', ')));
+  return parts.join(' ');
+};
 ---
 
 <Base title={`${s.services.title} — ${s.siteTitle}`} lang={lang}>
@@ -23,7 +35,7 @@ const categories = catalogue.categories();
     <p class="si-lede">{s.services.lede}</p>
 
     <!-- Filtering is a client concern; the counts come from the domain. -->
-    <div class="si-filters" role="group">
+    <div class="si-filters" role="group" aria-label={s.a11y.filterLabel}>
       <button type="button" class="si-chip is-on" data-filter="all" aria-pressed="true">
         {s.services.filterAll}
         <span class="si-n">{catalogue.size}</span>
@@ -41,6 +53,8 @@ const categories = catalogue.categories();
         <span class="si-n">{catalogue.free().length}</span>
       </button>
     </div>
+
+    <p class="sr" role="status" aria-live="polite" data-count data-template={s.a11y.showing}></p>
 
     {
       categories.map((category) => (
@@ -62,7 +76,10 @@ const categories = catalogue.categories();
                       ))}
                     </span>
                   </span>
-                  <span class="si-one">{service.oneLiner}</span>
+                  <span class="sr">{meterSummary(service)}</span>
+                  <span class="si-one" lang={lang === 'en' ? undefined : 'en'}>
+                    {service.oneLiner}
+                  </span>
                 </a>
               </li>
             ))}
@@ -119,16 +136,22 @@ const categories = catalogue.categories();
     border-color: var(--meter, var(--text-faint));
   }
 
+  /* Dark ink on the brand fill: white on AWS orange is only 2.14:1, while
+     #0f141a on it is 8.64:1. The blue and red chips keep white. */
   .si-chip.is-on {
     background: var(--meter, var(--squid-ink));
     border-color: var(--meter, var(--squid-ink));
     color: var(--on-dark);
   }
 
+  .si-chip.meter-time.is-on {
+    color: var(--text);
+  }
+
   .si-n {
     font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
   .si-cat {
@@ -200,16 +223,28 @@ const categories = catalogue.categories();
     flex: none;
   }
 
+  /* The off state is a visible ring, not a near-invisible one. Without a
+     legible empty slot the positional encoding is lost: two lit dots could be
+     time+bytes or bytes+calls and there is no way to tell which. */
   .si-lamps i {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--unlit);
   }
 
   .si-lamps i.is-on {
     background: var(--meter);
     border-color: var(--meter);
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .si-one {
@@ -236,6 +271,14 @@ const categories = catalogue.categories();
     for (const group of groups) {
       const visible = group.querySelectorAll('.si-item:not([hidden])').length;
       group.hidden = visible === 0;
+    }
+
+    const status = document.querySelector<HTMLElement>('[data-count]');
+    if (status) {
+      const shown = document.querySelectorAll('.si-item:not([hidden])').length;
+      status.textContent = (status.dataset.template ?? '')
+        .replace('{shown}', String(shown))
+        .replace('{total}', String(items.length));
     }
   };
 

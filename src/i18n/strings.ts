@@ -115,7 +115,17 @@ interface Strings {
     seeEntry: string;
   };
   oneLiner: string;
-  a11y: { billed: string; notBilled: string };
+  a11y: {
+    billed: string;
+    notBilled: string;
+    metersLabel: string;
+    filterLabel: string;
+    billedOn: string;
+    notBilledOn: string;
+    freeService: string;
+    showing: string;
+    diagramKey: string;
+  };
 }
 
 export const STRINGS: Record<Lang, Strings> = {
@@ -230,7 +240,17 @@ export const STRINGS: Record<Lang, Strings> = {
       seeTopic: 'Read the deep dive: {title}',
       seeEntry: 'See the catalogue entry for {name}',
     },
-    a11y: { billed: 'billed', notBilled: 'not billed' },
+    a11y: {
+      billed: 'billed',
+      notBilled: 'not billed',
+      metersLabel: 'Meters this service turns',
+      filterLabel: 'Filter by meter',
+      billedOn: 'Billed on: {billed}.',
+      notBilledOn: 'Not billed on: {unbilled}.',
+      freeService: 'Free — turns no meters of its own.',
+      showing: 'Showing {shown} of {total} services.',
+      diagramKey: 'Key',
+    },
   },
 
   ja: {
@@ -342,7 +362,17 @@ export const STRINGS: Record<Lang, Strings> = {
       seeTopic: '深掘りを読む: {title}',
       seeEntry: '{name} のカタログ項目を見る',
     },
-    a11y: { billed: '課金される', notBilled: '課金されない' },
+    a11y: {
+      billed: '課金される',
+      notBilled: '課金されない',
+      metersLabel: 'このサービスが回すメーター',
+      filterLabel: 'メーターで絞り込む',
+      billedOn: '課金されるメーター: {billed}。',
+      notBilledOn: '課金されないメーター: {unbilled}。',
+      freeService: '無料 — 自前のメーターを回さない。',
+      showing: '{total} 件中 {shown} 件を表示。',
+      diagramKey: '凡例',
+    },
   },
 };
 

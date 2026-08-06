@@ -258,7 +258,7 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    color: var(--meter);
+    color: var(--meter-ink);
   }
 
   .meter-name {
@@ -386,14 +386,45 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
     const start = performance.now();
     const pad = (n: number) => String(Math.floor(n)).padStart(2, '0');
 
-    const tick = () => {
-      const secs = (performance.now() - start) / 1000;
+    const render = (secs: number) => {
       time.dataset.value = `${pad(secs / 3600)}:${pad((secs / 60) % 60)}:${pad(secs % 60)}`;
       // Six decimals so the rightmost wheel is always visibly moving.
       cost.dataset.value = ((secs / 3600) * RATE_PER_HOUR).toFixed(6);
-      window.setTimeout(tick, 100);
     };
 
-    tick();
+    const stillness = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (stillness.matches) {
+      // A counter flickering ten times a second in peripheral vision is
+      // exactly what this preference asks us not to do. The point survives
+      // as a single reading: a whole day of an instance nobody is using.
+      render(86_400);
+    } else {
+      let frame = 0;
+      let last = 0;
+
+      const tick = (now: number) => {
+        // Ten updates a second is enough to read as motion; a frame-rate loop
+        // would burn battery on a page that is otherwise static HTML.
+        if (now - last >= 100) {
+          last = now;
+          render((performance.now() - start) / 1000);
+        }
+        frame = window.requestAnimationFrame(tick);
+      };
+
+      const run = () => {
+        // requestAnimationFrame already pauses in a background tab; this stops
+        // the loop being restarted twice.
+        if (!frame) frame = window.requestAnimationFrame(tick);
+      };
+      const halt = () => {
+        if (frame) window.cancelAnimationFrame(frame);
+        frame = 0;
+      };
+
+      document.addEventListener('visibilitychange', () => (document.hidden ? halt() : run()));
+      run();
+    }
   }
 </script>

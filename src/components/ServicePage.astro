@@ -38,7 +38,7 @@ const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${se
 
     <section class="sp-one">
       <p class="eyebrow">{s.oneLiner}</p>
-      <p class="sp-one-text">{service.oneLiner}</p>
+      <p class="sp-one-text" lang={lang === 'en' ? undefined : 'en'}>{service.oneLiner}</p>
       {service.isFree && <p class="sp-free">{s.services.freeNote}</p>}
     </section>
 
@@ -54,7 +54,7 @@ const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${se
 
     <section class="sp-block">
       <h2 class="eyebrow sp-head">{s.services.trapHead}</h2>
-      <p class="sp-trap">{service.trap}</p>
+      <p class="sp-trap" lang={lang === 'en' ? undefined : 'en'}>{service.trap}</p>
     </section>
 
     {

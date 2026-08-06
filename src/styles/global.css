@@ -19,7 +19,9 @@
   --surface: #f9f9fa;
   --surface-sunken: #f2f3f3;
   --border: #c6c6cd;
-  --border-subtle: #e9ebed;
+  /* Separators that convey grouping need 3:1; #e9ebed was 1.20:1. */
+  --border-subtle: #8f959c;
+  --border-faint: #e9ebed;
 
   /* AWS console header */
   --squid-ink: #232f3e;
@@ -32,20 +34,35 @@
 
   /*
    * The three meters, taken from AWS's own accent colours: the orange from the
-   * logo, Cloudscape's link blue, and its error red. Three hues that already
-   * read as "AWS" and stay distinguishable side by side.
+   * logo, Cloudscape's link blue, and its error red.
+   *
+   * Split into fill and ink deliberately. AWS orange is 2.14:1 on white — less
+   * than half of WCAG AA — and Time is the meter on 130 of 185 services, so
+   * the site's most-used colour was also its least legible. The fill keeps the
+   * brand; the ink is what any text or meaningful stroke uses.
    */
   --m-time: #ff9900;
   --m-bytes: #0972d3;
   --m-calls: #d13212;
+
+  /* Text-safe equivalents. Measured on #ffffff: 6.39, 4.82, 5.03. */
+  --m-time-ink: #8a5200;
+  --m-bytes-ink: #0972d3;
+  --m-calls-ink: #d13212;
 
   /* Tints for filled backgrounds behind each meter. */
   --m-time-tint: #fef6e7;
   --m-bytes-tint: #f0f8ff;
   --m-calls-tint: #fdf3f1;
 
-  /* Unlit. Anything free renders in this and never takes a hue. */
-  --unlit: #9ba7b6;
+  /*
+   * Unlit. Anything free renders in this and never takes a hue.
+   * Was #9ba7b6 at 2.44:1 — which put the entire "grey means free" half of the
+   * teaching device below the legibility floor. Now 4.83:1.
+   */
+  --unlit: #6b7280;
+  /* Hairlines that carry no state may stay faint. */
+  --unlit-hairline: #9ba7b6;
 
   --font-body:
     'Open Sans Variable', 'Open Sans', 'Helvetica Neue', Roboto, Arial, 'Hiragino Sans',
@@ -107,10 +124,13 @@ a {
   text-underline-offset: 0.15em;
 }
 
+/* Two-tone so the ring clears 3:1 on the dark hero as well as on white,
+   where a plain blue outline measured only 2.82:1. */
 :focus-visible {
   outline: 2px solid var(--m-bytes);
   outline-offset: 2px;
   border-radius: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9);
 }
 
 code {
@@ -127,16 +147,19 @@ code {
 
 .meter-time {
   --meter: var(--m-time);
+  --meter-ink: var(--m-time-ink);
   --meter-tint: var(--m-time-tint);
 }
 
 .meter-bytes {
   --meter: var(--m-bytes);
+  --meter-ink: var(--m-bytes-ink);
   --meter-tint: var(--m-bytes-tint);
 }
 
 .meter-calls {
   --meter: var(--m-calls);
+  --meter-ink: var(--m-calls-ink);
   --meter-tint: var(--m-calls-tint);
 }
 

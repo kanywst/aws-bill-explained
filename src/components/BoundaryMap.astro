@@ -52,7 +52,7 @@ const geom = rings.map((r, i) => ({
 ---
 
 <figure class="bm">
-  <div class="bm-scroll">
+  <div class="bm-scroll" tabindex="0" role="region" aria-label={caption}>
     <svg viewBox={`0 0 ${W} ${H}`} class="bm-svg" role="img" aria-label={caption}>
       {
         geom.map((r) => (
