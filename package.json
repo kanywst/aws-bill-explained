@@ -14,7 +14,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
-    "lint": "prettier --check . && markdownlint-cli2"
+    "lint": "prettier --check . && markdownlint-cli2",
+    "deploy": "npm run check && wrangler pages deploy dist --project-name=aws-bill-explained",
+    "preview:remote": "wrangler pages dev dist"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",
@@ -29,6 +31,7 @@
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.119.0"
   }
 }

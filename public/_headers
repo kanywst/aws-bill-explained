@@ -1,0 +1,24 @@
+# Cloudflare Pages header rules.
+#
+# The site is static, has no login and stores nothing, so the headers here are
+# about not being a useful target rather than about protecting a session.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  # Nothing here should ever be framed; this is the modern form of X-Frame-Options.
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+
+# Astro fingerprints these filenames, so a changed file is a changed URL and
+# the old one can be cached forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Pages themselves must revalidate, otherwise a corrected billing claim would
+# sit in caches after the fix has shipped.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
