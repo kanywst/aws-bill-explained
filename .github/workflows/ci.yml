@@ -55,7 +55,7 @@ jobs:
         run: npx astro check
 
       - name: Domain, layout and catalogue tests
-        run: npx vitest run --coverage
+        run: npx vitest run --coverage --coverage.reporter=text-summary --coverage.reporter=html
 
       - name: Upload coverage
         if: always()

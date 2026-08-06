@@ -1,9 +1,0 @@
-# Cloudflare Pages project configuration.
-#
-# The site is static output, so there is no adapter and no Worker - Pages just
-# serves the built directory. Keeping this in the repo means `wrangler pages
-# deploy` needs no flags, and the project name cannot drift from the URL baked
-# into astro.config.mjs.
-name = "aws-bill-explained"
-compatibility_date = "2026-08-06"
-pages_build_output_dir = "dist"

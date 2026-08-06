@@ -18,6 +18,9 @@ concurrency:
 
 jobs:
   deploy:
+    # Without the token there is nothing to deploy to, and a red main every
+    # push teaches people to ignore the colour. Skip loudly instead.
+    if: github.event_name == 'workflow_dispatch' || vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
