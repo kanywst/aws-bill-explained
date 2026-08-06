@@ -7,6 +7,9 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    versioning-strategy: increase
     groups:
       # Astro and its integrations move together; separate PRs for each just
       # produce a broken tree that has to be resolved by hand anyway.
@@ -18,6 +21,8 @@ updates:
         patterns:
           - vitest
           - prettier
+          - prettier-plugin-astro
+          - markdownlint-cli2
           - typescript
           - '@astrojs/check'
       fonts:
@@ -40,6 +45,17 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      # Without this, one round of action bumps arrived as three separate pull
+      # requests (#1, #2, #3) that all touched the same workflow file. They
+      # move in lockstep and there is no reason to review them apart.
+      actions:
+        patterns:
+          - '*'
     commit-message:
       prefix: chore
       include: scope
