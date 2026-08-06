@@ -35,20 +35,6 @@ describe('MeterSet', () => {
     expect(set.toArray()).toEqual(['time']);
   });
 
-  describe('parse', () => {
-    it('drops unknown meters instead of throwing, so a new AWS billing shape degrades', () => {
-      const set = MeterSet.parse(['time', 'quantum-flux', 'calls']);
-      expect(set.toArray()).toEqual(['time', 'calls']);
-    });
-
-    it('treats non-arrays as free rather than crashing the build', () => {
-      expect(MeterSet.parse(undefined).isFree).toBe(true);
-      expect(MeterSet.parse(null).isFree).toBe(true);
-      expect(MeterSet.parse('time').isFree).toBe(true);
-      expect(MeterSet.parse({ time: true }).isFree).toBe(true);
-    });
-  });
-
   describe('signature', () => {
     it('labels the free case explicitly rather than with an empty string', () => {
       expect(MeterSet.none().signature).toBe('free');

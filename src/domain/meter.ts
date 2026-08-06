@@ -43,12 +43,6 @@ export class MeterSet {
     return new MeterSet(new Set(ids));
   }
 
-  /** Parses untrusted input, dropping anything that is not a known meter. */
-  static parse(input: unknown): MeterSet {
-    if (!Array.isArray(input)) return MeterSet.none();
-    return MeterSet.of(input.filter(isMeterId));
-  }
-
   static none(): MeterSet {
     return new MeterSet(new Set());
   }

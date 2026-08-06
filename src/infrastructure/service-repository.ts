@@ -7,9 +7,10 @@
  * here gets clean domain objects or a loud failure; nothing downstream ever
  * sees a raw record.
  */
-import { MeterSet, type MeterId } from '../domain/meter';
+import { MeterSet, isMeterId, type MeterId } from '../domain/meter';
+import { ServiceSlug } from '../domain/service-slug';
 import { Catalogue } from '../domain/catalogue';
-import { Service, isCategoryId, normaliseSlug, type Confidence } from '../domain/service';
+import { Service, isCategoryId, type CategoryId, type Confidence } from '../domain/service';
 
 import compute from '../data/services/compute.json';
 import storage from '../data/services/storage.json';
@@ -39,12 +40,19 @@ const asConfidence = (value: unknown): Confidence => (value === 'high' ? 'high' 
  */
 const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes' };
 
-const asMeters = (value: unknown) =>
-  MeterSet.parse(
-    Array.isArray(value)
-      ? value.map((m) => (typeof m === 'string' ? (METER_ALIASES[m] ?? m) : m))
-      : value,
-  );
+/**
+ * Defensive parsing lives here rather than in MeterSet, because tolerating junk
+ * is a property of the untrusted source, not of the model. Unknown meter
+ * strings are dropped so a new AWS billing shape degrades to "we don't know"
+ * instead of failing a build.
+ */
+const asMeters = (value: unknown): MeterSet => {
+  if (!Array.isArray(value)) return MeterSet.none();
+  const ids = value
+    .map((m) => (typeof m === 'string' ? (METER_ALIASES[m] ?? m) : m))
+    .filter(isMeterId);
+  return MeterSet.of(ids);
+};
 
 /** Validates and normalises one raw record. Throws rather than guessing. */
 export function toService(raw: unknown): Service {
@@ -53,22 +61,25 @@ export function toService(raw: unknown): Service {
   }
   const r = raw as Record<string, unknown>;
 
-  if (typeof r.slug !== 'string' || r.slug.trim() === '') {
-    throw new InvalidServiceRecordError('service record has no slug');
+  const slug = ServiceSlug.tryOf(r.slug);
+  if (!slug) {
+    throw new InvalidServiceRecordError(
+      `service record has no usable slug (got ${String(r.slug)})`,
+    );
   }
   if (typeof r.name !== 'string' || r.name.trim() === '') {
-    throw new InvalidServiceRecordError(`service "${r.slug}" has no name`);
+    throw new InvalidServiceRecordError(`service "${slug.value}" has no name`);
   }
   if (!isCategoryId(r.category)) {
     throw new InvalidServiceRecordError(
-      `service "${r.slug}" has unknown category "${String(r.category)}"`,
+      `service "${slug.value}" has unknown category "${String(r.category)}"`,
     );
   }
 
   return new Service({
-    slug: normaliseSlug(r.slug),
+    slug,
     name: r.name,
-    category: r.category,
+    category: r.category as CategoryId,
     // Unknown meter strings are dropped rather than thrown on: a new AWS
     // billing shape should degrade to "we don't know" and not break the build.
     meters: asMeters(r.meters),

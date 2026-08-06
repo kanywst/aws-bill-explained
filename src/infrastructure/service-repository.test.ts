@@ -13,24 +13,25 @@ describe('toService', () => {
     billOn: ['Requests-Tier1'],
     confidence: 'high',
     sources: ['https://aws.amazon.com/s3/pricing/'],
+    checked: '2026-08-04',
   };
 
   it('normalises the slug at the boundary', () => {
-    expect(toService(valid).slug).toBe('s3');
+    expect(toService(valid).slug.value).toBe('s3');
   });
 
   it('rejects records that cannot be identified or routed', () => {
     expect(() => toService(null)).toThrow(InvalidServiceRecordError);
-    expect(() => toService({ ...valid, slug: '' })).toThrow(/no slug/);
+    expect(() => toService({ ...valid, slug: '' })).toThrow(/no usable slug/);
     expect(() => toService({ ...valid, name: '' })).toThrow(/no name/);
     expect(() => toService({ ...valid, category: 'wat' })).toThrow(/unknown category/);
   });
 
-  it('tolerates missing optional prose rather than failing a build over it', () => {
-    const s = toService({ slug: 'x', name: 'X', category: 'compute' });
-    expect(s.oneLiner).toBe('');
-    expect(s.billOn).toEqual([]);
-    expect(s.meters.isFree).toBe(true);
+  it('refuses a record the domain would reject, instead of building a broken Service', () => {
+    // The boundary no longer papers over missing prose: the model owns that rule.
+    expect(() => toService({ slug: 'x', name: 'X', category: 'compute' })).toThrow(
+      /oneLiner is empty/,
+    );
   });
 
   it('treats any confidence other than "high" as medium', () => {
@@ -60,13 +61,15 @@ describe('the real catalogue', () => {
 
   it('has no duplicate slugs across the eight research passes', () => {
     // Catalogue.from throws on duplicates, so reaching here proves uniqueness.
-    const slugs = catalogue.all().map((s) => s.slug);
+    const slugs = catalogue.all().map((s) => s.slug.value);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
   it('uses only slugs that are safe in a URL path', () => {
     for (const service of catalogue.all()) {
-      expect(service.slug, `slug "${service.slug}"`).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(service.slug.value, `slug "${service.slug.value}"`).toMatch(
+        /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      );
     }
   });
 
@@ -75,7 +78,7 @@ describe('the real catalogue', () => {
   });
 
   it('never publishes a claim without a source', () => {
-    expect(catalogue.unsourced().map((s) => s.slug)).toEqual([]);
+    expect(catalogue.unsourced().map((s) => s.slug.value)).toEqual([]);
   });
 
   it('cites only AWS-controlled sources', () => {
@@ -83,24 +86,24 @@ describe('the real catalogue', () => {
       /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//;
     for (const service of catalogue.all()) {
       for (const source of service.sources) {
-        expect(source, `${service.slug} cites ${source}`).toMatch(allowed);
+        expect(source, `${service.slug.value} cites ${source}`).toMatch(allowed);
       }
     }
   });
 
   it('gives every service a one-liner and a trap short enough to read', () => {
     for (const service of catalogue.all()) {
-      expect(service.oneLiner.length, `${service.slug} oneLiner`).toBeGreaterThan(0);
-      expect(service.oneLiner.length, `${service.slug} oneLiner`).toBeLessThanOrEqual(120);
-      expect(service.trap.length, `${service.slug} trap`).toBeGreaterThan(0);
-      expect(service.trap.length, `${service.slug} trap`).toBeLessThanOrEqual(220);
+      expect(service.oneLiner.length, `${service.slug.value} oneLiner`).toBeGreaterThan(0);
+      expect(service.oneLiner.length, `${service.slug.value} oneLiner`).toBeLessThanOrEqual(120);
+      expect(service.trap.length, `${service.slug.value} trap`).toBeGreaterThan(0);
+      expect(service.trap.length, `${service.slug.value} trap`).toBeLessThanOrEqual(220);
     }
   });
 
   it('quotes no dollar rates, because rates go stale and meters do not', () => {
     for (const service of catalogue.all()) {
       const prose = `${service.oneLiner} ${service.trap}`;
-      expect(prose, `${service.slug} quotes a rate`).not.toMatch(/\$\d/);
+      expect(prose, `${service.slug.value} quotes a rate`).not.toMatch(/\$\d/);
     }
   });
 
@@ -127,10 +130,12 @@ describe('the real catalogue', () => {
 
   it('dates every classification, because AWS reprices and a claim needs a timestamp', () => {
     for (const service of catalogue.all()) {
-      expect(service.checked, `${service.slug} has no checked date`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(service.checked, `${service.slug.value} has no checked date`).toMatch(
+        /^\d{4}-\d{2}-\d{2}$/,
+      );
       expect(
         Number.isNaN(Date.parse(service.checked)),
-        `${service.slug} checked date is unparseable`,
+        `${service.slug.value} checked date is unparseable`,
       ).toBe(false);
     }
   });

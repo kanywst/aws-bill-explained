@@ -53,7 +53,7 @@ const categories = catalogue.categories();
                 data-meters={service.meters.toArray().join(' ')}
                 data-free={service.isFree ? 'true' : 'false'}
               >
-                <a href={localePath(lang, `/services/${service.slug}/`)}>
+                <a href={localePath(lang, `/services/${service.slug.value}/`)}>
                   <span class="si-name">
                     {service.name}
                     <span class="si-lamps" aria-hidden="true">

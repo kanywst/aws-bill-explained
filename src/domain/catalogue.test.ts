@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { MeterSet, type MeterId } from './meter';
 import { Catalogue, DuplicateServiceError } from './catalogue';
 import { Service, type CategoryId } from './service';
+import { ServiceSlug } from './service-slug';
 
 const svc = (
   slug: string,
@@ -14,12 +15,12 @@ const svc = (
   } = {},
 ) =>
   new Service({
-    slug,
+    slug: ServiceSlug.of(slug),
     name: over.name ?? slug.toUpperCase(),
     category: over.category ?? 'compute',
     meters: MeterSet.of(meters),
-    oneLiner: '',
-    trap: '',
+    oneLiner: `What ${slug} charges for.`,
+    trap: `What people miss about ${slug}.`,
     billOn: [],
     confidence: over.confidence ?? 'high',
     sources: over.sources ?? ['https://aws.amazon.com/'],
@@ -43,7 +44,7 @@ describe('Catalogue', () => {
 
   it('finds by slug and returns undefined for a miss', () => {
     const c = Catalogue.from([svc('ec2', ['time'])]);
-    expect(c.find('ec2')?.slug).toBe('ec2');
+    expect(c.find('ec2')?.slug.value).toBe('ec2');
     expect(c.find('nope')).toBeUndefined();
   });
 
@@ -61,8 +62,8 @@ describe('Catalogue', () => {
       svc('lambda', ['time', 'calls']),
       svc('iam', []),
     ]);
-    expect(c.turning('time').map((s) => s.slug)).toEqual(['ec2', 'lambda']);
-    expect(c.turning('calls').map((s) => s.slug)).toEqual(['lambda']);
+    expect(c.turning('time').map((s) => s.slug.value)).toEqual(['ec2', 'lambda']);
+    expect(c.turning('calls').map((s) => s.slug.value)).toEqual(['lambda']);
   });
 
   it('treats free services as a first-class group', () => {
@@ -70,7 +71,7 @@ describe('Catalogue', () => {
     expect(
       c
         .free()
-        .map((s) => s.slug)
+        .map((s) => s.slug.value)
         .sort(),
     ).toEqual(['iam', 'sts']);
   });
@@ -80,7 +81,7 @@ describe('Catalogue', () => {
       svc('s3', ['time', 'bytes', 'calls']),
       svc('ec2', ['time', 'bytes']),
     ]);
-    expect(c.turningAll().map((s) => s.slug)).toEqual(['s3']);
+    expect(c.turningAll().map((s) => s.slug.value)).toEqual(['s3']);
   });
 
   it('reports only categories that have entries, in canonical order', () => {
@@ -108,14 +109,14 @@ describe('Catalogue', () => {
       svc('iam', []),
     ]);
     const shapes = c.byBillingShape();
-    expect(shapes.get('time+bytes')?.map((s) => s.slug)).toEqual(['ec2', 'lightsail']);
-    expect(shapes.get('free')?.map((s) => s.slug)).toEqual(['iam']);
+    expect(shapes.get('time+bytes')?.map((s) => s.slug.value)).toEqual(['ec2', 'lightsail']);
+    expect(shapes.get('free')?.map((s) => s.slug.value)).toEqual(['iam']);
   });
 
   describe('editorial guards', () => {
     it('surfaces services with no source behind their claims', () => {
       const c = Catalogue.from([svc('ec2', ['time']), svc('mystery', ['time'], { sources: [] })]);
-      expect(c.unsourced().map((s) => s.slug)).toEqual(['mystery']);
+      expect(c.unsourced().map((s) => s.slug.value)).toEqual(['mystery']);
     });
 
     it('surfaces services we are not confident about', () => {
@@ -123,7 +124,7 @@ describe('Catalogue', () => {
         svc('ec2', ['time']),
         svc('fsx', ['time'], { confidence: 'medium' }),
       ]);
-      expect(c.lowConfidence().map((s) => s.slug)).toEqual(['fsx']);
+      expect(c.lowConfidence().map((s) => s.slug.value)).toEqual(['fsx']);
     });
   });
 });

@@ -6,7 +6,7 @@ import { loadCatalogue } from '../../infrastructure/service-repository';
 export function getStaticPaths() {
   return loadCatalogue()
     .all()
-    .map((service) => ({ params: { slug: service.slug }, props: { service } }));
+    .map((service) => ({ params: { slug: service.slug.value }, props: { service } }));
 }
 
 const { service } = Astro.props;

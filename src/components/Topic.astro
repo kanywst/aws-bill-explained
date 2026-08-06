@@ -52,7 +52,7 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
     {
       service && (
         <aside class="tp-see">
-          <a href={localePath(lang, `/services/${service.slug}/`)}>
+          <a href={localePath(lang, `/services/${service.slug.value}/`)}>
             {s.services.seeEntry.replace('{name}', service.name)}
           </a>
         </aside>

@@ -28,8 +28,9 @@ export class Catalogue {
   static from(services: readonly Service[]): Catalogue {
     const bySlug = new Map<string, Service>();
     for (const service of services) {
-      if (bySlug.has(service.slug)) throw new DuplicateServiceError(service.slug);
-      bySlug.set(service.slug, service);
+      const key = service.slug.value;
+      if (bySlug.has(key)) throw new DuplicateServiceError(key);
+      bySlug.set(key, service);
     }
     return new Catalogue(bySlug);
   }

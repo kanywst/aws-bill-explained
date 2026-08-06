@@ -20,11 +20,11 @@ const sameShape =
   catalogue
     .byBillingShape()
     .get(service.meters.signature)
-    ?.filter((other) => other.slug !== service.slug)
+    ?.filter((other) => !other.slug.equals(service.slug))
     .slice(0, 6) ?? [];
 
 // The long-form page for this service, if one has been written in this locale.
-const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${service.slug}`);
+const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${service.slug.value}`);
 ---
 
 <Base title={`${service.name} — ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
@@ -45,7 +45,7 @@ const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${se
     {
       topic && (
         <aside class="sp-see">
-          <a href={localePath(lang, `/topics/${service.slug}/`)}>
+          <a href={localePath(lang, `/topics/${service.slug.value}/`)}>
             {s.services.seeTopic.replace('{title}', topic.data.title)}
           </a>
         </aside>
@@ -81,7 +81,7 @@ const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${se
           <ul class="sp-related">
             {sameShape.map((other) => (
               <li>
-                <a href={localePath(lang, `/services/${other.slug}/`)}>{other.name}</a>
+                <a href={localePath(lang, `/services/${other.slug.value}/`)}>{other.name}</a>
               </li>
             ))}
           </ul>

@@ -2,9 +2,17 @@
  * Domain: the Service entity.
  *
  * Identity is the slug — two records with the same slug are the same service
- * even if every other field differs. Everything else is descriptive.
+ * even if every other field differs.
+ *
+ * The constructor enforces the editorial rules rather than leaving them to a
+ * test over the real dataset. That distinction matters: a test can only catch
+ * a bad record that is already committed, while a constructor makes the bad
+ * record impossible to build in the first place. These limits are not styling
+ * preferences — a one-liner that runs long stops being something a reader can
+ * hold in their head, which is the entire premise of the site.
  */
 import { MeterSet, type MeterId } from './meter';
+import { ServiceSlug } from './service-slug';
 
 export const CATEGORY_IDS = [
   'compute',
@@ -26,22 +34,19 @@ export function isCategoryId(value: unknown): value is CategoryId {
 /** How sure we are of the meter classification, carried through to the UI. */
 export type Confidence = 'high' | 'medium';
 
-/**
- * Slugs arrive from several independent research passes, which name things
- * inconsistently ("amazon-s3" vs "s3"). Identity has to survive that, so the
- * vendor prefix is stripped at the boundary rather than left to leak into URLs.
- */
-export function normaliseSlug(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^(amazon|aws)-(?=.)/, '')
-    .replace(/^-+|-+$/g, '');
+/** Editorial limits, owned by the domain so tests can assert against them. */
+export const MAX_ONE_LINER = 120;
+export const MAX_TRAP = 220;
+
+export class InvalidServiceError extends Error {
+  constructor(slug: string, reason: string) {
+    super(`Service "${slug}": ${reason}`);
+    this.name = 'InvalidServiceError';
+  }
 }
 
 export interface ServiceProps {
-  slug: string;
+  slug: ServiceSlug;
   name: string;
   category: CategoryId;
   meters: MeterSet;
@@ -55,7 +60,7 @@ export interface ServiceProps {
 }
 
 export class Service {
-  readonly slug: string;
+  readonly slug: ServiceSlug;
   readonly name: string;
   readonly category: CategoryId;
   readonly meters: MeterSet;
@@ -67,6 +72,45 @@ export class Service {
   readonly checked: string;
 
   constructor(props: ServiceProps) {
+    const id = props.slug.value;
+
+    if (props.name.trim() === '') {
+      throw new InvalidServiceError(id, 'name is empty');
+    }
+    if (!isCategoryId(props.category)) {
+      throw new InvalidServiceError(id, `unknown category "${String(props.category)}"`);
+    }
+    if (props.oneLiner.trim() === '') {
+      throw new InvalidServiceError(id, 'oneLiner is empty');
+    }
+    if (props.oneLiner.length > MAX_ONE_LINER) {
+      throw new InvalidServiceError(
+        id,
+        `oneLiner is ${props.oneLiner.length} characters, over the ${MAX_ONE_LINER} limit`,
+      );
+    }
+    if (props.trap.trim() === '') {
+      throw new InvalidServiceError(id, 'trap is empty');
+    }
+    if (props.trap.length > MAX_TRAP) {
+      throw new InvalidServiceError(
+        id,
+        `trap is ${props.trap.length} characters, over the ${MAX_TRAP} limit`,
+      );
+    }
+    // A rate in the prose goes stale silently; the meter it turns does not.
+    for (const [field, text] of [
+      ['oneLiner', props.oneLiner],
+      ['trap', props.trap],
+    ] as const) {
+      if (/\$\d/.test(text)) {
+        throw new InvalidServiceError(id, `${field} quotes a dollar rate`);
+      }
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(props.checked) || Number.isNaN(Date.parse(props.checked))) {
+      throw new InvalidServiceError(id, `checked date "${props.checked}" is not an ISO date`);
+    }
+
     this.slug = props.slug;
     this.name = props.name;
     this.category = props.category;
@@ -77,17 +121,6 @@ export class Service {
     this.confidence = props.confidence;
     this.sources = props.sources;
     this.checked = props.checked;
-  }
-
-  /**
-   * How stale the classification is, in days, relative to a given date.
-   * AWS repricing is the normal case, so an undated or ancient claim is a
-   * defect rather than a nice-to-have.
-   */
-  ageInDays(asOf: Date): number {
-    const then = Date.parse(this.checked);
-    if (Number.isNaN(then)) return Number.POSITIVE_INFINITY;
-    return Math.floor((asOf.getTime() - then) / 86_400_000);
   }
 
   get isFree(): boolean {
@@ -106,7 +139,18 @@ export class Service {
     return this.sources.length > 0;
   }
 
+  /**
+   * How stale the classification is, in days, relative to a given date.
+   * AWS repricing is the normal case, so an undated or ancient claim is a
+   * defect rather than a nice-to-have.
+   */
+  ageInDays(asOf: Date): number {
+    const then = Date.parse(this.checked);
+    if (Number.isNaN(then)) return Number.POSITIVE_INFINITY;
+    return Math.floor((asOf.getTime() - then) / 86_400_000);
+  }
+
   equals(other: Service): boolean {
-    return this.slug === other.slug;
+    return this.slug.equals(other.slug);
   }
 }
