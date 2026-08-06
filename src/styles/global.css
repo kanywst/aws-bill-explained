@@ -43,17 +43,17 @@
    */
   --m-time: #ff9900;
   --m-bytes: #0972d3;
-  --m-calls: #d13212;
+  --m-units: #d13212;
 
   /* Text-safe equivalents. Measured on #ffffff: 6.39, 4.82, 5.03. */
   --m-time-ink: #8a5200;
   --m-bytes-ink: #0972d3;
-  --m-calls-ink: #d13212;
+  --m-units-ink: #d13212;
 
   /* Tints for filled backgrounds behind each meter. */
   --m-time-tint: #fef6e7;
   --m-bytes-tint: #f0f8ff;
-  --m-calls-tint: #fdf3f1;
+  --m-units-tint: #fdf3f1;
 
   /*
    * Unlit. Anything free renders in this and never takes a hue.
@@ -157,10 +157,10 @@ code {
   --meter-tint: var(--m-bytes-tint);
 }
 
-.meter-calls {
-  --meter: var(--m-calls);
-  --meter-ink: var(--m-calls-ink);
-  --meter-tint: var(--m-calls-tint);
+.meter-units {
+  --meter: var(--m-units);
+  --meter-ink: var(--m-units-ink);
+  --meter-tint: var(--m-units-tint);
 }
 
 /* ---- Motion ---- */

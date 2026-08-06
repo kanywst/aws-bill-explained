@@ -29,7 +29,7 @@ const svc = (
 
 describe('Catalogue', () => {
   it('refuses duplicate slugs rather than silently dropping a service', () => {
-    expect(() => Catalogue.from([svc('ec2', ['time']), svc('ec2', ['calls'])])).toThrow(
+    expect(() => Catalogue.from([svc('ec2', ['time']), svc('ec2', ['units'])])).toThrow(
       DuplicateServiceError,
     );
   });
@@ -39,7 +39,7 @@ describe('Catalogue', () => {
     expect(empty.size).toBe(0);
     expect(empty.all()).toEqual([]);
     expect(empty.categories()).toEqual([]);
-    expect(empty.countByMeter()).toEqual({ time: 0, bytes: 0, calls: 0 });
+    expect(empty.countByMeter()).toEqual({ time: 0, bytes: 0, units: 0 });
   });
 
   it('finds by slug and returns undefined for a miss', () => {
@@ -59,11 +59,11 @@ describe('Catalogue', () => {
   it('selects the services turning a given meter', () => {
     const c = Catalogue.from([
       svc('ec2', ['time', 'bytes']),
-      svc('lambda', ['time', 'calls']),
+      svc('lambda', ['time', 'units']),
       svc('iam', []),
     ]);
     expect(c.turning('time').map((s) => s.slug.value)).toEqual(['ec2', 'lambda']);
-    expect(c.turning('calls').map((s) => s.slug.value)).toEqual(['lambda']);
+    expect(c.turning('units').map((s) => s.slug.value)).toEqual(['lambda']);
   });
 
   it('treats free services as a first-class group', () => {
@@ -78,7 +78,7 @@ describe('Catalogue', () => {
 
   it('picks out the services that turn all three meters', () => {
     const c = Catalogue.from([
-      svc('s3', ['time', 'bytes', 'calls']),
+      svc('s3', ['time', 'bytes', 'units']),
       svc('ec2', ['time', 'bytes']),
     ]);
     expect(c.turningAll().map((s) => s.slug.value)).toEqual(['s3']);
@@ -95,11 +95,11 @@ describe('Catalogue', () => {
 
   it('counts each meter independently, not per service', () => {
     const c = Catalogue.from([
-      svc('s3', ['time', 'bytes', 'calls']),
+      svc('s3', ['time', 'bytes', 'units']),
       svc('ec2', ['time', 'bytes']),
       svc('iam', []),
     ]);
-    expect(c.countByMeter()).toEqual({ time: 2, bytes: 2, calls: 1 });
+    expect(c.countByMeter()).toEqual({ time: 2, bytes: 2, units: 1 });
   });
 
   it('groups services that bill the same way', () => {
@@ -117,7 +117,7 @@ describe('Catalogue', () => {
     it('reports no unsourced services, because the model refuses to build one', () => {
       // Kept as a regression guard: if Service ever stops enforcing sources,
       // this is the query that has to catch it again.
-      const c = Catalogue.from([svc('ec2', ['time']), svc('lambda', ['calls'])]);
+      const c = Catalogue.from([svc('ec2', ['time']), svc('lambda', ['units'])]);
       expect(c.unsourced()).toEqual([]);
     });
 

@@ -46,7 +46,7 @@ interface Strings {
   footerPrices: string;
   footerDisclaimer: string;
 
-  meters: Record<'time' | 'bytes' | 'calls', MeterCopy>;
+  meters: Record<'time' | 'bytes' | 'units', MeterCopy>;
   meterHeads: { counts: string; trap: string; bill: string };
 
   hero: {
@@ -146,19 +146,20 @@ export const STRINGS: Record<Lang, Strings> = {
       time: {
         name: 'Time',
         test: 'Does the thing exist?',
-        counts: 'Capacity × duration. Instances bill per second, storage bills per GB-month.',
+        counts:
+          'Something exists, multiplied by how long it existed. Instances bill per second, storage per GB-month, seats per month.',
         trap: 'It runs whether or not you use it. Forgetting to delete costs more than forgetting to stop.',
         onTheBill: 'BoxUsage, Hours, GB-Mo',
       },
       bytes: {
         name: 'Bytes',
-        test: 'Is anything counting gigabytes?',
+        test: 'Did bytes cross a boundary, pass through a box, or get read where they sat?',
         counts:
-          'Gigabytes metered. Transfer out of a boundary, and per-GB processing wherever a device sits in the path.',
-        trap: 'Inbound is free only for transfer. A NAT Gateway, endpoint or log pipeline charges per GB in both directions.',
+          'Gigabytes, counted three ways: leaving a boundary, handled by a box you put in the path, or scanned in place.',
+        trap: '"Inbound is free" is a rule about transfer, not about this meter. A NAT Gateway or interface endpoint bills both directions, and Athena bills bytes that never moved at all.',
         onTheBill: 'DataTransfer-Out-Bytes, NatGateway-Bytes',
       },
-      calls: {
+      units: {
         name: 'Calls',
         test: 'Did you invoke the API?',
         counts: 'The number of API operations. Payload size and direction are irrelevant.',
@@ -172,13 +173,13 @@ export const STRINGS: Record<Lang, Strings> = {
       eyebrow: 'How an AWS bill is built',
       headA: 'Every bill is',
       headB: 'three meters',
-      lede: "AWS documents pricing one service at a time, so every new service looks like a new billing model to learn. It isn't. Three meters exist. A service either has a given meter or it doesn't — and once you can name which, a pricing page stops being a lesson and becomes a lookup.",
+      lede: "AWS documents pricing one service at a time, so every new service looks like a new billing model to learn. It isn't. There are three meters — Time, Bytes, Units — and a service either turns one or it doesn't. Once you can say which, a pricing page stops being a lesson and becomes a lookup.",
       rigHead:
         'Since you opened this page, one t3.micro somebody forgot to terminate has been turning its meter.',
       capElapsed: 'Elapsed',
       capAccrued: 'Accrued, USD',
       rigFoot:
-        'You sent no requests. You moved no data. The meter ran anyway — that is the whole of meter one, and it is the one that quietly dominates most bills.',
+        'You sent no requests. You moved no data. The meter ran anyway. That is the whole of Time, the first of the three, and it is the one that quietly dominates most bills.',
       rigAssume:
         't3.micro on-demand at $0.0104/hour, us-east-1. EBS and the public IPv4 address would each add their own line.',
     },
@@ -186,13 +187,13 @@ export const STRINGS: Record<Lang, Strings> = {
     sections: { meters: 'The three meters', reading: 'Reading a diagram here', topics: 'Topics' },
 
     reading: {
-      lede: 'One rule holds across every picture on this site: lit means billed, dim means free. You can find the money before you read a word. Here is the simplest case — a request arrives, a response leaves.',
+      lede: 'One rule holds across every picture on this site: colour means billed, grey means free. You can find the money before you read a word. Here is the simplest case — a request arrives, a response leaves.',
       diagramCaption:
-        'EC2 serving a 1 GB response to the internet. The request in is dark; only the response out glows.',
-      note: 'The lamp on the EC2 box is the other half of the story: that box was turning meter one before the request arrived, and keeps turning it after the response is sent.',
+        'One request, one response, and all three meters. Grey means the meter did not turn.',
+      note: 'All three meters appear here. The lamp on the EC2 box is Time, turning before the request arrived and after the response is sent. The inbound request is free as bytes but still counts as one unit at the API. Only the response out turns the Bytes meter.',
       nodeClient: 'Client',
-      nodeIgw: 'Internet Gateway',
-      nodeIgwSub: 'no charge',
+      nodeIgw: 'API Gateway',
+      nodeIgwSub: 'per request',
       hopIn: 'Request (inbound)',
       hopOut: 'Response, 1 GB (outbound)',
     },
@@ -233,7 +234,7 @@ export const STRINGS: Record<Lang, Strings> = {
         'These services turn exactly the same meters, so what you learn here transfers.',
       sourcesHead: 'Checked against',
       mediumConfidence:
-        'Classified with medium confidence — the meter set could not be fully confirmed from primary AWS documentation. Verify against the sources before acting on it.',
+        "We are not certain about this one — AWS's own documentation does not pin the meter set down. Check the sources below before you build anything on it.",
       filterAll: 'All',
       filterFree: 'Free',
       count: 'services',
@@ -268,24 +269,27 @@ export const STRINGS: Record<Lang, Strings> = {
 
     meters: {
       time: {
-        name: '稼働時間',
+        name: '時間',
         test: 'それは「存在している」か？',
-        counts: '量 × 時間。インスタンスは秒単位、ストレージは GB-month。',
+        counts:
+          '何かが存在している × その長さ。インスタンスは秒単位、ストレージは GB-month、席は月単位。',
         trap: '使っていなくても回る。止め忘れより「消し忘れ」のほうが高くつく。',
         onTheBill: 'BoxUsage, Hours, GB-Mo',
       },
       bytes: {
-        name: 'バイト',
-        test: 'ギガバイトを数えているものがあるか？',
-        counts: '計測されたギガバイト。境界を出ていく転送と、経路上の装置がかける処理 GB の両方。',
-        trap: '「入るのは無料」が効くのは転送だけ。NAT Gateway・エンドポイント・ログ基盤は往復とも GB で取る。',
+        name: 'GB',
+        test: 'バイトが境界を越えたか、途中の何かを通ったか、その場で読まれたか？',
+        counts:
+          'GB で数えられるもの全部。境界を出ていく分、経路の途中に挟まるサービスが処理した分、そして動かないまま読まれた分。',
+        trap: '「入るのは無料」は転送のルールで、このメーターの性質ではない。NAT Gateway やエンドポイントは往復とも取るし、Athena は一歩も動いていないバイトに課金する。',
         onTheBill: 'DataTransfer-Out-Bytes, NatGateway-Bytes',
       },
-      calls: {
-        name: 'API 回数',
-        test: 'API を「呼んだ」か？',
-        counts: '呼んだ回数。サイズも方向も関係ない。',
-        trap: 'そもそもこのメーターを持たないサービスが多い。EC2・IAM・STS は呼び放題で無料。',
+      units: {
+        name: '個数',
+        test: '個別のものを何個頼んだか？',
+        counts:
+          '数えられる仕事の単位。リクエストが一番多いだけで、トークンも、ページも、文字も、宛先も、payload を 64KB で切った1片も同じ。',
+        trap: '1回の呼び出しが1個とは限らない。1MiB のキューメッセージは16個、200KB のイベントは4個。そしてこのメーターを持たないサービスが約半分ある。EC2・IAM・STS は呼び放題で無料。',
         onTheBill: 'Requests',
       },
     },
@@ -295,13 +299,13 @@ export const STRINGS: Record<Lang, Strings> = {
       eyebrow: 'AWS の請求書の成り立ち',
       headA: '回っているメーターは',
       headB: '3つだけ',
-      lede: 'AWS の料金はサービスごとに書かれている。だから新しいサービスを触るたびに課金の仕組みを覚え直す羽目になる。実際はそうじゃない。メーターは3種類しかなく、各サービスはそのどれを持っているかが違うだけだ。どれが回るか言えるようになれば、料金ページは勉強ではなく参照になる。',
+      lede: 'AWS の料金はサービスごとに書かれている。だから新しいサービスを触るたびに、まっさらな課金モデルを覚え直すように見える。実際は違う。メーターは Time・GB・個数 の3種類しかなくて、サービスごとに違うのは「そのうちどれが付いているか」だけだ。どれが回るか言えるようになれば、料金ページは勉強ではなく参照になる。',
       rigHead:
-        'あなたがこのページを開いてから、消し忘れられた t3.micro が 1 台、メーターを回し続けている。',
+        'このページを開いてから今この瞬間まで、誰かが消し忘れた t3.micro が 1 台、メーターを回し続けている。',
       capElapsed: '経過',
       capAccrued: '発生額 (USD)',
       rigFoot:
-        'リクエストは送っていない。データも動かしていない。それでもメーターは回った。これが1本目のメーターの全部で、たいていの請求書を静かに支配しているのもこれだ。',
+        'リクエストは送っていない。データも動かしていない。それでもメーターは回った。これが Time メーターの全部で、たいていの請求書を静かに支配しているのもこれだ。',
       rigAssume:
         't3.micro オンデマンド $0.0104/時 (us-east-1) 換算。EBS と パブリック IPv4 はそれぞれ別に計上される。',
     },
@@ -309,13 +313,12 @@ export const STRINGS: Record<Lang, Strings> = {
     sections: { meters: '3つのメーター', reading: '図の読み方', topics: 'トピック' },
 
     reading: {
-      lede: 'このサイトの図は全部ひとつのルールで描いてある。光っていれば課金、暗ければ無料。文章を読む前に、どこで金が出ているか分かる。まずは一番単純な形 — リクエストが来て、レスポンスが出ていく。',
-      diagramCaption:
-        'EC2 が 1GB のレスポンスをインターネットに返すところ。行きは暗く、帰りだけが光る。',
-      note: 'EC2 の箱についているランプが話の残り半分。あの箱はリクエストが来る前から1本目のメーターを回していて、レスポンスを返した後も回し続ける。',
+      lede: 'このサイトの図は全部ひとつのルールで描いてある。色が付いていれば課金、グレーなら無料。文章を読む前に、どこで金が出ているか分かる。まずは一番単純な形 — リクエストが来て、レスポンスが出ていく。',
+      diagramCaption: 'リクエスト1往復に、3本のメーターが全部出てくる。グレーは回らなかったもの。',
+      note: 'ここに3本とも出ている。EC2 の箱のランプが Time で、リクエストが来る前から回っていて、返した後も回り続ける。行きのリクエストは GB としては無料だが、API では1個として数えられる。GB メーターが回るのは帰りだけ。',
       nodeClient: 'クライアント',
-      nodeIgw: 'Internet Gateway',
-      nodeIgwSub: '無料',
+      nodeIgw: 'API Gateway',
+      nodeIgwSub: 'リクエスト単位',
       hopIn: 'リクエスト (inbound)',
       hopOut: 'レスポンス 1GB (outbound)',
     },
@@ -326,7 +329,7 @@ export const STRINGS: Record<Lang, Strings> = {
       meter: '課金メーター',
       idle: '回らない',
       nothing: 'このやり取りで回るメーターはゼロ。',
-      rings: '内側は無料。リングを1枚外に越えるたびに関所がある。',
+      rings: '一番内側だけが無料。リングを1枚越えて外に出るたびに関所がある。',
     },
 
     topicsLede: '各ページはまず結論のモデルを渡してから、その根拠に降りていく。',
@@ -344,7 +347,7 @@ export const STRINGS: Record<Lang, Strings> = {
     },
     services: {
       title: '全サービスをメーターで引く',
-      lede: 'どのメーターが回るか、そしてそのサービスで一番よく間違えられる点。金額は載せない — 動くから。メーターは動かない。',
+      lede: 'どのメーターが回るか、そしてそのサービスで一番よく間違えられる点。金額は載せない — レートは変わるから。回るメーターのほうは変わらない。',
       freeNote:
         'このサービス自体はメーターを回さない。下の「見落とすところ」に、どこに金が移るかを書いてある。',
       trapHead: '見落とすところ',

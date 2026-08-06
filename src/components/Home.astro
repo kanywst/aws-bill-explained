@@ -99,11 +99,11 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
       caption={s.reading.diagramCaption}
       nodes={[
         { id: 'user', label: s.reading.nodeClient, sub: 'internet' },
-        { id: 'igw', label: s.reading.nodeIgw, sub: s.reading.nodeIgwSub },
+        { id: 'igw', label: s.reading.nodeIgw, sub: s.reading.nodeIgwSub, charges: ['units'] },
         { id: 'ec2', label: 'EC2', sub: 't3.micro', charges: ['time'] },
       ]}
       hops={[
-        { from: 'user', to: 'ec2', label: s.reading.hopIn },
+        { from: 'user', to: 'igw', label: s.reading.hopIn, meter: 'units', cost: '1 unit' },
         { from: 'ec2', to: 'user', label: s.reading.hopOut, meter: 'bytes', cost: '$0.09/GB' },
       ]}
     />

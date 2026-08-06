@@ -18,7 +18,7 @@ const topics = defineCollection({
     /** Sub-navigation label. Falls back to title when omitted. */
     short: z.string().optional(),
     /** Which of the three meters this topic turns. Drives the badges. */
-    meters: z.array(z.enum(['time', 'bytes', 'calls'])).default([]),
+    meters: z.array(z.enum(['time', 'bytes', 'units'])).default([]),
     /** Lower sorts first. */
     order: z.number().default(100),
     /** Last time a human checked this against the AWS docs. */

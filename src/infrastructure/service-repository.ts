@@ -34,11 +34,12 @@ const asStrings = (value: unknown): string[] =>
 const asConfidence = (value: unknown): Confidence => (value === 'high' ? 'high' : 'medium');
 
 /**
- * The dataset was researched while the second meter was still called "egress".
- * Rather than rewrite every record, the boundary translates — which is what an
- * anti-corruption layer is for, and it means new research can use either name.
+ * Both renamed meters keep their old spelling as an inbound alias. The dataset
+ * itself has been migrated, so these exist for research written against the
+ * older names rather than as a permanent shim — which is what an
+ * anti-corruption layer is for.
  */
-const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes' };
+const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes', units: 'units' };
 
 /**
  * Defensive parsing lives here rather than in MeterSet, because tolerating junk

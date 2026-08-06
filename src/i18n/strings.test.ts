@@ -96,7 +96,7 @@ describe('string bundles', () => {
   it('names all three meters in every locale', () => {
     for (const lang of LANGS) {
       const meters = t(lang).meters;
-      expect(Object.keys(meters).sort()).toEqual(['bytes', 'calls', 'time']);
+      expect(Object.keys(meters).sort()).toEqual(['bytes', 'time', 'units']);
     }
   });
 

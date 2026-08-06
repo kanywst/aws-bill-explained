@@ -91,7 +91,7 @@ describe('Service', () => {
   it('answers which meters it turns', () => {
     const service = build();
     expect(service.turns('time')).toBe(true);
-    expect(service.turns('calls')).toBe(false);
+    expect(service.turns('units')).toBe(false);
   });
 
   it('cannot be built without an AWS source behind its claims', () => {

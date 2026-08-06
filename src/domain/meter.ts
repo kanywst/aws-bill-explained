@@ -6,14 +6,24 @@
  * meters. The domain layer knows nothing about rendering, locales, or Astro —
  * it only knows what a meter is and how to reason about a set of them.
  *
- * The second meter is "bytes", not "egress". It was called egress until the
- * dataset grew enough to contradict it: CloudWatch ingestion, Firehose intake
- * and NAT Gateway processing all meter gigabytes with no regard for direction.
- * "Inbound is free" is a rule about data *transfer*, not about the meter, and
- * pretending otherwise made the model wrong for about a dozen services.
+ * Two of the three have been renamed, both times for the same reason: the name
+ * was narrower than the shape and quietly excluded valid members.
+ *
+ * "bytes" was "egress" until the dataset contradicted it — CloudWatch
+ * ingestion, Firehose intake and NAT Gateway processing all meter gigabytes
+ * with no regard for direction. "Inbound is free" is a rule about data
+ * *transfer*, not a property of the meter.
+ *
+ * "units" was "units", defined as "the number of API operations; payload size
+ * and direction are irrelevant". That was a description of one implementation
+ * rather than of a billing shape, and most of its own members refuted it: SQS
+ * bills a 1 MiB call as sixteen requests, EventBridge chunks at 64 KB, Bedrock
+ * counts tokens, Polly counts characters, Textract counts pages, SES counts
+ * recipients. What they share is that something discrete gets counted — and a
+ * request is the most common instance of that, not the definition of it.
  */
 
-export const METER_IDS = ['time', 'bytes', 'calls'] as const;
+export const METER_IDS = ['time', 'bytes', 'units'] as const;
 
 export type MeterId = (typeof METER_IDS)[number];
 

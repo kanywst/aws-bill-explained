@@ -6,21 +6,25 @@ Every AWS bill is three meters. Learn the three and a pricing page stops being a
 
 AWS documents pricing one service at a time, so every new service looks like a new billing model. It isn't. Three meters exist, and a service either has a given meter or it doesn't:
 
-| Meter     | The question it answers         | What it counts                                                                       |
-| --------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| **Time**  | Does the thing exist?           | Capacity × duration                                                                  |
-| **Bytes** | Is anything counting gigabytes? | Transfer out of a boundary, and per-GB processing wherever a device sits in the path |
-| **Calls** | Did you invoke the API?         | API operations; size and direction are irrelevant                                    |
+| Meter     | The question it answers                                                     | What it counts                                                               |
+| --------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Time**  | Does the thing exist?                                                       | Something exists × how long it existed                                       |
+| **Bytes** | Did bytes cross a boundary, pass through a box, or get read where they sat? | Gigabytes leaving, gigabytes handled in the path, gigabytes scanned in place |
+| **Units** | How many discrete things did you ask for?                                   | Requests, tokens, pages, characters, recipients, payload slices              |
 
-The second meter is called Bytes rather than Egress on purpose. "Inbound is free" is a rule about data _transfer_, not a property of the meter: a NAT Gateway, an interface endpoint or a log pipeline charges per gigabyte in both directions.
+Two of the three have been renamed, both times because the name was narrower than the shape and quietly excluded valid members.
+
+**Bytes** was Egress until the dataset contradicted it: CloudWatch ingestion, Firehose intake and NAT Gateway processing all meter gigabytes with no regard for direction. "Inbound is free" is a rule about data _transfer_, not a property of the meter.
+
+**Units** was Calls, defined as "the number of API operations; payload size and direction are irrelevant". That described one implementation rather than a billing shape, and most of its own members refuted it — SQS bills a 1 MiB call as sixteen requests, Bedrock counts tokens, Textract counts pages, SES counts recipients. What they share is that something discrete gets counted. A request is the commonest instance of that, not the definition of it.
 
 This site classifies AWS services against those three, explains the one thing people get wrong about each, and names the usage type to search for on your own bill.
 
 ## Principles
 
 - **No dollar rates in the dataset.** Rates move and vary by region; which meter turns does not. The `Service` constructor rejects a record whose prose quotes one.
-- **Every claim carries a source** and a date it was checked against AWS documentation. Both are enforced by the model, not by convention.
-- **Lit means billed, dim means free** in every diagram, so you can find the money before reading a word.
+- **Every claim carries an AWS source** and a date it was checked. The `Service` constructor rejects a record with no source, or one citing a page outside AWS's own domains.
+- **Colour means billed, grey means free** in every diagram — and never colour alone, since it also has to work in greyscale and for a screen reader.
 - **Model before detail.** Each page opens with a single sentence, then earns it.
 
 Unofficial. Not affiliated with Amazon Web Services.
@@ -31,7 +35,7 @@ Unofficial. Not affiliated with Amazon Web Services.
 npm install
 npm run dev      # local dev server
 npm run test     # domain, layout, i18n and catalogue tests
-npm run check    # lint + types + tests + build guards — what CI runs
+npm run check    # lint + types + tests + build guards (CI also runs actionlint, coverage thresholds, npm audit and the source checker)
 npm run build    # static build into dist/
 ```
 
@@ -95,10 +99,10 @@ Add an object to the matching file in `src/data/services/`:
 }
 ```
 
-`meters` accepts `egress` as an alias for `bytes`; the repository translates it. Everything else is enforced: the build fails if the slug collides or is not URL-safe, the source is not an AWS-controlled domain, the prose quotes a dollar amount or runs long, or the checked date is missing.
+`meters` accepts the old spellings `egress` and `calls` as aliases for `bytes` and `units`; the repository translates them, so research written against the earlier names still lands correctly. Everything else is enforced: the build fails if the slug collides or is not URL-safe, the source is not an AWS-controlled domain, the prose quotes a dollar amount or runs long, or the checked date is missing.
 
 Use `node scripts/merge-services.mjs batch.json` to fold a research batch into the right per-category files without duplicating a slug across two of them.
 
 ## Adding a locale
 
-Add it to `LANGS` in `src/i18n/strings.ts`, fill in the string bundle, and create `src/pages/<lang>/`. Nothing else in the site is locale-aware, and a test asserts every locale carries the same key set. Pages that exist in only one language grey out in the language switcher rather than linking to a 404.
+Add it to `LANGS` in `src/i18n/strings.ts`, fill in the string bundle, and create `src/pages/<lang>/`. Three other places also hold the locale list and need updating: the sitemap config in `astro.config.mjs`, `LANGS` in `scripts/check-build.mjs`, and the `og:locale` mapping in `src/layouts/Base.astro`. A test asserts every locale carries the same key set. Pages that exist in only one language grey out in the language switcher rather than linking to a 404.

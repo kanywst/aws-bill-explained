@@ -13,8 +13,8 @@ describe('isMeterId', () => {
 
 describe('MeterSet', () => {
   it('is order-independent, because source data is not ordered', () => {
-    const a = MeterSet.of(['calls', 'time']);
-    const b = MeterSet.of(['time', 'calls']);
+    const a = MeterSet.of(['units', 'time']);
+    const b = MeterSet.of(['time', 'units']);
     expect(a.equals(b)).toBe(true);
     expect(a.signature).toBe(b.signature);
   });
@@ -26,7 +26,7 @@ describe('MeterSet', () => {
   });
 
   it('always returns canonical order regardless of input order', () => {
-    expect(MeterSet.of(['calls', 'bytes', 'time']).toArray()).toEqual(['time', 'bytes', 'calls']);
+    expect(MeterSet.of(['units', 'bytes', 'time']).toArray()).toEqual(['time', 'bytes', 'units']);
   });
 
   it('de-duplicates repeated meters', () => {
@@ -41,8 +41,8 @@ describe('MeterSet', () => {
     });
 
     it('distinguishes different billing shapes', () => {
-      expect(MeterSet.of(['time']).signature).not.toBe(MeterSet.of(['calls']).signature);
-      expect(MeterSet.of(['time', 'calls']).signature).toBe('time+calls');
+      expect(MeterSet.of(['time']).signature).not.toBe(MeterSet.of(['units']).signature);
+      expect(MeterSet.of(['time', 'units']).signature).toBe('time+units');
     });
   });
 });
