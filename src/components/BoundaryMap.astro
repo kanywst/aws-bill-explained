@@ -52,7 +52,13 @@ const geom = rings.map((r, i) => ({
 /**
  * Which boundary costs money is the entire content of this diagram, and
  * role="img" kept all of it inside the SVG where assistive tech cannot reach.
- * Nested rings are a nested list, so that is how they are described.
+ *
+ * The list is REVERSED. `rings` arrives outermost-first because that is the
+ * order the boxes have to be drawn in, but the argument runs the other way —
+ * the centre is free and each ring you cross outward is a toll. Announcing
+ * them in prop order told a screen reader the innermost boundary was the
+ * internet, inverting the thesis for exactly the readers who could not see the
+ * picture that contradicts it.
  */
 const a11y = t(lang).a11y;
 const ringAlt = (r: (typeof rings)[number]) =>
@@ -66,7 +72,7 @@ const ringAlt = (r: (typeof rings)[number]) =>
     <p class="sr">{a11y.boundaryAlt}</p>
     <ol class="sr">
       {
-        rings.map((r) => (
+        [...rings].reverse().map((r) => (
           <li>
             {ringAlt(r)}
             {r.note ? ` ${r.note}` : ''}
@@ -74,6 +80,7 @@ const ringAlt = (r: (typeof rings)[number]) =>
         ))
       }
     </ol>
+    <p class="sr">{s.rings}</p>
     <svg viewBox={`0 0 ${W} ${H}`} class="bm-svg" aria-hidden="true">
       {
         geom.map((r) => (

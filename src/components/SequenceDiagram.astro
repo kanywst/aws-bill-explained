@@ -52,11 +52,20 @@ const GUTTER_W = SEQ_GUTTER_WIDTH;
 // at a negative x and draw the arrow off the left of the canvas — silently, and
 // only for the one step with the typo. Fail the build instead, the way
 // PathDiagram does for hops.
-const laneX = (id: string) => {
+const actorIndex = (id: string) => {
   const i = actors.findIndex((a) => a.id === id);
   if (i < 0) throw new Error(`SequenceDiagram: step references unknown actor id "${id}"`);
-  return seqLaneX(i);
+  return i;
 };
+// Forced here, before anything renders. The text alternative resolves actor
+// labels and is emitted above the SVG, so without this a typo'd id died inside
+// that lookup with a bare "cannot read properties of undefined" instead of the
+// message above.
+steps.forEach((step) => {
+  actorIndex(step.from);
+  actorIndex(step.to);
+});
+const laneX = (id: string) => seqLaneX(actorIndex(id));
 const stepY = (i: number) => seqStepY(i);
 
 const LANES_W = seqLanesWidth(actors.length);
@@ -71,12 +80,12 @@ const billed = steps.filter((s) => s.meter);
  * a list, so they are now marked up as one.
  */
 const a11y = t(lang).a11y;
-const actorLabel = (id: string) => actors.find((x) => x.id === id)!.label;
+const actorLabel = (id: string) => actors[actorIndex(id)]!.label;
 const stepAlt = (step: SeqStep) => {
   const base = step.meter
     ? a11y.hopBilled
         .replace('{meter}', t(lang).meters[step.meter].name)
-        .replace('{cost}', step.charge ?? a11y.billed)
+        .replace('{cost}', step.charge ?? a11y.costUnstated)
     : a11y.hopFree;
   const text = base
     .replace('{from}', actorLabel(step.from))

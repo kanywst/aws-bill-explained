@@ -89,16 +89,41 @@ const hopAlt = (hop: PathHop) =>
         .replace('{to}', label(hop.to))
         .replace('{label}', hop.label)
         .replace('{meter}', meterName(hop.meter))
-        .replace('{cost}', hop.cost ?? a.billed)
+        .replace('{cost}', hop.cost ?? a.costUnstated)
     : a.hopFree
         .replace('{from}', label(hop.from))
         .replace('{to}', label(hop.to))
         .replace('{label}', hop.label);
+
+/**
+ * A node's lamps are a separate claim from the hops: they say the box bills for
+ * existing, whether or not anything flows. Listing only the hops made an idle
+ * path read as entirely free — on the very articles whose thesis is that it is
+ * not. `sub` goes in too, because it is where the rate or the region lives.
+ */
+const billedNodes = nodes.filter((n) => n.charges?.length || n.sub);
+const nodeAlt = (n: PathNode) => {
+  const named = n.sub ? `${n.label} (${n.sub})` : n.label;
+  return n.charges?.length
+    ? a.nodeCharges
+        .replace('{node}', named)
+        .replace('{meters}', n.charges.map(meterName).join(', '))
+    : named;
+};
 ---
 
 <figure class="pd">
   <div class="pd-scroll" tabindex="0" role="region" aria-label={caption}>
     <p class="sr">{a.pathAlt.replace('{nodes}', nodes.map((n) => n.label).join(', '))}</p>
+    {
+      billedNodes.length > 0 && (
+        <ul class="sr">
+          {billedNodes.map((n) => (
+            <li>{nodeAlt(n)}</li>
+          ))}
+        </ul>
+      )
+    }
     <ol class="sr">
       {hops.map((hop) => <li>{hopAlt(hop)}</li>)}
     </ol>

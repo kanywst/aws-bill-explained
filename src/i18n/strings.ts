@@ -136,6 +136,9 @@ interface Strings {
     stepReply: string;
     ringCrossing: string;
     ringFree: string;
+    ringSummary: string;
+    nodeCharges: string;
+    costUnstated: string;
   };
 }
 
@@ -272,6 +275,9 @@ export const STRINGS: Record<Lang, Strings> = {
       stepReply: 'reply',
       ringCrossing: '{label}. Crossing it: {crossing}.',
       ringFree: '{label}. Crossing it: {crossing}. Free.',
+      ringSummary: '{summary}',
+      nodeCharges: '{node} is billed on the {meters} meter for as long as it exists.',
+      costUnstated: 'rate not shown',
     },
   },
 
@@ -405,6 +411,9 @@ export const STRINGS: Record<Lang, Strings> = {
       stepReply: '応答',
       ringCrossing: '{label}。ここを越えると: {crossing}。',
       ringFree: '{label}。ここを越えると: {crossing}。無料。',
+      ringSummary: '{summary}',
+      nodeCharges: '{node} は存在している間ずっと{meters}メーターで課金される。',
+      costUnstated: '料率は未記載',
     },
   },
 };
