@@ -110,11 +110,15 @@ jobs:
 
   sources:
     # Every claim carries an AWS source URL, so a dead citation is a
-    # correctness problem here rather than a broken-link nit. AWS moves pages
-    # often enough that this reports instead of blocking.
+    # correctness problem here rather than a broken-link nit.
+    #
+    # This used to carry continue-on-error, which made it green whatever it
+    # found — a check nobody reads. The script itself already draws the line:
+    # it exits non-zero only on a definite 404/410 and treats timeouts, 403s
+    # and redirects as warnings, so the flakiness that flag was guarding
+    # against cannot fail the job anyway.
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: true
     permissions:
       contents: read
     steps:
