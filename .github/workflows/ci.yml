@@ -36,7 +36,7 @@ jobs:
         run: npx markdownlint-cli2
 
       - name: Workflows
-        uses: raven-actions/actionlint@v2
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
 
   test:
     runs-on: ubuntu-latest
