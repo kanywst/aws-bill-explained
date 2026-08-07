@@ -126,7 +126,6 @@ interface Strings {
     notBilledOn: string;
     freeService: string;
     showing: string;
-    diagramKey: string;
     /** Text alternatives for the diagrams, whose SVG content is aria-hidden. */
     pathAlt: string;
     seqAlt: string;
@@ -266,7 +265,6 @@ export const STRINGS: Record<Lang, Strings> = {
       notBilledOn: 'Not billed on: {unbilled}.',
       freeService: 'Free — turns no meters of its own.',
       showing: 'Showing {shown} of {total} services.',
-      diagramKey: 'Key',
       pathAlt: 'Path through {nodes}, hop by hop:',
       seqAlt: 'Exchange between {actors}, step by step:',
       boundaryAlt: 'Boundaries from the inside out:',
@@ -402,7 +400,6 @@ export const STRINGS: Record<Lang, Strings> = {
       notBilledOn: '課金されないメーター: {unbilled}。',
       freeService: '無料 — 自前のメーターを回さない。',
       showing: '{total} 件中 {shown} 件を表示。',
-      diagramKey: '凡例',
       pathAlt: '{nodes} を通る経路。1ホップずつ:',
       seqAlt: '{actors} のやりとり。1ステップずつ:',
       boundaryAlt: '内側から外側への境界:',

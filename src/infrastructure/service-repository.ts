@@ -31,7 +31,19 @@ export class InvalidServiceRecordError extends Error {
 const asStrings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 
-const asConfidence = (value: unknown): Confidence => (value === 'high' ? 'high' : 'medium');
+/**
+ * Confidence is our own editorial field, not something AWS hands us, so an
+ * unrecognised value is an authoring mistake rather than a new billing shape to
+ * tolerate. It used to fold anything that was not "high" into "medium", which
+ * quietly PROMOTED a record marked "low" — on a site whose whole claim is that
+ * you can tell how sure it is. There are two levels; say one of them.
+ */
+const asConfidence = (value: unknown, slug: string): Confidence => {
+  if (value === 'high' || value === 'medium') return value;
+  throw new InvalidServiceRecordError(
+    `${slug}: confidence is ${JSON.stringify(value)}, expected "high" or "medium"`,
+  );
+};
 
 /**
  * Both renamed meters keep their old spelling as an inbound alias. The dataset
@@ -94,7 +106,7 @@ export function toService(raw: unknown): Service {
     oneLiner: typeof r.oneLiner === 'string' ? r.oneLiner : '',
     trap: typeof r.trap === 'string' ? r.trap : '',
     billOn: asStrings(r.billOn),
-    confidence: asConfidence(r.confidence),
+    confidence: asConfidence(r.confidence, slug.value),
     sources: asStrings(r.sources),
     checked: typeof r.checked === 'string' ? r.checked : '',
   });

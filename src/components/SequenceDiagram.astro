@@ -5,6 +5,7 @@ import {
   SEQ_COL_WIDTH,
   SEQ_GUTTER_WIDTH,
   SEQ_HEAD_HEIGHT,
+  seqActorIndex,
   seqCanvasHeight,
   seqCanvasWidth,
   seqLaneX,
@@ -52,11 +53,7 @@ const GUTTER_W = SEQ_GUTTER_WIDTH;
 // at a negative x and draw the arrow off the left of the canvas — silently, and
 // only for the one step with the typo. Fail the build instead, the way
 // PathDiagram does for hops.
-const actorIndex = (id: string) => {
-  const i = actors.findIndex((a) => a.id === id);
-  if (i < 0) throw new Error(`SequenceDiagram: step references unknown actor id "${id}"`);
-  return i;
-};
+const actorIndex = (id: string) => seqActorIndex(actors, id);
 // Forced here, before anything renders. The text alternative resolves actor
 // labels and is emitted above the SVG, so without this a typo'd id died inside
 // that lookup with a bare "cannot read properties of undefined" instead of the

@@ -10,6 +10,7 @@ import {
   nodeX,
   pathCanvasHeight,
   pathCanvasWidth,
+  pathNodeIndex,
 } from '../lib/diagram-layout';
 
 /**
@@ -59,11 +60,7 @@ const MID = PATH_MID_Y;
 
 const x = nodeX;
 const cx = (i: number) => nodeX(i) + NODE_W / 2;
-const idx = (id: string) => {
-  const i = nodes.findIndex((n) => n.id === id);
-  if (i < 0) throw new Error(`PathDiagram: hop references unknown node id "${id}"`);
-  return i;
-};
+const idx = (id: string) => pathNodeIndex(nodes, id);
 
 const W = pathCanvasWidth(nodes.length);
 const hasReturn = hops.some((h) => idx(h.to) < idx(h.from));

@@ -154,6 +154,27 @@ export function seqLaneX(index: number): number {
   return SEQ_PAD_X + index * SEQ_COL_WIDTH + SEQ_COL_WIDTH / 2;
 }
 
+/**
+ * Resolves an actor id to its lane index, or throws naming the id.
+ *
+ * This lives here rather than in the component so there is one home for the
+ * rule and it can be tested. The component's copy was the only version that
+ * named the bad id, which meant the useful message was the untested one and
+ * the tested one guarded a branch production could never reach.
+ */
+export function seqActorIndex(actors: readonly { id: string }[], id: string): number {
+  const i = actors.findIndex((a) => a.id === id);
+  if (i < 0) throw new Error(`SequenceDiagram: step references unknown actor id "${id}"`);
+  return i;
+}
+
+/** The same rule for PathDiagram's nodes. */
+export function pathNodeIndex(nodes: readonly { id: string }[], id: string): number {
+  const i = nodes.findIndex((n) => n.id === id);
+  if (i < 0) throw new Error(`PathDiagram: hop references unknown node id "${id}"`);
+  return i;
+}
+
 export function seqStepY(index: number): number {
   return SEQ_HEAD_HEIGHT + SEQ_FIRST_STEP_OFFSET + index * SEQ_STEP_HEIGHT;
 }

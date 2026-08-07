@@ -10,10 +10,12 @@ import {
   PATH_MID_Y,
   pathCanvasHeight,
   pathCanvasWidth,
+  pathNodeIndex,
   SEQ_COL_WIDTH,
   SEQ_GUTTER_WIDTH,
   seqCanvasHeight,
   seqCanvasWidth,
+  seqActorIndex,
   seqLaneX,
   seqLanesWidth,
   seqStepY,
@@ -160,6 +162,22 @@ describe('sequence geometry', () => {
    */
   it('refuses a negative actor index instead of drawing off-canvas', () => {
     expect(() => seqLaneX(-1)).toThrow(/unknown actor/);
+  });
+
+  /*
+   * These two are the path production actually takes — the components call them
+   * with an id. The index guard above can only be reached by a caller that has
+   * already resolved the id itself, which is why it was possible for the tested
+   * guard and the useful error message to live in different places.
+   */
+  it('names the id it could not resolve, for both diagram kinds', () => {
+    const actors = [{ id: 'app' }, { id: 'net' }];
+    expect(seqActorIndex(actors, 'net')).toBe(1);
+    expect(() => seqActorIndex(actors, 'nett')).toThrow(/unknown actor id "nett"/);
+
+    const nodes = [{ id: 'user' }, { id: 'ec2' }];
+    expect(pathNodeIndex(nodes, 'ec2')).toBe(1);
+    expect(() => pathNodeIndex(nodes, 'ec3')).toThrow(/unknown node id "ec3"/);
   });
 
   it('keeps every lane on the canvas', () => {

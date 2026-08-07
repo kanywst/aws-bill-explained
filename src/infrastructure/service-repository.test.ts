@@ -29,15 +29,22 @@ describe('toService', () => {
 
   it('refuses a record the domain would reject, instead of building a broken Service', () => {
     // The boundary no longer papers over missing prose: the model owns that rule.
-    expect(() => toService({ slug: 'x', name: 'X', category: 'compute' })).toThrow(
-      /oneLiner is empty/,
-    );
+    expect(() =>
+      toService({ slug: 'x', name: 'X', category: 'compute', confidence: 'medium' }),
+    ).toThrow(/oneLiner is empty/);
   });
 
-  it('treats any confidence other than "high" as medium', () => {
+  /**
+   * Confidence is ours to author, not AWS's to change, so a value outside the
+   * two levels is a mistake and not a shape to absorb. Folding everything that
+   * was not "high" into "medium" silently PROMOTED a record marked "low" on a
+   * site whose selling point is knowing how sure it is.
+   */
+  it('refuses a confidence outside the two levels instead of promoting it', () => {
     expect(toService({ ...valid, confidence: 'high' }).confidence).toBe('high');
-    expect(toService({ ...valid, confidence: 'wildly-unsure' }).confidence).toBe('medium');
-    expect(toService({ ...valid, confidence: undefined }).confidence).toBe('medium');
+    expect(toService({ ...valid, confidence: 'medium' }).confidence).toBe('medium');
+    expect(() => toService({ ...valid, confidence: 'low' })).toThrow(/expected "high" or "medium"/);
+    expect(() => toService({ ...valid, confidence: undefined })).toThrow(/confidence is undefined/);
   });
 
   /**
