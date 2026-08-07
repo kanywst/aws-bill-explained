@@ -44,7 +44,7 @@ export const MAX_TRAP = 220;
  * rather than in a test over the committed data — a test only catches a bad
  * record after somebody has written it down.
  */
-const AWS_SOURCE =
+export const AWS_SOURCE =
   /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//;
 
 export class InvalidServiceError extends Error {

@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { AWS_SOURCE } from './domain/service';
 
 /**
  * The whole site is built on one promise: you get the model before the detail.
@@ -27,22 +28,15 @@ const topics = defineCollection({
      * AWS pages the article's claims rest on. Every service record carries
      * these and gets its links checked in CI; the articles make just as many
      * verifiable claims and carried nothing but a date. Restricted to
-     * AWS-controlled hosts for the same reason the Service entity restricts
-     * its own: a citation to a third-party blog is not a citation.
+     * AWS-controlled hosts by the Service entity's own rule — imported rather
+     * than restated, because two copies of it drift and then the catalogue and
+     * the articles disagree about what counts as a citation.
      */
     sources: z
       .array(
-        // No .url() — it is deprecated in this zod, and the refine below is
-        // strictly narrower anyway: https, and an AWS-controlled host.
         z
           .string()
-          .refine(
-            (u) =>
-              /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//.test(
-                u,
-              ),
-            { message: 'source must be an AWS-controlled page' },
-          ),
+          .refine((u) => AWS_SOURCE.test(u), { message: 'source must be an AWS-controlled page' }),
       )
       .default([]),
   }),

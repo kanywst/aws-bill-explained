@@ -176,23 +176,34 @@ describe('sequence geometry', () => {
     expect(seqLaneX(4) - seqLaneX(3)).toBe(SEQ_COL_WIDTH);
   });
 
-  it('leaves the whole gutter free of lifelines, since that is where costs go', () => {
+  /*
+   * The three assertions below are pinned to what the component actually draws
+   * rather than to the formulas, because a test written against the formula
+   * cannot fail: an earlier version asserted things like
+   * `seqCanvasWidth(n) - GUTTER === seqLanesWidth(n)`, which is that function's
+   * own definition restated.
+   *
+   * Offsets come from SequenceDiagram.astro: the label sits at `y - 9`, the
+   * gutter rule at `y + 18`, and the widest actor box spans COL_W - 24 centred
+   * on the lane.
+   */
+  it('keeps the widest actor box clear of the cost gutter', () => {
     for (let actors = 1; actors <= 6; actors += 1) {
+      const boxRight = seqLaneX(actors - 1) + SEQ_COL_WIDTH / 2 - 12;
       const gutterStart = seqCanvasWidth(actors) - SEQ_GUTTER_WIDTH;
-      expect(seqLaneX(actors - 1), `${actors} actors`).toBeLessThan(gutterStart);
+      expect(boxRight, `${actors} actors`).toBeLessThanOrEqual(gutterStart);
     }
   });
 
-  it('grows the canvas with the steps and never crops the last one', () => {
+  it('leaves room below the last step for the gutter rule it draws', () => {
     for (let steps = 1; steps <= 8; steps += 1) {
-      expect(seqStepY(steps - 1), `${steps} steps`).toBeLessThan(seqCanvasHeight(steps));
+      expect(seqStepY(steps - 1) + 18, `${steps} steps`).toBeLessThan(seqCanvasHeight(steps));
     }
-    expect(seqCanvasHeight(4)).toBeGreaterThan(seqCanvasHeight(3));
   });
 
-  it('never overlaps two steps', () => {
-    expect(seqStepY(1)).toBeGreaterThan(seqStepY(0));
-    expect(seqStepY(2) - seqStepY(1)).toBe(seqStepY(1) - seqStepY(0));
+  it('spaces steps wide enough that a label never lands on its neighbour', () => {
+    // Each step occupies y-9 (label) through y+18 (gutter rule): 27px.
+    expect(seqStepY(1) - seqStepY(0)).toBeGreaterThan(27);
   });
 });
 

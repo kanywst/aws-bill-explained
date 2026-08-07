@@ -128,7 +128,11 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
     max-width: var(--measure);
   }
 
-  .tp-body :global(h2) {
+  /* The sources section sits outside .tp-body, so it has to opt in to the
+     heading treatment explicitly or it renders at browser-default h2 — the one
+     shouting heading on an otherwise quiet page. */
+  .tp-body :global(h2),
+  .tp-src h2 {
     font-family: var(--font-ui);
     font-size: 0.72rem;
     font-weight: 700;
@@ -138,6 +142,32 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
     margin: 3.5rem 0 1.1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
+  }
+
+  .tp-src {
+    max-width: var(--measure);
+  }
+
+  .tp-src ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+
+  .tp-src li {
+    margin-bottom: 0.35rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .tp-src a {
+    color: var(--text-dim);
+  }
+
+  .tp-src a:hover {
+    color: var(--text);
   }
 
   .tp-body :global(p) {
