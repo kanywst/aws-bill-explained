@@ -1,0 +1,108 @@
+---
+title: どこで動かすかが値段の一部
+short: リージョン
+oneLiner: 「AWS の価格」は存在しない。あるのはリージョンごとの価格で、請求書の usage type がどれかを名指ししている。
+meters: ['time', 'bytes', 'units']
+order: 28
+checked: 2026-08-07
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+「`m7i.large` の値段」というものは存在しない。あるのはリージョンごとの値段だ。同じインスタンスタイプ、Linux、オンデマンド、共有テナンシー、すべて同じ日に Price List API から引いた数字:
+
+- us-east-1 (バージニア北部) と us-west-2 (オレゴン) — $0.1008/時
+- ap-south-1 (ムンバイ) — $0.10605
+- eu-west-1 (アイルランド) — $0.11235
+- eu-central-1 (フランクフルト) — $0.12075
+- ap-southeast-1 (シンガポール) — $0.126
+- ap-northeast-1 (東京) — $0.1302
+- af-south-1 (ケープタウン) — $0.13335
+- sa-east-1 (サンパウロ) — $0.16065
+
+1か月 730 時間動かすと、バージニア北部で $73.58、サンパウロで $117.27。マシン側は何も変わっていない。リージョンは電力も土地も回線も税制も違う物理的な場所であり、AWS はグローバルな定価表ではなく各リージョンの実コストに対して値付けしている。だから並び順は地図どおりにはならない。ムンバイはフランクフルトより安く、アイルランドはシンガポールより安い。
+
+**請求書は usage type の接頭辞でリージョンを名指ししている。** `USE2-BoxUsage:m7i.large` はオハイオのそのインスタンスだ。接頭辞は AWS が表として公開している短縮コードで、`USE1` が us-east-1、`USE2` が us-east-2、`USW2` が us-west-2、`CAN1` が ca-central-1、`EUC1` が eu-central-1、`APN1` が ap-northeast-1、`SAE1` が sa-east-1、といった具合。ここで引っかかるポイントが4つある。
+
+- **接頭辞がない = us-east-1。** `BoxUsage:m7i.large`、`TimedStorage-ByteHrs`、`DataTransfer-Out-Bytes` はすべてバージニア北部。us-east-1 はこの命名規則より前からあるので、古い usage type には接頭辞が付かなかった。新しいものには付く (CloudWatch は同リージョンで `USE1-DataScanned-Bytes` を計上する) ので、両方の形が同じリージョンを指して共存している。
+- **eu-west-1 は `EUW1` ではなく `EU`。** ヨーロッパの他のリージョンはまともなコードをもらった (`EUC1` フランクフルト、`EUW2` ロンドン、`EUN1` ストックホルム)。アイルランドだけが最初の表記のまま残っている。
+- **コードの数字はリージョン名の数字と一致しない。** `APS1` は ap-southeast-1 (シンガポール)、`APS3` は ap-south-1 (ムンバイ)、`APS5` は ap-south-2 (ハイデラバード)。意味のないラベルとして扱い、必ず表を引くこと。
+- **一部のサービスは短縮コードを使わずフルのリージョンコードを出す。** KMS は `APN1-` ではなく `ap-northeast-1-KMS-Requests` で計上される。
+
+接頭辞が2つ連続していたらリージョンのペアを意味する。`USE1-APN1-AWS-Out-Bytes` はバージニア北部から東京へ出ていくバイト。
+
+## で、いくらなの
+
+動くのは時間メーターだけではない。3つのメーターすべてがリージョンで変わる。
+
+**time。** EBS gp3 のプロビジョニング済みストレージ、GB-month あたり: us-east-1 が $0.08、ap-northeast-1 が $0.096、sa-east-1 が $0.152。誰も触っていないボリュームでほぼ倍。
+
+**bytes。** S3 Standard、月 50 TB まで: us-east-1 が $0.023/GB-month、eu-central-1 が $0.0245、ap-northeast-1 が $0.025、af-south-1 が $0.0274、sa-east-1 が $0.0405 — バージニア北部の 1.76 倍。インターネット向け転送、月 10 TB まで: us-east-1 が $0.09/GB、ap-northeast-1 が $0.114、sa-east-1 が $0.15、af-south-1 が $0.154。
+
+**units。** S3 の PUT/COPY/POST/LIST、1,000 リクエストあたり: us-east-1 が $0.005、ap-northeast-1 が $0.0047、eu-central-1 が $0.0054、af-south-1 が $0.006、sa-east-1 が $0.007。GET は 1,000 あたり us-east-1 が $0.0004、ap-northeast-1 が $0.00037、sa-east-1 が $0.00056。
+
+東京を2回見てほしい。ストレージはバージニア北部より 8.7% 高く、リクエストは 7% ほど安い。**順位はリージョン単位ではなくメーター単位で決まる。** 同じサービスでも、ストレージ主体のワークロードで安いリージョンが、リクエスト主体のワークロードでは高いほうになりうる。
+
+**グローバルサービスにはそもそもリージョンがない。** Route 53 はホストゾーン1つにつき月 $0.50 (最初の25個まで)、標準クエリ 100 万件につき $0.40 (最初の 10 億件まで) で、これはどこにいても同じレートだ。Price List 上の location は "Any" で、usage type は `HostedZone` や `DNS-Queries` のように接頭辞を持たない。名指しすべきリージョンが存在しないからだ。CloudFront は価格が変動するが、変動軸は AWS リージョンではなくエッジの地域区分になる。インターネット向け転送 (月 10 TB まで) は `US-` と `EU-` が $0.085/GB、`JP-` が $0.114、`AP-` が $0.12。CloudFront の請求はこれを **Global** にまとめ、Cost Explorer もリージョンなしのバケットに入れる。
+
+<SequenceDiagram
+  lang="ja"
+  caption="日本のビューワと ap-northeast-1 のオリジン。配信バイトの単価はオリジンのリージョンではなくエッジの地域区分で決まる。"
+  actors={[
+    { id: 'viewer', label: '日本のビューワ' },
+    { id: 'edge', label: 'CloudFront エッジ' },
+    { id: 'origin', label: 'S3 ap-northeast-1' },
+  ]}
+  steps={[
+    {
+      from: 'viewer',
+      to: 'edge',
+      label: 'HTTPS で GET',
+      meter: 'units',
+      charge: 'JP · $0.012 / 10,000',
+    },
+    { from: 'origin', to: 'edge', label: 'キャッシュミス: 1GB をオリジン取得', reply: true },
+    {
+      from: 'edge',
+      to: 'viewer',
+      label: '1GB を配信',
+      reply: true,
+      meter: 'bytes',
+      charge: 'JP · $0.114/GB',
+    },
+  ]}
+/>
+
+では、バージニア北部に何も置いていないアカウントの請求書に us-east-1 の使用量が出るのはなぜか。グローバルサービスの副作用がそこに落ちるからだ。CloudFront の追加メトリクスを有効にすると、CloudFront は最大8個のメトリクスを **US East (バージニア北部) リージョンの** CloudWatch に送る。日本にしか配信していないディストリビューションが `USE1-` の CloudWatch 明細を生む。そのディストリビューションにカスタムドメインを付けるなら ACM 証明書は us-east-1 で発行する必要がある。CloudFront は他リージョンの証明書を受け付けない。Billing と IAM のコンソール操作も us-east-1 に記録される。バージニアが出てくるのは、そこがグローバルなコントロールプレーンの置き場所だからだ。
+
+**「使えるかどうか」も値段のうち。** `m8i.large` は us-east-1、eu-west-2、sa-east-1 を含む 24 リージョンで提供されている。eu-north-1 (ストックホルム)、ap-northeast-3 (大阪)、il-central-1 (テルアビブ)、me-central-1 (UAE) では提供されていない。必要なものが自分のリージョンにないと、その後の設計 — 持っているリージョンを叩きに行く、あるいはデータをそちらに複製する — が、可用性の穴を毎月の bytes 課金に変換してしまう。
+
+## 例外と罠
+
+**us-east-1 の見積もりは他リージョンの見積もりではない。** AWS の料金ページにはリージョンセレクタとデフォルト値があり、そのデフォルトが読み手の対象リージョンであることはまずない。数字を読んだらセレクタを合わせて読み直す。習慣にするなら Price List API のほうが早い。同じ製品を `regionCode` だけ変えて引けば、2つのレートをそのまま比較できる。
+
+**安いコンピュートの代金を転送で払う。** リージョン間転送のレートは**送信元**リージョンに属していて、しかも対称ではない。us-east-1 発なら、ほぼすべての商用リージョン宛てで $0.02/GB。ap-northeast-1 発なら $0.09/GB。sa-east-1 発 us-east-1 宛ては $0.138/GB で、同じ線を逆向きに流すだけで 6.9 倍になる。
+
+<PathDiagram
+  lang="ja"
+  caption="レートは送信元リージョンのもの。同じ線でも向きによって値段が違う。ワーカーを動かしてもデータは動いていない。"
+  nodes={[
+    { id: 'tokyo', label: 'S3 バケット', sub: 'ap-northeast-1' },
+    { id: 'virginia', label: 'バッチワーカー', sub: 'us-east-1', charges: ['time'] },
+  ]}
+  hops={[
+    { from: 'tokyo', to: 'virginia', label: '1TB を読む', meter: 'bytes', cost: '$0.09/GB' },
+    { from: 'virginia', to: 'tokyo', label: '結果を書き戻す', meter: 'bytes', cost: '$0.02/GB' },
+  ]}
+/>
+
+`m7i.large` を東京からバージニア北部に移すと月 $21.46 浮く。東京から 1TB 読み出すと $92.16 かかる。データは動いていないので、浮くほうは頭打ちで、転送のほうは GB 単位でトラフィックとともに伸びていく。
+
+**`EU-` は2つの別物を指す。** EC2 とデータ転送では `EU-` はアイルランドの eu-west-1。CloudFront では `EU-` はヨーロッパのエッジロケーションで、アイルランドとは無関係。同じ3文字が別の名前空間に属していて、見分けられるのはサービス列だけだ。
+
+**Local Zone と Wavelength Zone は親リージョンとは別建ての価格。** `c5.2xlarge` は us-west-2 で $0.34/時。ロサンゼルスの Local Zone では `LAX1-BoxUsage:c5.2xlarge` として $0.408、20% 増しになる。もっと開くところもある。ハンブルク `HAM1-` が $0.524、パース `PER1-` が $0.599、リマ `LIM1-` が $0.655。Wavelength Zone は親リージョンを含む複合コードになり、`EUW3WL1DSS1-BoxUsage:c5.2xlarge` は eu-west-3 配下のダカール Wavelength Zone で $0.461。請求書では見覚えのないリージョン接頭辞のように見えるが、実際そのとおりのものだ。
+
+**2つのリージョンの価格は独立に動く。** us-east-1 と us-west-2 は `m7i.large` について今はたまたま同額だ。それは現在のレートカードについての事実であってルールではないし、どちらの S3 や転送料についても何も語っていない。一度測った倍率は使い回せない。両方引き直すこと。

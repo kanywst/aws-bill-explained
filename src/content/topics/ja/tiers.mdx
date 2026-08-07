@@ -1,0 +1,106 @@
+---
+title: 表示単価は誰の単価でもない
+short: 階段料金
+oneLiner: 料金ページの単価は限界単価だ。境界をまたいだ瞬間、その数字は誰の実効単価でもなくなる。
+meters: ['bytes', 'units']
+order: 27
+checked: 2026-08-07
+---
+
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+「最初の 10 TB/月 — $0.090/GB」と書いてある料金ページは、値段を提示していない。**階段の一段目**を提示している。その単価が効くのは、その段に収まる GB だけだ。境界をまたげば次の GB は安くなり、すでに払った GB はその段に置いてきたまま動かない。累進課税の計算とまったく同じで、フラットレートだと読んだ瞬間に同じ壊れ方をする。
+
+Price List API を見ると構造がそのまま出ている。price dimension には必ず `beginRange` と `endRange` があり、階段料金とは「その usage type が price dimension を複数持っている」というだけのことだ。us-east-1 の `DataTransfer-Out-Bytes` は 4 段ある。
+
+- 0 – 10,240 GB — $0.090/GB
+- 10,240 – 51,200 GB — $0.085/GB
+- 51,200 – 153,600 GB — $0.070/GB
+- 153,600 GB 以上 — $0.050/GB
+
+ここで二度読む価値があるのが 2 点。境界は 2 進数だ。「最初の 10 TB」は 10,240 GB であって 10,000 GB ではない。そしてこの範囲は、**その usage type 1 本の月初からの累計**に対して効く。リクエスト単位でもリソース単位でもバケット単位でもない。
+
+<SequenceDiagram
+  lang="ja"
+  caption="us-east-1 から 1 か月で 60 TB 出した場合 — 61,440 GB で $5,120.00。平均は $0.0833/GB、表示単価は $0.090/GB、次の 1 GB は $0.070。"
+  actors={[
+    { id: 'app', label: 'ワークロード' },
+    { id: 'net', label: 'インターネット' },
+  ]}
+  steps={[
+    {
+      from: 'app',
+      to: 'net',
+      label: '最初の 10,240 GB @ $0.090',
+      meter: 'bytes',
+      charge: '$921.60',
+    },
+    {
+      from: 'app',
+      to: 'net',
+      label: '次の 40,960 GB @ $0.085',
+      meter: 'bytes',
+      charge: '$3,481.60',
+    },
+    {
+      from: 'app',
+      to: 'net',
+      label: '次の 10,240 GB @ $0.070',
+      meter: 'bytes',
+      charge: '$716.80',
+    },
+  ]}
+/>
+
+数字を 3 つ同時に持っておく必要がある。**表示単価**は $0.090。**限界単価** — 次の 1 GB の値段 — は $0.070。**平均単価** — 自分より下流の人間が口にするのは常にこれだ — は $0.0833。3 つとも間違っていない。答えている質問が違うだけで、見積もりが壊れるのは「平均はいくら」という質問に表示単価で答えたときだ。
+
+どれくらい効いてくるかはメーター次第で、しかも上段と下段の開きはサービスごとにまるで揃っていない。us-east-1 の S3 Standard ストレージは最初の 50 TB が $0.023/GB-月、次の 450 TB が $0.022、500 TB 超が $0.021。3 段で開きは 8.7% しかなく、ほぼフラットだ。600 TB を表示単価で見積もっても実際の $13,465.60 に対して誤差 5% 以内に収まる。一方でデータ転送アウトは上段から下段まで 44% 落ちる。CloudWatch カスタムメトリクスは最初の 10,000 個が $0.30/メトリクス-月、1,000,000 個超が $0.02 で、落差は 93%。同じ課金の仕組みで、「階段を無視していいか」の答えが正反対になる。
+
+## で、いくらなの
+
+**階段は毎月 1 日にゼロに戻る。** AWS は consolidated billing のドキュメントにそう書いている。使用量は毎月計測され、「as each month begins, your service usage is reset to zero」。階段は一度登れば終わりの会員ランクではない。3 月に 200 TB 移行しても、手に入るのは 3 月の残りぶんの $0.050 の段だけで、4 月 1 日には何も残らない。境界の近くに居座るワークロードだともっと厄介で、ある月は 45 TB、ある月は 55 TB 動かすサービスは毎月違う平均単価を払うことになる。前月比の増減はチームがやったことと何の関係もない。
+
+**階段は consolidated billing ファミリー全体で合算される。** ここが一番知られていないところで、AWS の書き方に曖昧さはない。「For billing purposes, AWS treats all of the accounts in the organization as if they were one account」。そして「Member accounts don't reach tier thresholds individually. Instead, all usage in the organization is aggregated for each service」。
+
+us-east-1 から 20 TB ずつ出している 3 アカウントが、それぞれ別の支払いアカウントを持っているなら、階段は 3 本別々に登る。10,240 GB × $0.090 + 10,240 GB × $0.085 で 1 アカウント $1,792.00、合計 $5,376.00。同じ 3 アカウントを 1 つの支払いアカウントの下に入れると、組織が 61,440 GB まで 1 本の階段を登って $5,120.00 になる。ワークロード側は何も変わっていない。逆向きに動かすともっと極端になる。
+
+<SequenceDiagram
+  lang="ja"
+  caption="us-east-1 からの同じ 20 TB。すでに月 150 TB 動かしている組織に参加する前と後。平均単価は $0.0875/GB から $0.050/GB へ。"
+  actors={[
+    { id: 'acct', label: 'あるアカウント' },
+    { id: 'net', label: 'インターネット' },
+  ]}
+  steps={[
+    {
+      from: 'acct',
+      to: 'net',
+      label: '20 TB 転送 — 単独の支払いアカウント',
+      meter: 'bytes',
+      charge: '$1,792.00',
+    },
+    {
+      from: 'acct',
+      to: 'net',
+      label: '20 TB 転送 — 組織が 150 TB 超',
+      meter: 'bytes',
+      charge: '$1,024.00',
+    },
+  ]}
+/>
+
+**データ転送アウトの階段は、サービスをまたいでも合算される。** EC2 の料金ページが対象を名指ししている。「Rate tiers take into account your aggregate usage for Data Transfer Out to the Internet across Amazon EC2, Amazon S3, Amazon Glacier, Amazon RDS, Amazon Redshift, Amazon SageMaker, Amazon SES, Amazon SimpleDB, Amazon SQS, Amazon SNS, Amazon DynamoDB, AWS Storage Gateway, AWS CloudShell, and Amazon CloudWatch Logs」。S3 の egress が EC2 の egress を 1 段下に押し下げる、ということだ。ただし階段はあくまで usage type に紐づいていて、データ転送アウトの usage type にはリージョンの接頭辞が付く (`USE2-DataTransfer-Out-Bytes` はオハイオ)。つまりリージョンごとに別の階段が公開され、別々に登る。
+
+**無料枠も合算されるし、それは組織に 1 つしかない。** インターネットへのデータ転送アウトは月 100 GB まで無料で、これは「aggregated across all AWS Services and Regions (except China and GovCloud)」。無料利用枠全般についても同じで、「AWS applies the free tier to the total usage across all accounts in an AWS organization. AWS doesn't apply the free tier to each account individually」。メンバーアカウントを新しく作っても、新しい枠は付いてこない。
+
+## 例外と罠
+
+**S3 の請求書には「Tier」が 2 種類あって、ボリューム階段なのは片方だけだ。** `Requests-Tier1` は PUT・COPY・POST・LIST で us-east-1 だと 1,000 件 $0.005。`Requests-Tier2` は GET とその他すべてで 10,000 件 $0.004。これは数量の段ではなく**リクエストのクラス**で、price dimension は 0 から無限大まで 1 本しかない。どれだけ叩いても単価は動かない。しかも番号は `Requests-Tier8` まで続いていて、Tier3 と Tier4 はライフサイクル遷移と Glacier リストア、Tier5 と Tier6 は Bulk と Expedited のリストア、Tier8 は S3 Access Grants だ。一方で同じ請求書に載っている `TimedStorage-ByteHrs` のほうは本物の 3 段の階段を持っているのに、名前に「tier」が入っていない。名前は何も教えてくれない。教えてくれるのは `beginRange` だ。
+
+**一段目で見積もれば安い方向に外し、最下段で見積もれば高い方向に外す。** 60 TB の egress を表示単価 $0.090 で見積もると $5,529.60、実際は $5,120.00 で 8% 高い。同じ 60 TB を最下段の $0.050 で見積もると $3,072.00 で 40% 低い。成長曲線に沿って外挿すると誤差はどちらも膨らみ、しかも向きが逆なので、同じ料金ページを見ている 2 つのチームが同じワークロードについて 80% ずれた数字を出せてしまう。
+
+**階段の下では「単位あたりコスト」は効率指標として壊れている。** 平均 $/GB は、効率が上がったかどうかと無関係に規模が伸びれば下がるし、縮めば上がる。egress を倍にして「GB あたりコストが 5% 下がりました」と報告するチームは、何も証明していない。単位あたりの数字がどうしても要るなら、固定の参照単価と比較するか、いま自分が乗っている限界単価を追いかけて、平均は会計上の副産物として扱う。
+
+**アカウントを分けても階段は分かれないし、逆にアカウントを寄せると単価が黙って変わる。** 影響範囲の分離やチャージバックのためにサービスを別アカウントへ移しても、支払いアカウントが同じなら単価には何も起きない。階段は組織で登るからだ。刺さるのは逆方向のほうで、組織を抜けたアカウントは自分の階段をゼロから登り直す。事業売却や分社化で、1 バイトも動いていないのに請求額が上がる。そして明細の単価そのままでチームに配賦するチャージバックは、まったく同じ使用量の 2 チームに違う単価を渡すことになる。その GB が組織の階段のどこに落ちたか、それだけの理由で。Cost and Usage Report に unblended rate の隣へわざわざ blended rate の列がある理由もそこにある。blended rate は組織の総額を組織の総使用量で割った値で、そんな列が存在するのは、どのアカウントの実単価も誰かが期待した単価にならないからだ。

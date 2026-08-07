@@ -1,0 +1,91 @@
+---
+title: リソースのない請求
+short: アカウント課金
+oneLiner: リソースにぶら下がらない課金がある。タグも付かず、インフラを消しても直接は減らない。
+meters: []
+order: 33
+checked: 2026-08-07
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+このサイトの他のページは、全部「自分が作った物」を指している。インスタンス、バケット、NAT ゲートウェイ。物が存在するからメーターが回り、物を消せばメーターが止まる。このページはその規則から外れる課金の話だ。**アカウント**か**組織**にぶら下がっていて、背後にリソースが存在せず、インフラを消しても直接は動かない。
+
+そういう課金を生んでいる仕組みは、だいたい2つしかない。
+
+1つは一括請求 (consolidated billing) だ。AWS Organizations のドキュメントは身も蓋もなく書いている。組織には必ず management account があり、それが「すべての member account の料金を支払う」。メンバーごとの請求書は「情報提供のみを目的とする (for informational purpose only)」。**金を使ったアカウントと金を払うアカウントは、設計上そもそも別物**ということだ。payer に、payer の誰も作っていない行が現れるのはバグではない。
+
+もう1つは「支出に対する割合」という値付けだ。AWS Support には単位がない。月間の AWS 利用料に対する**パーセンテージ**で、しかも段階的な帯 (band) と下限付き。この決定ひとつで、サポート費用は請求書の他のすべての行の関数になる。**価格が他の行から計算される唯一の行**だ。
+
+どちらもメーターとしては **time** が回っている。このサイトの言い方でいえば、サブスクリプションが存在するから月単位で課金される、誰も使っていなくても課金される。珍しいのはメーターではない。**単価がレートカードに載っていない**ことのほうだ。
+
+**ここで、このサイトが読者に対して負っている訂正を1つ。** AWS Trusted Advisor と AWS Health Dashboard は「無料」と載せてあるが、それが本当なのは「目で見る側の半分」だけだ。Basic Support で見えるのは Service Limits カテゴリの全チェックと、Security / Fault Tolerance から選ばれた6件 — EBS のパブリックスナップショット、RDS のパブリックスナップショット、S3 バケットのアクセス許可、root ユーザーの MFA、特定ポートが開放されたセキュリティグループ、リージョンをまたぐ STS グローバルエンドポイントの使用。自動更新も付かないので、Basic ではセキュリティチェックを手で refresh することになる。AWS 自身の Trusted Advisor ページが差を数えている。どのプランでも 56 チェック、Business Support+ 以上でさらに 426 チェックが開いて合計 482。Trusted Advisor API も有料プラン側だ。Health はもっと厳しく、Business Support+ / Enterprise Support / Unified Operations のどれも持たないアカウントから AWS Health API を叩くと `SubscriptionRequiredException` が返る。**コンソールは無料で、自動化は無料ではない。そして自動化の値段は、他の全支出に対するパーセンテージ**だ。
+
+<PathDiagram
+  lang="ja"
+  caption="課金がどこにぶら下がるか。ワークロードはタグが付き、消せる。その上の2つはどちらでもなく、存在するだけで毎月課金される。下のアカウントは計算の出発点でしかない。"
+  nodes={[
+    { id: 'work', label: 'ワークロード', sub: 'EC2 / S3 / RDS — タグ可', charges: ['time'] },
+    { id: 'acct', label: 'アカウント', sub: 'AWS Support サブスクリプション', charges: ['time'] },
+    {
+      id: 'payer',
+      label: 'payer アカウント',
+      sub: 'Shield Advanced / Marketplace',
+      charges: ['time'],
+    },
+  ]}
+  hops={[
+    { from: 'work', to: 'acct', label: '割引前の gross charges', cost: '% の計算基礎' },
+    { from: 'acct', to: 'payer', label: '1枚の請求書に集約', cost: 'payer が払う' },
+  ]}
+/>
+
+## で、いくらなの
+
+Support のラインナップは変わった。記憶で答えると古いほうを答えることになる。Developer Support・Business Support・Enterprise On-Ramp は 2027年1月1日にすべて提供終了で、Enterprise On-Ramp の顧客は 2026年中に Enterprise Support へ自動アップグレードされる。その過程で Enterprise の最低額は $15,000 から $5,000 に下がった。3つとも AWS GovCloud (US) リージョンでは引き続き提供される。現行で売っているのは3プラン。Support の価格にリージョンの区別はなく、どこで動かしていても同じ数字だ。
+
+どのプランも「最低額と帯計算の**大きいほう**」を取る。
+
+- **Business Support+** — アカウントあたり $29/月、または月間 AWS 利用料の $10K までが 9%、$10K〜$80K が 7%、$80K〜$250K が 5%、$250K 超が 3%。計算はアカウント単位。
+- **Enterprise Support** — $5,000/月、または $150K までが 10%、$150K〜$500K が 7%、$500K〜$1M が 5%、$1M 超が 3%。加入している全アカウント ID の gross charges を合算して計算する。
+- **Unified Operations** — $50,000/月、または $1M までが 10%、$1M〜$5M が 6%、$5M 超が 5%。こちらも合算。
+
+計算の基礎は「割引やクレジットを適用する**前**の (before any discounts or credits are applied)」gross charges だ。ここは2度読む価値がある。**交渉した割引はサポート費用を減らさない。** 基礎から除外されるサービスも明示されていて、AWS Support 自身、AWS Marketplace、AWS Managed Services、AWS Professional Services、Amazon EKS Anywhere、VMware Cloud on AWS などが入る。コミットメントは逆に算入される。Savings Plans と Reserved Instance の前払いは購入した月に、リカーリング費用は発生した月に基礎へ入る。最低契約期間は 30 日、Unified Operations だけ 90 日。アドオンも同じ形をしていて、AWS Countdown Premium が 1プロジェクトあたり $10K/月、AWS Incident Detection and Response が登録アカウントの合算月額に対して最低 $7K または 2%。
+
+<SequenceDiagram
+  lang="ja"
+  caption="AWS 自身の計算例。Business Support+ で月間 $20,000 の AWS 利用料があった場合。何もプロビジョニングしていないし、タグも付かない。それでも請求書の他の行が動けばこの額も動く。"
+  actors={[
+    { id: 'gross', label: '月間 gross charges' },
+    { id: 'sup', label: 'AWS Support' },
+  ]}
+  steps={[
+    { from: 'gross', to: 'sup', label: '最初の $10K × 9%', meter: 'time', charge: '$900' },
+    { from: 'gross', to: 'sup', label: '次の $10K × 7%', meter: 'time', charge: '$700' },
+    {
+      from: 'sup',
+      to: 'gross',
+      label: 'アカウントに請求',
+      reply: true,
+      meter: 'time',
+      charge: '当月 $1,600',
+    },
+  ]}
+/>
+
+**AWS Shield Advanced** はこの手の課金のいちばん純粋な例だ。**組織あたり月 $3,000。** 料金ページの注記いわく、この料金は「その payer アカウント自身、または少なくとも1つのリンクアカウントが Shield Advanced に加入している payer アカウント単位で課金される」。payer がそれらのアカウントを所有している限り、支払いは1回で済む。API リファレンスはもっと直球で、組織のメンバーアカウントの場合、サブスクリプションは「payer アカウント自身が加入しているかどうかにかかわらず、組織の payer アカウントに対して課金される」と書いてある。**1年のサブスクリプションコミットメント**が必要で、毎年自動更新される。更新のキャンセルができるのは更新日の 30 日前から 5 日前までの間だけだ。保護対象リソースからのデータ転送アウトはこれに上乗せで計量され、AWS の計算例では ALB のリージョン内データ転送アウトが $0.050/GB、CloudFront が $0.025/GB。サブスクリプションには、加入している payer ID あたり月 500 億件までの AWS WAF リクエストも含まれる。
+
+同じ形は他にもある。**AWS Billing Conductor** は請求グループに入れたアカウント数による段階制で、AWS がそのものずばりを書いている。「アカウント内で稼働しているリソースの数は ABC の料金に影響しません」。組織をまたぐ Billing Transfer は AWS managed pricing plan なら無料、customer managed pricing plan なら AWS 組織あたり月 $50。**Amazon EKS Anywhere Enterprise Subscription** は1年契約でクラスターあたり年 $24,000 (月 $2,000 で請求)、3年契約でクラスターあたり年 $18,000。クラスターは自分のデータセンターで動くので、**AWS の中にあるのはサブスクリプションだけ**だ。**AWS Marketplace** のソフトウェアは AWS の請求書に載るが、見分けられるのは `bill/BillingEntity` が `AWS` ではなく `AWS Marketplace` になっている点だけ。
+
+## 例外と罠
+
+**コスト削減プロジェクトは自分のサポート費用も削るが、そこを見積もりに入れる人がいない。** AWS の Enterprise の例では月間 $750K の利用料に対してサポート費用が $52K。そこから上の帯の $100K を落とせば、ワークロードに一切触らずにその 7%、月 $7K も一緒に落ちる。支出が増える移行では逆に効く。ただし歯止めが2つある。**削減効果は最低額で止まる** — Enterprise Support ならどれだけ削っても $5,000 の下限は払う。そして基礎は gross なので、**クレジットはサポート費用を1ドルも減らさない**。
+
+**素朴な showback は、全チームを同じ割合だけ過少報告する。** AWS は明言している。「AWS Support や AWS Marketplace の月額料金のようなサブスクリプション型の課金は割り当てできない (can't be allocated)」。コスト配分タグをぶら下げるリソース ID が存在しないからだ。だからタグ付きコストを合計しても請求書とは合わないし、その差はランダムではない。**おおよそ「サポートのパーセンテージ + タグの付かないサブスクリプション」**だ。ならば意図的に配賦するしかない。Cost Categories の split charge rules は3つの方式を持っていて、ターゲットごとの加重コストに比例する Proportional、割合を自分で決める Fixed、均等割りの Even。ソースに空文字列を指定すると未分類コストを意味する。Enterprise Support なら Billing API の `GetEnterpriseSupportChargeSummary` が `supportChargePercentage`、`totalSupportEligibleSpend`、アカウントごとの `supportCharge` をそのまま返すので、推定ではなく **AWS 自身の計算式から配賦を組み直せる**。
+
+**Shield Advanced は今月引けるレバーではない。** 1年コミットメントがある以上、「今四半期の節約のために止められるか」の答えは No で、しかもキャンセル可能な窓は1年の末尾に5日間しかない。さらに、**コストを減らすどころか増やす失敗モード**を持っている。組織から抜けたアカウントは加入したままになり、一括請求ファミリーから外れた結果、そのアカウント自身に日割りの Shield Advanced 料金が発生する。ガバナンス目的でやったアカウント移動が、月 $3,000 の行をもう1本静かに開けることがある。
+
+**Support プランは継承されない。** management account のプランはメンバーをカバーしない。各アカウントが自分で加入する。すでにプランを持つアカウントが組織に参加すると、AWS はいったんプランを解約し、日割りで返金し、再有効化して、一括請求に載せ直す。参加した月のレポートが変に見えて、請求書は正しい、という状態はこれが理由だ。

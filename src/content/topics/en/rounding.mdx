@@ -1,0 +1,131 @@
+---
+title: Minimums and rounding
+short: Rounding
+oneLiner: Every meter rounds up to a minimum unit. You are billed for the box your usage landed in, not the usage.
+meters: ['time', 'bytes', 'units']
+order: 22
+checked: 2026-08-07
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+No AWS meter reads the true quantity. Each one reads a quantised version of it — your usage snapped to the next multiple of some unit — and the snap is always upward. Of the 185 services indexed on this site, 26 have a minimum, a floor, or a rounding rule written into their billing, and every one of them is documented locally, as small print on its own pricing page. It is not small print. It is one rule applied everywhere, and it is why small workloads never cost what quantity × rate predicts.
+
+EC2 is the cleanest statement of it. Usage is "billed in one-second increments, with a minimum of 60 seconds" — and that applies to Amazon Linux, Windows, RHEL, Ubuntu and Ubuntu Pro, not to everything you can boot. SUSE Linux Enterprise Server is still billed by the whole hour: each partial instance-hour is charged as a full hour. Same instance type, same region, same workload; the AMI you picked decides whether your quantum is one second or 3,600 of them. EBS follows EC2 — provisioned storage, provisioned IOPS and provisioned throughput are all "billed in per-second increments, with a 60-second minimum".
+
+The hour is not a historical artefact, either. An Application Load Balancer is charged "for each hour or partial hour that an Application Load Balancer is running", and "each partial Application Load Balancer hour used is billed as a full hour" — $0.0225 per hour in us-east-1, plus $0.008 per LCU-hour. Create one, test it for ninety seconds, delete it: $0.0225. Amazon OpenSearch Service is the same shape, and its clock starts earlier than you would think: billing "commences for an Amazon OpenSearch Service instance as soon as the instance is available", and partial instance hours "are billed as full hours".
+
+<SequenceDiagram
+  lang="en"
+  caption="us-east-1. The left column is what happened; the gutter is what the meter recorded. Every one rounds up and none of them rounds down."
+  actors={[
+    { id: 'usage', label: 'What ran' },
+    { id: 'meter', label: 'The meter' },
+  ]}
+  steps={[
+    {
+      from: 'usage',
+      to: 'meter',
+      label: 'EC2, Amazon Linux — up 8 s',
+      meter: 'time',
+      charge: '60 s',
+    },
+    { from: 'usage', to: 'meter', label: 'ALB — up 90 s', meter: 'time', charge: '1 hour' },
+    { from: 'usage', to: 'meter', label: 'Lambda — ran 27.40 ms', meter: 'time', charge: '28 ms' },
+    {
+      from: 'usage',
+      to: 'meter',
+      label: 'S3 Standard-IA — 4 KB object',
+      meter: 'bytes',
+      charge: '128 KB',
+    },
+    {
+      from: 'usage',
+      to: 'meter',
+      label: 'Comprehend — 12 characters',
+      meter: 'units',
+      charge: '3 units',
+    },
+  ]}
+/>
+
+The reason is not arbitrary. A minimum is the meter amortising a fixed cost — placement, image pull, attach, boot — over a duration that may be shorter than the setup itself. Which makes it predictable: the smaller and shorter the thing you bill for, the more of the bill is quantum rather than usage.
+
+## What it costs
+
+**Lambda is the least quantised compute AWS sells, and it got that way deliberately.** Until December 2020, duration was rounded up to the nearest 100 ms. It is now "rounded up to the nearest 1ms" with no minimum execution time — AWS's own example shows an invocation that measured 27.40 ms and used to bill 100 ms now billing 28 ms. The other dimension is memory, and it is barely quantised at all: any value from 128 MB to 10,240 MB in 1 MB increments, at $0.0000166667 per GB-second in us-east-1 with $0.20 per million requests on top. So a 200 ms function at 1,024 MB really does cost about a fifth of the same function at one second. That is unusual. Do not assume it anywhere else.
+
+Lambda's remaining rounding is at the front of the clock, not the end of it. Since 1 August 2025 the INIT phase counts toward billed duration on on-demand invocations of ZIP-packaged functions on managed runtimes, which previously were not billed for it. SnapStart adds a floor of a different kind: caching a published version is charged "for a minimum of 3 hours".
+
+**CodeBuild ships three different quanta on one meter, on one pricing page.** On-demand builds on EC2 compute are "calculated in minutes ... rounded up to the nearest minute". On-demand builds on Lambda compute round up to the nearest second instead. Reserved capacity fleets bill in minutes rounded up with "a minimum usage charge of 60 minutes" per instance — and the clock runs "from the time you submit a request for a new instance until your instance is terminated", which is provisioning, not build start. A three-minute build on a freshly provisioned reserved instance bills sixty minutes. Reserved macOS instances carry a 24-hour minimum on top of that.
+
+<SequenceDiagram
+  lang="en"
+  caption="A CodeBuild reserved capacity fleet. Twelve minutes of wall clock, three of them building, sixty billed."
+  actors={[
+    { id: 'you', label: 'You' },
+    { id: 'fleet', label: 'Fleet instance' },
+    { id: 'build', label: 'Build' },
+  ]}
+  steps={[
+    {
+      from: 'you',
+      to: 'fleet',
+      label: 'Request instance — clock starts',
+      meter: 'time',
+      charge: 'minute 0',
+    },
+    {
+      from: 'fleet',
+      to: 'build',
+      label: 'Provisioned, idle 4 min',
+      meter: 'time',
+      charge: 'billed',
+    },
+    { from: 'you', to: 'build', label: 'Build runs 3 min', meter: 'time', charge: 'billed' },
+    {
+      from: 'build',
+      to: 'fleet',
+      label: 'Build ends, instance stays up',
+      meter: 'time',
+      charge: 'billed',
+    },
+    {
+      from: 'you',
+      to: 'fleet',
+      label: 'Terminate at minute 12',
+      meter: 'time',
+      charge: '60 min minimum',
+    },
+  ]}
+/>
+
+Fargate has the same start-early rule with a smaller floor: "pricing is calculated per second with a 1-minute minimum", and "duration is calculated from the time you start to download your container image (Docker pull) until the task terminates". Windows tasks get a 5-minute minimum instead. Glue puts floors on three separate things — ETL jobs have a 1-minute minimum, crawler runs and provisioned development endpoints have a 10-minute minimum, all billed per second above the floor.
+
+**On the Bytes meter the quantum is a minimum object size.** S3 Standard-IA and One Zone-IA: "If an object is less than 128 KB, Amazon S3 charges you for 128 KB." Glacier Instant Retrieval carries the same 128 KB minimum. Glacier Flexible Retrieval and Deep Archive have no minimum object size, but every object costs 40 KB of overhead — 8 KB for the name and metadata billed at S3 Standard rates, plus 32 KB of index billed at the archive class's own rate. EFS is finer-grained and more honest about it: IA and Archive storage is "metered in 4 KiB increments and have a minimum billing charge per file of 128 KiB", data access for those classes "is metered in 128 KiB increments", and the `StorageBytes` CloudWatch metric reports "the total number of bytes that are consumed by small-file rounding". That last one is rare and worth using — a meter that publishes its own rounding error as a number.
+
+**On the Units meter the quantum is a minimum count per request.** Comprehend measures text "in units of 100 characters (1 unit = 100 characters), with a 3 unit (300 character) minimum charge per request", at $0.0001 per unit for the first 10 million units in us-east-1. Transcribe bills audio "in one-second increments, with a minimum per request charge of 15 seconds". Athena bills bytes scanned "rounded up to the nearest megabyte, with a 10 MB minimum per query", at $5 per TB. Three services, three meters, one mechanism.
+
+## Traps
+
+**Optimising the wrong axis.** Below the minimum, speed is free and worth nothing. Cut a Glue crawler from 40 seconds to 20 and you still pay ten minutes. Cut a reserved-fleet CodeBuild job from six minutes to two and you still pay sixty. The lever down there is not performance. It is consolidation — fewer, longer runs, so more of each quantum is real work — or a different quantum entirely, which for CodeBuild means an on-demand fleet with no 60-minute floor. Lambda is the opposite regime: at 1 ms granularity with no minimum, every millisecond you remove is money. Work out which regime you are in before you profile anything.
+
+**Many small things is the worst case on all three meters at once.** A 4 KB object in Standard-IA is billed as 128 KB — 32× the bytes. A 3-second Transcribe request is billed as 15 seconds — 5×. A 20-character Comprehend call is billed as 300 characters — 15×. A pipeline built out of small files, short calls and tiny messages hits all three simultaneously, and not one of the three multipliers appears anywhere in your code. The extreme case is archiving small objects: a 10 KB file moved to Deep Archive is metered as 8 KB at S3 Standard rates plus 32 KB at Deep Archive rates plus a transition request, which is more accounting than object. S3 now refuses lifecycle transitions of objects smaller than 128 KB into the IA classes for objects created after September 2024 — the service defending you against its own rounding.
+
+**A minimum size and a minimum duration are different mechanisms, and they stack.** A minimum size is a multiplier on quantity that never goes away: that 4 KB object is billed as 128 KB every hour it exists. A minimum duration is a floor on the term — delete a Standard-IA object on day one and you are still charged for thirty days, settled as a prorated early-deletion charge. Standard-IA and One Zone-IA hold 30 days, Glacier Flexible Retrieval and Glacier Instant Retrieval 90, Deep Archive 180, EBS snapshot archive 90. Both mechanisms apply to the same object at the same time and multiply together, which is what makes short-retention lifecycle rules lose money: a policy that moves objects into Standard-IA and deletes them after seven days pays 128 KB × 30 days on every one, and is strictly worse than S3 Standard.
+
+<PathDiagram
+  lang="en"
+  caption="One 4 KB object, alive for one day. The size floor multiplies the quantity by 32; the duration floor multiplies the term by 30. Separate rules, and they compose."
+  nodes={[
+    { id: 'app', label: 'Your app' },
+    { id: 'ia', label: 'S3 Standard-IA', sub: 'us-east-1', charges: ['bytes'] },
+  ]}
+  hops={[
+    { from: 'app', to: 'ia', label: 'PUT — 4 KB object', meter: 'units', cost: '1 Tier1 request' },
+    { from: 'ia', to: 'app', label: 'Deleted on day 1', meter: 'bytes', cost: '128 KB × 30 days' },
+  ]}
+/>

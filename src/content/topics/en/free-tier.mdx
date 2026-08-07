@@ -1,0 +1,185 @@
+---
+title: What "free" means here
+short: Free tier
+oneLiner: Free is a discount applied to a meter that already ran. Nothing was switched off.
+meters: []
+order: 8
+checked: 2026-08-07
+---
+
+import BoundaryMap from '../../../components/BoundaryMap.astro';
+import PathDiagram from '../../../components/PathDiagram.astro';
+
+## Why it works that way
+
+Nothing on an AWS bill is free in the sense of "not measured". Free-tier usage is metered,
+priced, and then discounted to zero, which is why it still produces line items and why the
+free tier has usage type strings of its own. `BoxUsage:freetier.micro` is an EC2
+instance-hour. `Resource-Invocation-Count-FreeTier` is a CloudFormation handler operation.
+AWS had to name the quantity before it could decline to charge for it.
+
+That is not pedantry. A meter running at a rate of zero goes back to a non-zero rate the
+moment a condition outside the resource changes — a date passes, a monthly allowance fills,
+an account joins an organization — and the resource itself does not change at all.
+
+### The kinds of free
+
+For fifteen years there were three: **always free** (a monthly allowance that never expires),
+**12 months free** (from your sign-up date), and **short-term trials** (which start on first
+use, not on sign-up). On **July 15, 2025** AWS rebuilt the front door and added a fourth
+mechanism: credits.
+
+A new account now picks a plan at sign-up and gets **USD $100 in credits either way**, plus up
+to $100 more earned in $20 increments for five console activities — EC2, RDS, Lambda, Bedrock
+and Budgets. The credits expire twelve months from the account's open date, on either plan.
+
+- **Free plan.** You cannot incur a charge. It ends six months after account creation or when
+  the credits are exhausted, whichever comes first, and then **the account closes
+  automatically** — you lose access to your resources and data. AWS holds the content for 90
+  days; upgrade to a Paid plan inside that window or it is deleted permanently. Only
+  `Always Free` offers are active: no short-term trials, no Savings Plans, no Reserved
+  Instances. Joining AWS Organizations or standing up a Control Tower landing zone converts
+  the account to a Paid plan and expires the credits immediately.
+- **Paid plan.** All services, plus short-term trials. Credits are applied automatically to
+  eligible usage; anything past them is charged at on-demand rates and the account stays open.
+
+What went away is the 12-month tier. AWS now calls the old arrangement the **Legacy Free
+Tier** and says plainly that the 12-months-free offers "are only available to Legacy Free
+Tier AWS customers". An account opened before July 15, 2025 keeps them for the remainder of
+its twelve months. Everyone else has always-free allowances, trials, and a credit balance
+with a clock on it. Even the eligible instance list forked on that date: before, "Free tier
+eligible" on EC2 meant `t2.micro` and `t3.micro`; on or after, it means `t3.micro`,
+`t3.small`, `t4g.micro`, `t4g.small`, `c7i-flex.large` and `m7i-flex.large`.
+
+<BoundaryMap
+  lang="en"
+  caption="Four shells around the same metered usage. Crossing outward changes who absorbs the charge, not whether the meter ran."
+  rings={[
+    {
+      label: 'Your invoice',
+      crossing: 'on-demand rate',
+      note: 'nothing left to absorb it — this is the rate card',
+    },
+    {
+      label: 'Free Tier credits',
+      crossing: '$0.00 until the balance runs out',
+      free: true,
+      note: '$100 at sign-up plus up to $100 earned; expire 12 months after the account opens',
+    },
+    {
+      label: 'Short-term trial',
+      crossing: '$0.00 for a fixed window',
+      free: true,
+      note: 'clock starts on first use, per service, often per Region — Paid plan only',
+    },
+    {
+      label: 'Always free allowance',
+      crossing: '$0.00 every month',
+      free: true,
+      note: 'resets monthly, never rolls over, never expires',
+    },
+  ]}
+/>
+
+### Whose free tier is it
+
+Not your account's. The Free Tier Terms state that an Organization "can only benefit from
+Offers from one account in the Organization", and that AWS aggregates usage across all
+accounts in it to decide how much of an offer has been consumed. One free tier per
+consolidated billing family.
+
+Order of application matters too, and AWS is explicit: "AWS applies AWS Free Tier benefits
+before Savings Plans benefits. Savings Plans cover excess usage that Free Tier doesn't
+cover." Free-tier hours leave the pool _before_ a commitment gets a chance to match against
+them — a real reason a young organization's Compute Savings Plan can look under-used in its
+first months.
+
+## What it costs
+
+Free costs nothing. What costs something is the first hour on the other side of it. All rates
+below are **us-east-1**, on-demand, from the AWS Price List:
+
+- `t3.micro` Linux — **$0.0104 per hour**, so the 750 hours a legacy account used to get free
+  is about **$7.80 a month**.
+- Public IPv4 address — **$0.005 per hour**, charged identically whether it is in use or idle.
+- EBS `gp3` — **$0.08 per GB-month**; `gp2` is **$0.10**; standard-tier snapshots are
+  **$0.05 per GB-month**.
+- Data transfer out to the internet — **$0.09 per GB**. The price list describes that tier, in
+  its own words, as "first 10 TB / month data transfer out beyond the global free tier".
+- NAT Gateway — **$0.045 per hour plus $0.045 per GB processed**, with no free tier at all.
+
+<PathDiagram
+  lang="en"
+  caption="One free-tier t3.micro in us-east-1. Four meters, four separate allowances, and on a legacy account all of them expire on the same day."
+  nodes={[
+    { id: 'net', label: 'Internet' },
+    { id: 'ip', label: 'Public IPv4', sub: 'in use or idle', charges: ['time'] },
+    { id: 'ec2', label: 't3.micro', sub: 'metered, then discounted', charges: ['time'] },
+    { id: 'ebs', label: 'gp3 root volume', sub: '30 GiB', charges: ['bytes'] },
+  ]}
+  hops={[
+    { from: 'net', to: 'ip', label: 'inbound request' },
+    { from: 'ip', to: 'ec2', label: 'to the instance' },
+    { from: 'ec2', to: 'ebs', label: 'baseline IOPS and throughput' },
+    { from: 'ec2', to: 'net', label: 'response out', meter: 'bytes', cost: '$0.09/GB' },
+  ]}
+/>
+
+Always-free allowances are monthly quantities that reset, and the Free Tier Terms are blunt
+about the unused part: "Unused usage amounts remaining at the end of the month under any
+Offers do not roll over to subsequent months." The ones people actually meet: Lambda's 1
+million requests and 400,000 GB-seconds; Step Functions' 4,000 state transitions, after which
+Standard workflows cost $0.025 per 1,000; DynamoDB's first 25 GB of storage; CloudWatch's 10
+custom metrics and alarms, 1 million API requests, and 5 GB each of log ingestion and log
+archive.
+
+Visibility is worse than the numbers suggest. AWS sends a Free Tier usage alert at **85
+percent** of a service's limit, to the root user's email address — on by default for
+standalone accounts, but **off by default for an organization's management account**, the
+exact account that owns the only free tier in the family. The Billing console has a Free Tier
+page broken down by service, Region and usage type, with a `GetFreeTierUsage` API behind it.
+The EC2 console's own free-tier box is explicitly not real time: AWS documents it as updating
+three times a day.
+
+## Traps
+
+**A free resource drags paid ones behind it.** A free-tier EC2 instance is not a free-tier
+system. It needs a public IPv4 address to be reachable, and that address bills at $0.005 an
+hour whether attached or not — AWS added 750 hours a month of _in-use_ public IPv4 to the EC2
+free tier on February 1, 2024, but an idle Elastic IP was never covered, and only addresses
+you bring yourself under BYOIP are free outright. The root volume draws on a separate 30 GB
+allowance, snapshots on a separate 1 GB one, and a snapshot outlives the instance that made
+it. Move the instance to a private subnet to dodge the IPv4 charge and you have bought a NAT
+Gateway instead, which has no free tier and bills on two meters at once.
+
+**Some allowances are global and some are per-Region, and you cannot tell by looking.** The
+Free Tier Terms say "we will aggregate your use across all AWS regions", and the 100 GB of
+free monthly data transfer out is "aggregated across all AWS Services and Regions (except
+China and GovCloud)". Trials count the other way. Amazon Detective grants "a 30-day free
+trial for each account in each Region"; Security Hub's trial allowance is 10,000 ingested
+findings per account per Region per month. Turn a trial service on in six Regions and you
+have started six independent clocks that expire on six different dates.
+
+**A free service does not make its bytes free.** Lambda's allowance is always free, but the
+pricing page is clear that data "transferred 'in' to and 'out' of your AWS Lambda functions,
+from outside the region the function executed, will be charged at the Amazon EC2 data
+transfer rates". Same-Region traffic to S3, DynamoDB, SQS, SNS, EFS, ECR and a handful of
+others is free; anything crossing the Region boundary is not, and it draws down the same
+shared 100 GB that every other service in your organization is drawing down.
+
+**One service can mean two different things by "free".** CloudFront's pay-as-you-go model
+still carries the always-free 1 TB of monthly data transfer and 10 million requests. Its
+flat-rate plans, offered alongside it, have a **Free tier at $0/month covering 1 million
+requests and 100 GB per distribution** — and there the overage behaviour inverts: exceed a
+plan's allowance and "you may experience reduced performance… but you won't incur overage
+charges." Same word, same service, allowances an order of magnitude apart, two different
+failure modes.
+
+**Nothing stops at the cliff, and the cliff's shape depends on when you signed up.** For a
+legacy account the twelve months end on a calendar date; the instance keeps running, the
+usage type does not change, and a rate that was zero is no longer zero. The 85 percent alerts
+track monthly allowances, not the end of the term, so they never fire for it. For a new-model
+account the failure is worse: on a Free plan, exhausting the credits or the six months closes
+the account and takes your access to the resources and data with it. On a Paid plan the
+credits absorb every overage silently until they are gone, so a dollar of overspend that used
+to arrive as a visible charge now just shortens the runway.

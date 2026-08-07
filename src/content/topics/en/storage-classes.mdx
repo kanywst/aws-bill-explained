@@ -1,0 +1,217 @@
+---
+title: Cold storage is not cheap storage
+short: Storage classes
+oneLiner: A storage class sets five prices at once. Per-GB is the only one a colder class always improves.
+meters: ['bytes', 'units']
+order: 18
+checked: 2026-08-07
+---
+
+import BoundaryMap from '../../../components/BoundaryMap.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+The comparison everyone makes is one number wide. S3 Standard is $0.023 per GB-month in
+us-east-1 and S3 Glacier Flexible Retrieval is $0.0036, so Glacier is six times cheaper, so
+move everything to Glacier. That per-GB-month rate is the one thing a colder class always
+improves, and on most real workloads it is not the number that decides the bill.
+
+A storage class is not a price. It is a bundle of five prices, and choosing a class sets all
+five at once:
+
+- the storage rate, per GB-month;
+- a retrieval fee, per GB read back;
+- a request rate, per 1,000 requests, usually higher the colder the class;
+- a minimum billable object size, which can be larger than your objects;
+- a minimum storage duration, which can be longer than your objects live.
+
+Colder classes trade the first against the other four. That is the design, and AWS states all
+of it on the S3 pricing page. Only the first one ever makes it onto the slide.
+
+All rates below are us-east-1.
+
+| Storage class                 | Storage / GB-mo | Retrieval / GB    | PUT, COPY, POST, LIST / 1,000 | GET / 1,000 | Min billable size | Min duration |
+| ----------------------------- | --------------- | ----------------- | ----------------------------- | ----------- | ----------------- | ------------ |
+| S3 Standard                   | $0.023          | none              | $0.005                        | $0.0004     | none              | none         |
+| S3 Standard-IA                | $0.0125         | $0.01             | $0.01                         | $0.001      | 128 KB            | 30 days      |
+| S3 One Zone-IA                | $0.01           | $0.01             | $0.01                         | $0.001      | 128 KB            | 30 days      |
+| S3 Glacier Instant Retrieval  | $0.004          | $0.03             | $0.02                         | $0.01       | 128 KB            | 90 days      |
+| S3 Glacier Flexible Retrieval | $0.0036         | by retrieval tier | $0.03                         | $0.0004     | +40 KB per object | 90 days      |
+
+S3 Standard storage is the first-50-TB rate. Read the table column by column rather than row
+by row. Standard to Standard-IA cuts storage by 46%, doubles writes, multiplies reads by 2.5,
+and introduces a retrieval fee where there was none. Standard to Glacier Instant Retrieval
+cuts storage by 83%, multiplies writes by 4 and reads by 25. Every colder class is cheaper on
+exactly one line and more expensive on at least three.
+
+Two of the five are not rates at all, and those are the ones that bite. **The minimum billable
+object size** means Standard-IA bills 128 KB whatever you actually stored. **The minimum
+storage duration** means Standard-IA bills 30 days whatever you actually kept. Neither appears
+in a per-GB comparison, because neither is a rate. They are floors, and floors only matter
+when you are underneath them.
+
+Glacier Flexible Retrieval and Glacier Deep Archive swap the size floor for a different
+mechanism: 40 KB of metadata per archived object, of which 8 KB is billed at S3 Standard rates
+and 32 KB at the archive rate. No 128 KB minimum, but a per-object tax that a million small
+objects will find.
+
+<BoundaryMap
+  lang="en"
+  caption="Each ring is a storage class; the toll is the S3 Lifecycle transition request price to move an object into it, us-east-1. The note is the pair of floors that come with it."
+  rings={[
+    {
+      label: 'S3 Glacier Deep Archive',
+      crossing: '$0.05 / 1,000',
+      note: '180-day minimum, +40 KB per object',
+    },
+    {
+      label: 'S3 Glacier Flexible Retrieval',
+      crossing: '$0.03 / 1,000',
+      note: '90-day minimum, +40 KB per object',
+    },
+    {
+      label: 'S3 Glacier Instant Retrieval',
+      crossing: '$0.02 / 1,000',
+      note: '90-day minimum, 128 KB floor',
+    },
+    { label: 'S3 Standard-IA', crossing: '$0.01 / 1,000', note: '30-day minimum, 128 KB floor' },
+    { label: 'S3 Standard', crossing: '$0.00', free: true, note: 'no floor, no minimum' },
+  ]}
+/>
+
+## What it costs
+
+**Getting cold costs a request.** S3 Lifecycle transitions are billed per object moved, at
+rates that climb with coldness: $0.01 per 1,000 into Standard-IA, One Zone-IA or
+Intelligent-Tiering, $0.02 into Glacier Instant Retrieval, $0.03 into Glacier Flexible
+Retrieval, $0.05 into Glacier Deep Archive. A million objects into Deep Archive is $50 on the
+day the rule fires, before a single byte of the cheaper storage has been billed. Ten million
+is $500.
+
+**Getting warm again turns both meters at once.** Restoring from Glacier Flexible Retrieval is
+billed per request and per GB, and you pick the pair:
+
+- **Expedited** — $0.01 per request and $0.03 per GB. A million objects is $10,000 in requests
+  alone.
+- **Standard** — $0.05 per 1,000 requests and $0.01 per GB.
+- **Bulk** — free on both.
+
+Deep Archive drops Expedited and reprices the bytes: $0.02 per GB Standard, $0.0025 per GB
+Bulk. Either way, a restore also produces a temporary copy accessible under the same key,
+billed at S3 Standard storage rates for as many days as you asked to keep it — and you still
+pay a GET to read that copy.
+
+<SequenceDiagram
+  lang="en"
+  caption="One million 1 MiB objects (976.6 GiB) through a full archive round trip in us-east-1. The storage rate that motivated the move is not on this diagram at all."
+  actors={[
+    { id: 'app', label: 'Application' },
+    { id: 'std', label: 'S3 Standard' },
+    { id: 'gfr', label: 'Glacier Flexible' },
+  ]}
+  steps={[
+    {
+      from: 'app',
+      to: 'std',
+      label: 'PUT × 1,000,000',
+      meter: 'units',
+      charge: '$0.005/1k = $5.00',
+    },
+    {
+      from: 'std',
+      to: 'gfr',
+      label: 'Lifecycle transition × 1,000,000',
+      meter: 'units',
+      charge: '$0.03/1k = $30.00',
+    },
+    {
+      from: 'app',
+      to: 'gfr',
+      label: 'RestoreObject × 1,000,000, Standard',
+      meter: 'units',
+      charge: '$0.05/1k = $50.00',
+    },
+    {
+      from: 'gfr',
+      to: 'std',
+      label: 'Retrieved bytes → temporary copy',
+      meter: 'bytes',
+      charge: '976.6 GiB × $0.01 = $9.77',
+    },
+    {
+      from: 'std',
+      to: 'app',
+      label: 'GET × 1,000,000',
+      reply: true,
+      meter: 'units',
+      charge: '$0.0004/1k = $0.40',
+    },
+  ]}
+/>
+
+**Intelligent-Tiering charges for the watching.** The monitoring and automation fee is $0.0025
+per 1,000 objects per month — $2.50 per million objects per month, whatever they weigh and
+whether or not anything moves. Objects smaller than 128 KB are exempt: they are not eligible
+for auto-tiering, are always billed at Frequent Access rates, and are not charged the
+monitoring fee. Intelligent-Tiering has no retrieval fee and, since 2021, no minimum storage
+duration for any object. It is the one class here that does not trade the storage rate against
+the other four; it charges a per-object fee instead.
+
+**EBS snapshots price a different shape of the same idea.** Snapshots are incremental: only
+the blocks that changed since the previous snapshot are stored, and you are billed for stored
+blocks at $0.05 per GB-month. AWS's own worked example is the clearest statement of what that
+does to deletions. Snapshot a 10 GiB volume, change 4 GiB, snapshot again: you are billed for
+14 GiB. Delete the first snapshot and you are still billed for 10 GiB, because the 6 GiB the
+second snapshot references is retained and reallocated to it. Deleting a snapshot frees only
+the blocks that snapshot alone referenced, so deleting the oldest link in a chain usually
+reclaims almost nothing.
+
+## Traps
+
+**Early delete bills the remainder, not nothing.** A lifecycle rule that moves objects to
+Glacier Flexible Retrieval and expires them 40 days later pays for 90. The other 50 days are
+not waived; they arrive as their own usage type, prorated. Standard-IA produces
+`EarlyDelete-SIA` at $0.0125 per GB-month, One Zone-IA `EarlyDelete-ZIA` at $0.01, Glacier
+Instant Retrieval `EarlyDelete-GIR` at $0.004, Glacier Flexible Retrieval
+`EarlyDelete-ByteHrs` at $0.0036. Overwriting counts as deleting. Transitioning to another
+class counts as deleting. A tidy-up job that re-sorts objects between classes every month pays
+the minimum on every class it touches.
+
+**Below the floor, colder costs more per real byte.** Standard-IA bills at least 128 KB per
+object, so its cost per object-month is fixed at 128 × $0.0125 below that size while Standard
+keeps scaling with the real size at $0.023. The two lines cross at about 69.6 KiB. Under that,
+Standard-IA storage is more expensive than S3 Standard for the same bytes. One Zone-IA crosses
+at about 55.7 KiB, Glacier Instant Retrieval at about 22.3 KiB. Note also that S3 Lifecycle
+will not transition objects smaller than 128 KB created after September 2024 unless you add an
+explicit size filter — AWS made the default the safe one.
+
+**Worked comparison.** Five million thumbnails averaging 64 KiB, written straight to
+Standard-IA and deleted after 45 days. Real data: 305.2 GiB. Billed data in Standard-IA at
+128 KiB per object: 610.4 GiB.
+
+| Line                    | S3 Standard | S3 Standard-IA |
+| ----------------------- | ----------- | -------------- |
+| Billed bytes            | 305.2 GiB   | 610.4 GiB      |
+| Storage, 1.5 months     | $10.53      | $11.44         |
+| PUT requests, 5,000,000 | $25.00      | $50.00         |
+| **Total**               | **$35.53**  | **$61.44**     |
+
+The colder class costs 73% more. Of the $25.91 gap, $0.92 is storage and $25.00 is requests —
+the line everybody compared accounts for four percent of the difference. Add one read per
+object and Standard-IA takes another $5.00 in GETs plus $3.05 of retrieval, against $2.00 for
+Standard.
+
+**The full round trip of a cheap archive.** Take the million 1 MiB objects from the diagram,
+hold them for the 90-day minimum, then restore everything with Standard retrieval and keep the
+copies seven days. Transition in, $30.00. Glacier storage for three months, including the
+40 KB per-object metadata, $11.40. Restore requests, $50.00. Retrieved bytes, $9.77. The
+temporary S3 Standard copy, $5.24. GETs, $0.40. Total $106.81. The same three months in S3
+Standard with the same single read is $67.78. Glacier costs 58% more, and the storage line it
+was chosen for is $11.40 of $106.81 — eleven percent of the bill. If the restored data then
+leaves AWS, data transfer out is charged on top of all of it.
+
+**Comparing classes on the per-GB rate alone is the mistake this article exists to stop.** The
+rate you compared is the one the vendor optimised for the comparison. Before you move
+anything, count the objects, measure the median object size, and write down how long the data
+actually lives. Those three numbers decide the bill; the per-GB rate is a tiebreaker.
