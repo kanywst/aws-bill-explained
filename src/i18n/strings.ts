@@ -169,10 +169,11 @@ export const STRINGS: Record<Lang, Strings> = {
         onTheBill: 'DataTransfer-Out-Bytes, NatGateway-Bytes',
       },
       units: {
-        name: 'Calls',
-        test: 'Did you invoke the API?',
-        counts: 'The number of API operations. Payload size and direction are irrelevant.',
-        trap: 'Most services do not have this meter at all. EC2, IAM and STS charge nothing per call.',
+        name: 'Units',
+        test: 'How many countable things did you ask for?',
+        counts:
+          'Countable units of work. Requests are just the commonest kind — tokens, pages, characters, destinations and every 64 KB slice of a payload all count the same way.',
+        trap: 'One call is often not one unit. A 1 MiB queue message is 16 of them, a 200 KB event is 4. And about half of all services never turn this meter: EC2, IAM and STS charge nothing per call.',
         onTheBill: 'Requests',
       },
     },
