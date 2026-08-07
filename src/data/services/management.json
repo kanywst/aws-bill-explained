@@ -373,14 +373,15 @@
     "category": "management",
     "meters": [],
     "oneLiner": "Free to read, both the public status page and your own account events.",
-    "trap": "The API is the gated part. Calling it from an account without Business, Enterprise On-Ramp or Enterprise Support returns SubscriptionRequiredException, so automation on Basic support cannot use it.",
+    "trap": "The API is the gated part. Calling it from an account without Business Support+, Enterprise Support or Unified Operations returns SubscriptionRequiredException, so automation on Basic support cannot use it.",
     "billOn": [],
     "confidence": "high",
     "sources": [
       "https://docs.aws.amazon.com/health/latest/APIReference/Welcome.html",
-      "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html"
+      "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-08-07"
   },
   {
     "slug": "managed-grafana",
@@ -525,14 +526,15 @@
     "category": "management",
     "meters": [],
     "oneLiner": "Never a line item. Your Support plan decides how much of it you can see.",
-    "trap": "A core set of checks is open to every account. The full check set, the Trusted Advisor API and Priority need Business, Enterprise On-Ramp or Enterprise Support, which is billed as part of that plan.",
+    "trap": "56 checks are open to every account. The other 426, the Trusted Advisor API and Priority need Business Support+, Enterprise Support or Unified Operations, which is billed as part of that plan.",
     "billOn": [],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/",
-      "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+      "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-08-07"
   },
   {
     "slug": "well-architected-tool",
