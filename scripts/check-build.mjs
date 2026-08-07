@@ -73,7 +73,13 @@ for (const [slug, langs] of bySlug) {
   }
 }
 
-// 3. Every topic must carry a checked date, and it must be plausible.
+// 3. Every topic must carry a checked date and cite its sources.
+//
+//    Both are read from the frontmatter alone. Matching against the whole file
+//    would let a `checked:` line in prose satisfy the rule, and the sources
+//    check exists because CI probes the URLs an article lists but has no way to
+//    notice an article that lists none — the citations would simply never be
+//    checked, silently, which is the failure this whole pair guards against.
 for (const lang of LANGS) {
   let files = [];
   try {
@@ -83,13 +89,25 @@ for (const lang of LANGS) {
   }
   for (const f of files.filter((f) => f.endsWith('.mdx'))) {
     const body = await readFile(join(CONTENT, lang, f), 'utf8');
-    const m = body.match(/^checked:\s*(\d{4}-\d{2}-\d{2})\s*$/m);
-    if (!m) {
-      failures.push(`${lang}/${f}: no "checked" date in frontmatter`);
+    const frontmatter = body.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1];
+    if (frontmatter === undefined) {
+      failures.push(`${lang}/${f}: no frontmatter block`);
       continue;
     }
-    if (Number.isNaN(Date.parse(m[1]))) {
+
+    const m = frontmatter.match(/^checked:\s*(\d{4}-\d{2}-\d{2})\s*$/m);
+    if (!m) {
+      failures.push(`${lang}/${f}: no "checked" date in frontmatter`);
+    } else if (Number.isNaN(Date.parse(m[1]))) {
       failures.push(`${lang}/${f}: unparseable checked date "${m[1]}"`);
+    }
+
+    // Sliced rather than matched: under /m a $ anchors to a line end, so a lazy
+    // match stops on the sources: line itself and reads every article as bare.
+    const at = frontmatter.search(/^sources:/m);
+    const sources = at < 0 ? '' : frontmatter.slice(at);
+    if (!/https:\/\//.test(sources)) {
+      failures.push(`${lang}/${f}: cites no AWS sources`);
     }
   }
 }

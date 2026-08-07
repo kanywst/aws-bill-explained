@@ -147,11 +147,17 @@ await Promise.all(
  * — so this reports real relocations rather than every redirect. Anchored to
  * the host so a path segment that merely looks like a locale survives.
  */
-const canonical = (u) =>
-  u
-    .replace(/[?#].*$/, '')
+const TRACKING = /^(icmpid|trk|sc_channel|sc_campaign|sc_geo|sc_country|sc_outcome|ref_|did)$/i;
+const canonical = (u) => {
+  const url = new URL(u);
+  // Drop only the tracking parameters. Discarding the whole query would hide a
+  // relocation that strips a parameter the page needs to select the right view.
+  for (const k of [...url.searchParams.keys()]) if (TRACKING.test(k)) url.searchParams.delete(k);
+  url.hash = '';
+  return `${url.origin}${url.pathname}${url.search}`
     .replace(/^(https:\/\/[^/]+)\/[a-z]{2}(?:_[a-z]{2})?\//i, '$1/')
     .replace(/\/+$/, '');
+};
 
 const gone = results.filter((r) => r.status === 404 || r.status === 410);
 const unreachable = results.filter((r) => r.status === 0);
