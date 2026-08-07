@@ -69,6 +69,19 @@ describe('toService', () => {
     expect(legacy.isUnclassified).toBe(false);
   });
 
+  /**
+   * There are two legacy spellings and only egress was covered, so when the
+   * Calls-to-Units rename swept the codebase it rewrote the alias entry itself
+   * from `calls: 'units'` to `units: 'units'` — a no-op — and no test noticed.
+   * A batch of research written before the rename would have had its third
+   * meter dropped and the service marked unclassified.
+   */
+  it('translates the legacy calls spelling too, not just egress', () => {
+    const legacy = toService({ ...valid, meters: ['time', 'calls'] });
+    expect(legacy.meters.toArray()).toEqual(['time', 'units']);
+    expect(legacy.isUnclassified).toBe(false);
+  });
+
   it('refuses a record with no source, since the model now owns that rule', () => {
     expect(() => toService({ ...valid, sources: [] })).toThrow(/has no source/);
     expect(() => toService({ ...valid, sources: ['https://evil.example/'] })).toThrow(

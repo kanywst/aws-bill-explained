@@ -39,7 +39,7 @@ const asConfidence = (value: unknown): Confidence => (value === 'high' ? 'high' 
  * older names rather than as a permanent shim — which is what an
  * anti-corruption layer is for.
  */
-const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes', units: 'units' };
+const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes', calls: 'units' };
 
 /**
  * Defensive parsing lives here rather than in MeterSet, because tolerating junk
