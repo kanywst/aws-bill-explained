@@ -59,6 +59,23 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
       )
     }
 
+    {
+      entry.data.sources.length > 0 && (
+        <section class="tp-src">
+          <h2>{s.sources}</h2>
+          <ul>
+            {entry.data.sources.map((url) => (
+              <li>
+                <a href={url} rel="noopener nofollow">
+                  {url.replace(/^https:\/\//, '')}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
     <footer class="tp-foot">
       <span class="tp-checked">{s.checked}: <time datetime={checked}>{checked}</time></span>
     </footer>

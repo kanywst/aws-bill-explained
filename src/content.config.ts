@@ -23,6 +23,28 @@ const topics = defineCollection({
     order: z.number().default(100),
     /** Last time a human checked this against the AWS docs. */
     checked: z.date(),
+    /**
+     * AWS pages the article's claims rest on. Every service record carries
+     * these and gets its links checked in CI; the articles make just as many
+     * verifiable claims and carried nothing but a date. Restricted to
+     * AWS-controlled hosts for the same reason the Service entity restricts
+     * its own: a citation to a third-party blog is not a citation.
+     */
+    sources: z
+      .array(
+        // No .url() — it is deprecated in this zod, and the refine below is
+        // strictly narrower anyway: https, and an AWS-controlled host.
+        z
+          .string()
+          .refine(
+            (u) =>
+              /^https:\/\/(aws\.amazon\.com|docs\.aws\.amazon\.com|repost\.aws|pricing\.[a-z0-9-]+\.amazonaws\.com)\//.test(
+                u,
+              ),
+            { message: 'source must be an AWS-controlled page' },
+          ),
+      )
+      .default([]),
   }),
 });
 

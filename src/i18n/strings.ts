@@ -86,6 +86,8 @@ interface Strings {
 
   topicsLede: string;
   checked: string;
+  /** Heading for an article's AWS source list. */
+  sources: string;
   categories: Record<
     | 'compute'
     | 'storage'
@@ -219,6 +221,7 @@ export const STRINGS: Record<Lang, Strings> = {
 
     topicsLede: 'Each page opens with the model, then earns it.',
     checked: 'Checked',
+    sources: 'Sources',
     oneLiner: 'In one line',
     categories: {
       compute: 'Compute',
@@ -352,6 +355,7 @@ export const STRINGS: Record<Lang, Strings> = {
 
     topicsLede: '各ページはまず結論のモデルを渡してから、その根拠に降りていく。',
     checked: '確認日',
+    sources: '出典',
     oneLiner: 'ひとことで言うと',
     categories: {
       compute: 'コンピュート',
