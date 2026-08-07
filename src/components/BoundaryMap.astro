@@ -49,11 +49,32 @@ const geom = rings.map((r, i) => ({
   h: boxes[i]!.height,
   colour: r.free ? 'var(--unlit)' : 'var(--m-bytes)',
 }));
+/**
+ * Which boundary costs money is the entire content of this diagram, and
+ * role="img" kept all of it inside the SVG where assistive tech cannot reach.
+ * Nested rings are a nested list, so that is how they are described.
+ */
+const a11y = t(lang).a11y;
+const ringAlt = (r: (typeof rings)[number]) =>
+  (r.free ? a11y.ringFree : a11y.ringCrossing)
+    .replace('{label}', r.label)
+    .replace('{crossing}', r.crossing);
 ---
 
 <figure class="bm">
   <div class="bm-scroll" tabindex="0" role="region" aria-label={caption}>
-    <svg viewBox={`0 0 ${W} ${H}`} class="bm-svg" role="img" aria-label={caption}>
+    <p class="sr">{a11y.boundaryAlt}</p>
+    <ol class="sr">
+      {
+        rings.map((r) => (
+          <li>
+            {ringAlt(r)}
+            {r.note ? ` ${r.note}` : ''}
+          </li>
+        ))
+      }
+    </ol>
+    <svg viewBox={`0 0 ${W} ${H}`} class="bm-svg" aria-hidden="true">
       {
         geom.map((r) => (
           <g class:list={['bm-ring', r.free && 'is-free']}>

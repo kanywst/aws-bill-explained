@@ -64,11 +64,35 @@ const W = seqCanvasWidth(actors.length);
 const H = seqCanvasHeight(steps.length);
 
 const billed = steps.filter((s) => s.meter);
+
+/**
+ * The billing gutter is the whole point of this diagram, and role="img" hid it
+ * from assistive tech along with everything else inside the SVG. The steps are
+ * a list, so they are now marked up as one.
+ */
+const a11y = t(lang).a11y;
+const actorLabel = (id: string) => actors.find((x) => x.id === id)!.label;
+const stepAlt = (step: SeqStep) => {
+  const base = step.meter
+    ? a11y.hopBilled
+        .replace('{meter}', t(lang).meters[step.meter].name)
+        .replace('{cost}', step.charge ?? a11y.billed)
+    : a11y.hopFree;
+  const text = base
+    .replace('{from}', actorLabel(step.from))
+    .replace('{to}', actorLabel(step.to))
+    .replace('{label}', step.label);
+  return step.reply ? `${text} (${a11y.stepReply})` : text;
+};
 ---
 
 <figure class="sq">
   <div class="sq-scroll" tabindex="0" role="region" aria-label={caption}>
-    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="sq-svg" role="img" aria-label={caption}>
+    <p class="sr">{a11y.seqAlt.replace('{actors}', actors.map((x) => x.label).join(', '))}</p>
+    <ol class="sr">
+      {steps.map((step) => <li>{stepAlt(step)}</li>)}
+    </ol>
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="sq-svg" aria-hidden="true">
       <defs>
         <marker
           id="sq-head"

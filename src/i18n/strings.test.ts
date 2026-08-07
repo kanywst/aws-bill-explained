@@ -106,4 +106,29 @@ describe('string bundles', () => {
       expect(t(lang).services.seeEntry, lang).toContain('{name}');
     }
   });
+
+  /**
+   * The diagrams are aria-hidden and these strings ARE the accessible version of
+   * them. A dropped placeholder does not throw — it silently ships a sentence
+   * with a hole where the meter or the cost should be, in the one rendering a
+   * screen reader user gets.
+   */
+  it('keeps every placeholder the diagram text alternatives interpolate', () => {
+    const required: Record<string, string[]> = {
+      pathAlt: ['{nodes}'],
+      seqAlt: ['{actors}'],
+      hopBilled: ['{from}', '{to}', '{label}', '{meter}', '{cost}'],
+      hopFree: ['{from}', '{to}', '{label}'],
+      ringCrossing: ['{label}', '{crossing}'],
+      ringFree: ['{label}', '{crossing}'],
+    };
+    for (const lang of LANGS) {
+      const a = t(lang).a11y as unknown as Record<string, string>;
+      for (const [key, placeholders] of Object.entries(required)) {
+        for (const p of placeholders) {
+          expect(a[key], `${lang} a11y.${key}`).toContain(p);
+        }
+      }
+    }
+  });
 });

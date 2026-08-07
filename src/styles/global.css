@@ -174,3 +174,17 @@ code {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Visually hidden, still announced. Astro scopes component styles, so this was
+ * redeclared in every component that needed it; the diagrams made that three
+ * more copies, so it lives here now.
+ */
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

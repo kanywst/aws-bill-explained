@@ -125,6 +125,15 @@ interface Strings {
     freeService: string;
     showing: string;
     diagramKey: string;
+    /** Text alternatives for the diagrams, whose SVG content is aria-hidden. */
+    pathAlt: string;
+    seqAlt: string;
+    boundaryAlt: string;
+    hopBilled: string;
+    hopFree: string;
+    stepReply: string;
+    ringCrossing: string;
+    ringFree: string;
   };
 }
 
@@ -251,6 +260,14 @@ export const STRINGS: Record<Lang, Strings> = {
       freeService: 'Free — turns no meters of its own.',
       showing: 'Showing {shown} of {total} services.',
       diagramKey: 'Key',
+      pathAlt: 'Path through {nodes}, hop by hop:',
+      seqAlt: 'Exchange between {actors}, step by step:',
+      boundaryAlt: 'Boundaries from the inside out:',
+      hopBilled: '{from} to {to}: {label}. Billed on the {meter} meter, {cost}.',
+      hopFree: '{from} to {to}: {label}. Not billed.',
+      stepReply: 'reply',
+      ringCrossing: '{label}. Crossing it: {crossing}.',
+      ringFree: '{label}. Crossing it: {crossing}. Free.',
     },
   },
 
@@ -375,6 +392,14 @@ export const STRINGS: Record<Lang, Strings> = {
       freeService: '無料 — 自前のメーターを回さない。',
       showing: '{total} 件中 {shown} 件を表示。',
       diagramKey: '凡例',
+      pathAlt: '{nodes} を通る経路。1ホップずつ:',
+      seqAlt: '{actors} のやりとり。1ステップずつ:',
+      boundaryAlt: '内側から外側への境界:',
+      hopBilled: '{from} から {to}: {label}。{meter}メーターで課金、{cost}。',
+      hopFree: '{from} から {to}: {label}。課金されない。',
+      stepReply: '応答',
+      ringCrossing: '{label}。ここを越えると: {crossing}。',
+      ringFree: '{label}。ここを越えると: {crossing}。無料。',
     },
   },
 };

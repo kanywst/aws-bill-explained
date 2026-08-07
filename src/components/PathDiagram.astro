@@ -49,6 +49,7 @@ interface Props {
 const { nodes, hops, caption, lang = 'en' } = Astro.props;
 const s = t(lang).diagram;
 const meterName = (m: MeterId) => t(lang).meters[m].name;
+const a = t(lang).a11y;
 
 // All geometry comes from src/lib/diagram-layout.ts so it is unit-tested;
 // this file only resolves node ids to indices.
@@ -73,11 +74,35 @@ const lanes = hops.map((hop, i) => ({
   key: `${hop.from}-${hop.to}-${i}`,
   ...layoutHop(idx(hop.from), idx(hop.to)),
 }));
+
+/**
+ * role="img" prunes everything inside the SVG from the accessibility tree, so a
+ * screen reader used to get the caption and nothing else — no nodes, no meters,
+ * no costs. On a site whose argument lives in the diagrams that is the argument
+ * going missing. The SVG is now aria-hidden and this list carries it instead.
+ */
+const label = (id: string) => nodes[idx(id)]!.label;
+const hopAlt = (hop: PathHop) =>
+  hop.meter
+    ? a.hopBilled
+        .replace('{from}', label(hop.from))
+        .replace('{to}', label(hop.to))
+        .replace('{label}', hop.label)
+        .replace('{meter}', meterName(hop.meter))
+        .replace('{cost}', hop.cost ?? a.billed)
+    : a.hopFree
+        .replace('{from}', label(hop.from))
+        .replace('{to}', label(hop.to))
+        .replace('{label}', hop.label);
 ---
 
 <figure class="pd">
   <div class="pd-scroll" tabindex="0" role="region" aria-label={caption}>
-    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="pd-svg" role="img" aria-label={caption}>
+    <p class="sr">{a.pathAlt.replace('{nodes}', nodes.map((n) => n.label).join(', '))}</p>
+    <ol class="sr">
+      {hops.map((hop) => <li>{hopAlt(hop)}</li>)}
+    </ol>
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} class="pd-svg" aria-hidden="true">
       <defs>
         <marker
           id="pd-head-lit"
