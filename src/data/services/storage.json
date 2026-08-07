@@ -20,6 +20,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "data-transfer-terminal",
+    "name": "AWS Data Transfer Terminal",
+    "category": "storage",
+    "meters": ["time"],
+    "oneLiner": "Per port-hour of a reserved slot at a physical AWS upload location; the data volume is not metered.",
+    "trap": "You book time, not bytes. Every reservation is charged at least one full port hour, two ports for an hour bills two, and the rate climbs when the terminal and the destination Region are on different continents.",
+    "billOn": ["EQPA3-NA-PortUsage-100G", "NDCS2-EU-PortUsage-100G", "ATTC1-NA-PortUsage-100G"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/data-transfer-terminal/pricing/",
+      "https://aws.amazon.com/data-transfer-terminal/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "datasync",
     "name": "AWS DataSync",
     "category": "storage",
@@ -120,6 +135,27 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "healthimaging",
+    "name": "AWS HealthImaging",
+    "category": "storage",
+    "meters": ["bytes", "units", "time"],
+    "oneLiner": "Per GB-month in frequent-access or archive tiers, plus indexed metadata storage and API requests.",
+    "trap": "Importing is free, but everything imported carries a 30-day minimum storage charge and a 5 MB minimum per image set, so a study split into many small image sets bills well above its real byte count.",
+    "billOn": [
+      "TimedStorage-ActiveByteHrs",
+      "TimedStorage-ArchiveByteHrs",
+      "TimedStorage-IndexedByteHrs",
+      "API-Requests-Core",
+      "DataStore-Hours"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/healthimaging/pricing/",
+      "https://aws.amazon.com/healthimaging/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "mainframe-modernization",
     "name": "AWS Mainframe Modernization",
     "category": "storage",
@@ -178,6 +214,21 @@
       "https://aws.amazon.com/about-aws/whats-new/2025/10/aws-service-availability/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "refactor-spaces",
+    "name": "AWS Migration Hub Refactor Spaces",
+    "category": "storage",
+    "meters": ["time", "units"],
+    "oneLiner": "An hourly charge per environment, plus a per-API-request fee on nearly every call.",
+    "trap": "The environment fee is the small half. Refactor Spaces provisions a Transit Gateway, API Gateway and load balancers into your account and each bills at its own rate. Closed to new customers since November 7, 2025.",
+    "billOn": ["EnvironmentHours", "API-Request"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/migrationhub-refactor-spaces/latest/userguide/migrationhub-availability-change.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMigrationHubRefactorSpaces/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "s3",
@@ -284,5 +335,20 @@
       "https://docs.aws.amazon.com/transfer/latest/APIReference/API_StopServer.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "transform",
+    "name": "AWS Transform",
+    "category": "storage",
+    "meters": ["units"],
+    "oneLiner": "Per agent-minute of active work. Assessment and several migration agents are free.",
+    "trap": "Agent minutes are not wall-clock minutes: several agents can run in parallel on one task and each bills its own. Your idle time and local CLI work are excluded, and every run rounds up to a whole minute.",
+    "billOn": ["AgentMinute"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/transform/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransform/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   }
 ]

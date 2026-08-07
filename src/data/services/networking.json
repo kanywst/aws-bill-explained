@@ -15,6 +15,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "application-recovery-controller",
+    "name": "Amazon Application Recovery Controller (ARC)",
+    "category": "networking",
+    "meters": ["time"],
+    "oneLiner": "Routing control clusters and readiness checks bill hourly; Region switch plans bill monthly.",
+    "trap": "A routing control cluster bills every hour from creation to deletion whether or not you ever fail over, and each readiness check bills hourly too. Zonal shift and zonal autoshift cost nothing.",
+    "billOn": ["Cluster-Hours", "ReadinessCheck-Hours", "AmazonARCRegionSwitchPlan"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/application-recovery-controller/pricing/",
+      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "client-vpn",
     "name": "AWS Client VPN",
     "category": "networking",
@@ -25,6 +40,41 @@
     "confidence": "high",
     "sources": ["https://aws.amazon.com/vpn/pricing/", "https://aws.amazon.com/vpc/pricing/"],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloud-map",
+    "name": "AWS Cloud Map",
+    "category": "networking",
+    "meters": ["time", "units"],
+    "oneLiner": "Per registered resource per month, plus per million service discovery and DNS lookup API calls.",
+    "trap": "The registry is cheap; the lookups are not. Code that calls DiscoverInstances on every request instead of caching turns a handful of registered resources into millions of billed API calls a month.",
+    "billOn": ["Cloud-Map-Resources", "Cloud-Map-API-Calls", "Cloud-Map-DIR-API-Calls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloud-map/pricing/",
+      "https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "cloud-wan",
+    "name": "AWS Cloud WAN",
+    "category": "networking",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Per hour for each Core Network Edge and each attachment, plus per GB of data through the network.",
+    "trap": "The Core Network Edge is the expensive part and you need one in every Region the network reaches. It bills by the hour on its own, before a single attachment or byte, so an empty core network is not a free one.",
+    "billOn": [
+      "CloudWAN-CoreNetworkEdge-Hours",
+      "CloudWAN-Attachment-Hours",
+      "CloudWAN-Peering-Hours",
+      "CloudWAN-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloud-wan/pricing/",
+      "https://docs.aws.amazon.com/network-manager/latest/cloudwan/what-is-cloudwan.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "cloudfront",
@@ -45,6 +95,27 @@
       "https://aws.amazon.com/cloudfront/faqs/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "data-transfer",
+    "name": "AWS Data Transfer",
+    "category": "networking",
+    "meters": ["bytes"],
+    "oneLiner": "Per GB of traffic that leaves a Region, crosses Availability Zones, or goes out to the internet.",
+    "trap": "Traffic that never leaves AWS still bills: cross-AZ chatter is charged per GB in both directions, and cross-Region copies are charged on the way out. Inbound from the internet is free, which is why egress is the shock.",
+    "billOn": [
+      "DataTransfer-Out-Bytes",
+      "DataTransfer-Regional-Bytes",
+      "DataTransfer-In-Bytes",
+      "USE1-USW2-AWS-Out-Bytes",
+      "USE1-CloudFront-Out-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ec2/pricing/on-demand/",
+      "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "direct-connect",
@@ -135,6 +206,25 @@
       "https://aws.amazon.com/ground-station/pricing/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "interconnect",
+    "name": "AWS Interconnect",
+    "category": "networking",
+    "meters": ["time"],
+    "oneLiner": "Per hour for each interconnect, priced by bandwidth and a distance tier. Data transfer is not metered.",
+    "trap": "Billing starts when you create the interconnect and stops only when you delete it, so an idle link costs what a saturated one does. The tier follows the longest path it serves, and the other cloud bills its own side.",
+    "billOn": [
+      "GCP-MgdConUsage:10G-Tier2",
+      "OCI-MgdConUsage:1G-Tier1",
+      "NYC-MgdConUsage:100G-Tier3"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/interconnect/multicloud/pricing/",
+      "https://docs.aws.amazon.com/interconnect/latest/userguide/interconnect-pricing.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "internet-gateway",
@@ -242,6 +332,26 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "rtb-fabric",
+    "name": "AWS RTB Fabric",
+    "category": "networking",
+    "meters": ["units", "bytes"],
+    "oneLiner": "Per billion bid transactions you send, plus payload above 2 KiB per transaction.",
+    "trap": "No-bid responses carry their own per-billion meter, and for most demand-side platforms no-bids are the bulk of traffic. Sending to partners not on the fabric costs more than internal traffic; what you receive is free.",
+    "billOn": [
+      "RTBFabric-Tx-Billion-Internal",
+      "RTBFabric-Tx-Billion-External",
+      "RTBFabric-NoBid-Billion-External",
+      "RTBFabric-TransactionExtraData-External"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rtb-fabric/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSRTBFabric/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "site-to-site-vpn",
     "name": "AWS Site-to-Site VPN",
     "category": "networking",
@@ -252,6 +362,21 @@
     "confidence": "high",
     "sources": ["https://aws.amazon.com/vpn/pricing/", "https://aws.amazon.com/vpc/pricing/"],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "telco-network-builder",
+    "name": "AWS Telco Network Builder (TNB)",
+    "category": "networking",
+    "meters": ["time", "units"],
+    "oneLiner": "An hourly charge per managed network function item, plus API requests over a monthly allowance.",
+    "trap": "MNFI hours run from instantiation to termination whatever the traffic, and the EC2, ELB and S3 resources TNB deploys for each function bill separately on top. The first 45,000 API requests per Region each month are free.",
+    "billOn": ["TNB_MNFI", "TNB_API_Calls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/tnb/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTelcoNetworkBuilder/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "transit-gateway",

@@ -20,6 +20,25 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "aurora-dsql",
+    "name": "Amazon Aurora DSQL",
+    "category": "database",
+    "meters": ["bytes", "units"],
+    "oneLiner": "Distributed Processing Units for read, write and query work, plus a per GB-month charge for storage.",
+    "trap": "No instance to size and no idle charge, but a multi-Region cluster meters replicated writes as extra DPUs in every peer Region, and turning on change data capture streaming adds DPUs again.",
+    "billOn": [
+      "USE1-DSQL-DistributedProcessingUnits",
+      "USE1-DSQL-Storage-ByteHrs",
+      "Global-DSQL-DistributedProcessingUnits"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/aurora/dsql/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AuroraDSQL/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "aurora-serverless-v2",
     "name": "Amazon Aurora Serverless v2",
     "category": "database",
@@ -33,6 +52,21 @@
       "https://aws.amazon.com/blogs/database/introducing-scaling-to-0-capacity-with-amazon-aurora-serverless-v2/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "dax",
+    "name": "Amazon DynamoDB Accelerator (DAX)",
+    "category": "database",
+    "meters": ["time"],
+    "oneLiner": "Per node-hour for every node in the cluster, whether or not anything is hitting the cache.",
+    "trap": "DAX bills nodes, not cached reads, and a production cluster wants three nodes across AZs. The cluster keeps billing after traffic stops, and the DynamoDB reads it saves you are a separate, smaller line.",
+    "billOn": ["NodeUsage:dax.r5.large", "NodeUsage:dax.t3.small", "NodeUsage:dax.r7i.xlarge"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/dynamodb/pricing/",
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "dms",
@@ -97,6 +131,24 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "healthlake",
+    "name": "AWS HealthLake",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "An hourly charge per FHIR data store, plus stored GB, query overage, NLP characters and exports.",
+    "trap": "The data store bills by the hour from the moment it is created, empty or not, and there is no pause. Queries past the included hourly allowance, medical NLP per 100 characters and per-GB exports stack on top.",
+    "billOn": [
+      "FHIRDataStore",
+      "FHIRDataStorage",
+      "FHIRQueries",
+      "IntegratedMedicalNLP",
+      "FHIRDataExport"
+    ],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/healthlake/pricing/", "https://aws.amazon.com/healthlake/"],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "keyspaces",
     "name": "Amazon Keyspaces",
     "category": "database",
@@ -110,6 +162,28 @@
       "https://docs.aws.amazon.com/keyspaces/latest/devguide/ReadWriteCapacityMode.OnDemand.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "managed-blockchain",
+    "name": "Amazon Managed Blockchain",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Hourly membership and peer nodes for Fabric, node storage per GB, and per-request Access and Query.",
+    "trap": "A Hyperledger Fabric network bills the membership fee plus every peer node by the hour whether or not a transaction is ever submitted, and each member pays their own. Data written to the network meters separately.",
+    "billOn": [
+      "Member",
+      "Node:bc.m5.large",
+      "Node-Storage",
+      "Data-Written-To-Network",
+      "Access-Public-L",
+      "Query-Public-M"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/managed-blockchain/pricing/",
+      "https://aws.amazon.com/managed-blockchain/faqs/"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "memorydb",
@@ -145,6 +219,21 @@
       "https://aws.amazon.com/about-aws/whats-new/2024/02/amazon-neptune-io-optimized/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "oracle-database-at-aws",
+    "name": "Oracle Database@AWS",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "An AWS Marketplace subscription for Oracle-run Exadata infrastructure, with rates set by Oracle.",
+    "trap": "The bulk of the cost arrives under AWS Marketplace on your invoice, not as an ordinary service line. Only the zero-ETL side is AWS-metered, and change data capture transfer costs far more per GB than the initial load.",
+    "billOn": ["USE1-ODB:CDC-DataTransfer", "USE1-ODB:DataExport"],
+    "confidence": "medium",
+    "sources": [
+      "https://docs.aws.amazon.com/odb/latest/UserGuide/what-is-odb.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/OracleDbAtAWS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "rds",

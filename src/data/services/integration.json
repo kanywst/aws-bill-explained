@@ -50,6 +50,27 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "b2b-data-interchange",
+    "name": "AWS B2B Data Interchange",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per hour that each trading partnership exists, plus a fee for every EDI document transformed.",
+    "trap": "Partnership hours accrue whether or not a document flows, so dormant partners still bill every month. Failed transformations are charged at the same rate as successful ones, and large documents cost more.",
+    "billOn": [
+      "PartnershipHours",
+      "PartnershipMonths",
+      "InboundTranslations",
+      "OutboundTranslations",
+      "FailedTransformations"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/b2b-data-interchange/pricing/",
+      "https://docs.aws.amazon.com/b2bi/latest/userguide/what-is-b2bi.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "chime-sdk",
     "name": "Amazon Chime SDK",
     "category": "integration",
@@ -74,10 +95,45 @@
     "billOn": ["end-customer-mins", "chat-message", "tasks"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/connect/pricing/",
+      "https://aws.amazon.com/products/connect/customer/pricing/",
       "https://docs.aws.amazon.com/connect/latest/adminguide/granular-billing.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "connect-cases",
+    "name": "Amazon Connect Cases",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Billed per case created, from the agent application, the API, or a contact flow action.",
+    "trap": "A Create Case block in a flow bills every time it executes successfully, so a misrouted flow opens and charges for a case per contact. Tasks and Customer Profiles used alongside Cases meter separately.",
+    "billOn": ["us-east-1-case-created"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/products/connect/customer/pricing/appendix/",
+      "https://aws.amazon.com/products/connect/customer/pricing/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "connect-health",
+    "name": "Amazon Connect Health",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly subscription per clinician for ambient documentation, plus per-action patient verification.",
+    "trap": "The seat fee covers a fixed monthly encounter allowance; past it, documentation bills per minute of captured audio. The Amazon Connect voice minutes carrying those patient calls bill separately.",
+    "billOn": [
+      "USE1-Subscription-Paid",
+      "USE1-AmbientDocumentationMinutes:Overage",
+      "USE1-Patient-Verification"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/products/connect/health/pricing/",
+      "https://docs.aws.amazon.com/connecthealth/latest/userguide/what-is-service.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/healthagent/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "data-firehose",
@@ -160,6 +216,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "iot-fleetwise",
+    "name": "AWS IoT FleetWise",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per vehicle per month for every vehicle registered, plus per million data messages collected.",
+    "trap": "The vehicle fee counts everything registered that month, not the vehicles that actually reported. A broad signal collection campaign multiplies messages fast, and the data still lands in S3 or Timestream at its own cost.",
+    "billOn": ["vehicles", "Messages"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-fleetwise/pricing/",
+      "https://docs.aws.amazon.com/iot-fleetwise/latest/developerguide/what-is-iotfleetwise.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "iot-greengrass",
     "name": "AWS IoT Greengrass",
     "category": "integration",
@@ -225,6 +296,28 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "kinesis-video-streams",
+    "name": "Amazon Kinesis Video Streams",
+    "category": "integration",
+    "meters": ["bytes", "units", "time"],
+    "oneLiner": "Per GB ingested, consumed and stored; WebRTC adds channels, signaling messages and TURN minutes.",
+    "trap": "Storage bills for the whole retention window set on the stream, so always-on cameras keep a rolling copy on the meter forever. Warm storage has a 30-day minimum and charges an early-delete fee.",
+    "billOn": [
+      "BytesIn",
+      "BytesOut",
+      "BytesHr",
+      "SignalingChannel",
+      "SignalingMessages",
+      "TURNMinutes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/kinesis/video-streams/pricing/",
+      "https://aws.amazon.com/kinesis/video-streams/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "location",
     "name": "Amazon Location Service",
     "category": "integration",
@@ -275,6 +368,26 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "mwaa",
+    "name": "Amazon Managed Workflows for Apache Airflow (MWAA)",
+    "category": "integration",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Hourly per environment by size, plus hourly per extra worker, scheduler and web server, plus DB storage.",
+    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button — you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
+    "billOn": [
+      "Airflow-SmallEnvironment",
+      "Airflow-LargeWorker",
+      "Airflow-LargeScheduler",
+      "Airflow-StandardDatabaseStorage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/managed-workflows-for-apache-airflow/pricing/",
+      "https://docs.aws.amazon.com/mwaa/latest/userguide/what-is-mwaa.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "pinpoint",
     "name": "Amazon Pinpoint",
     "category": "integration",
@@ -288,6 +401,26 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPinpoint/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "q-in-connect",
+    "name": "Amazon Q in Connect",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Per voice minute, chat, email or task that the assistant touches inside Amazon Connect.",
+    "trap": "Cost and usage reports still tag it with the old product code AWSWisdom, so the line is easy to miss. Self-service and agent-assistance meter separately, and voice bills per minute of the contact rather than per contact.",
+    "billOn": [
+      "QinConnectAgentAssistanceVoice",
+      "QinConnectSelfServiceChat",
+      "QinConnectAgentAssistanceEmail",
+      "QinConnectAgentAssistanceTask"
+    ],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/products/connect/customer/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWisdom/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "ses",
@@ -350,6 +483,21 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "wickr",
+    "name": "AWS Wickr",
+    "category": "integration",
+    "meters": ["time"],
+    "oneLiner": "A monthly seat charge per user on the Standard or Premium plan.",
+    "trap": "Seats bill on provisioned users, not active ones, so dormant accounts keep charging. Guests are free only up to an allowance per paid seat, two on Standard and five on Premium; every guest past that bills as an add-on.",
+    "billOn": ["AWSWickr-Standard", "AWSWickr-Premium", "AWSWickr-GuestUsers"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/wickr/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWickr/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "workmail",

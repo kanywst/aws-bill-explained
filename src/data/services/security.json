@@ -1,5 +1,35 @@
 [
   {
+    "slug": "appfabric",
+    "name": "AWS AppFabric",
+    "category": "security",
+    "meters": ["time"],
+    "oneLiner": "Per authorised user per month, plus a small monthly add-on per user for each app beyond thirty.",
+    "trap": "The meter counts users in the connected SaaS applications, not the security people reading the output, so one large SaaS tenant sets the price. The audit logs it delivers are stored and queried at your own cost.",
+    "billOn": ["StandardUser", "AdditionalAppUser", "FreeTrialUser"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/appfabric/pricing/",
+      "https://docs.aws.amazon.com/appfabric/latest/adminguide/what-is-appfabric.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "audit-manager",
+    "name": "AWS Audit Manager",
+    "category": "security",
+    "meters": ["units"],
+    "oneLiner": "Per resource assessment, where one assessment is one piece of evidence about one resource.",
+    "trap": "A single daily config snapshot across a hundred instances is a hundred assessments a day, not one. Adding frameworks multiplies the count, and the Config and Security Hub checks feeding evidence bill on their own.",
+    "billOn": ["USE1-Resource-Assessment-Collected"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/audit-manager/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/auditmanager/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "certificate-manager",
     "name": "AWS Certificate Manager (ACM)",
     "category": "security",
@@ -17,6 +47,21 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/ACM/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloud-directory",
+    "name": "Amazon Cloud Directory",
+    "category": "security",
+    "meters": ["bytes", "units"],
+    "oneLiner": "Per GB-month of directory data, plus per-request charges split by read consistency.",
+    "trap": "Writes and strongly consistent reads share the expensive request tier while eventually consistent reads sit in the cheap one, so a consistency flag decides the bill. Closed to new customers since October 7, 2025.",
+    "billOn": ["TimedStorage-ByteHrs", "Requests-Tier1", "Requests-Tier2"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloud-directory/pricing/",
+      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "cloudhsm",
@@ -119,14 +164,33 @@
     "category": "security",
     "meters": [],
     "oneLiner": "Free. Users, roles, policies, MFA, all of it.",
-    "trap": "Access Analyzer is the part that bills. External-access analyzers cost nothing, but unused-access analyzers charge per IAM role or user monitored and internal-access analyzers charge per AWS resource, monthly.",
-    "billOn": ["AccessFinding-Monitored-IAM-Resources", "AccessFinding-Monitored-AWS-Resources"],
+    "trap": "IAM itself never bills. Access Analyzer is the part that does, and it is a separate entry: unused-access and internal-access analysers charge per monitored resource per month.",
+    "billOn": [],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/iam/faqs/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIAMAccessAnalyzer/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "iam-access-analyzer",
+    "name": "AWS IAM Access Analyzer",
+    "category": "security",
+    "meters": ["time", "units"],
+    "oneLiner": "External access findings are free; unused and internal access analysers bill per monitored resource a month.",
+    "trap": "Switching on an unused access analyser meters every IAM role and user in the account every month, and a second analyser over the same account bills those resources again. Custom policy checks are charged per API call.",
+    "billOn": [
+      "AccessFinding-Monitored-IAM-Resources",
+      "AccessFinding-Monitored-AWS-Resources",
+      "CustomCheck-API-Requests"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iam/access-analyzer/pricing/",
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "iam-identity-center",
@@ -177,6 +241,21 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonInspectorV2/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-device-defender",
+    "name": "AWS IoT Device Defender",
+    "category": "security",
+    "meters": ["time", "units"],
+    "oneLiner": "Audit bills per device per month. Detect bills per metric datapoint reported, not per device.",
+    "trap": "ML Detect costs roughly eighty times Rules Detect per datapoint, and it bills from the moment datapoints arrive — including the two-week training window before the model can alert on anything.",
+    "billOn": ["USE1-Audit", "USE1-Detect", "USE1-ML-Detect"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-device-defender/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceDefender/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "kms",
@@ -243,6 +322,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "payment-cryptography",
+    "name": "AWS Payment Cryptography",
+    "category": "security",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly charge per active key, prorated hourly, plus a per-call charge on every API operation.",
+    "trap": "A key bills from the moment its state goes complete, whether or not a transaction ever touches it, and the per-call rate stays high until you clear twenty million calls in a month.",
+    "billOn": ["USE1-ActiveKeys", "USE1-Requests"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/payment-cryptography/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/PaymentCryptography/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "private-ca",
     "name": "AWS Private Certificate Authority",
     "category": "security",
@@ -293,6 +387,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "security-agent",
+    "name": "AWS Security Agent",
+    "category": "security",
+    "meters": ["time"],
+    "oneLiner": "Per task-hour of autonomous penetration testing. Task-hours accumulate across parallel work.",
+    "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Threat modeling and code review are free only while in preview.",
+    "billOn": ["USE1-Penetration-Testing", "USE1-Threat-Modeling", "USE1-repository-code-review"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/security-agent/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/SecAgent/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "security-hub",
     "name": "AWS Security Hub",
     "category": "security",
@@ -306,6 +415,40 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityHub/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "security-incident-response",
+    "name": "AWS Security Incident Response",
+    "category": "security",
+    "meters": ["units"],
+    "oneLiner": "Per security finding ingested from GuardDuty and Security Hub, past a monthly free allowance.",
+    "trap": "Findings ingested drive the bill, not incidents you actually escalate, so a chatty detection integration is what costs you. The first 10,000 a month are free, and Enterprise Support and Unified Operations pay nothing.",
+    "billOn": ["FindingIngested"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/security-incident-response/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityIncidentResponse/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "security-lake",
+    "name": "Amazon Security Lake",
+    "category": "security",
+    "meters": ["bytes"],
+    "oneLiner": "Per GB of log data delivered into the lake, plus a separate per-GB charge to normalize it to OCSF.",
+    "trap": "CloudTrail events ingest at triple the rate of other sources, and normalization bills on top of ingestion. The S3 storage, Glue, EventBridge, Lambda and SQS under the lake are all billed separately.",
+    "billOn": [
+      "USE1-PaidCloudTrailEvents-Bytes",
+      "USE1-PaidOtherLogs-Bytes",
+      "USE1-PaidNormalization-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/security-lake/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSecurityLake/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "shield",
@@ -355,6 +498,25 @@
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "verified-permissions",
+    "name": "Amazon Verified Permissions",
+    "category": "security",
+    "meters": ["units"],
+    "oneLiner": "Every authorization decision is a billed API request, and policy reads and writes bill too.",
+    "trap": "A BatchIsAuthorized call meters as one request however many decisions it carries, but costs thirty times a lone IsAuthorized — so batching only pays off once you pack it full. ListPolicies bills as well.",
+    "billOn": [
+      "USE1-SingleAuthorizationRequest-API-Requests",
+      "USE1-AuthorizationRequest-API-Requests",
+      "USE1-ListPolicies-API-Requests"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/verified-permissions/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVerifiedPermissions/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "waf",

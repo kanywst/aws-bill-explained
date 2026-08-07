@@ -10,7 +10,7 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/apprunner/pricing/",
-      "https://docs.aws.amazon.com/apprunner/latest/dg/manage-pause-resume.html"
+      "https://docs.aws.amazon.com/apprunner/latest/dg/manage-pause.html"
     ],
     "checked": "2026-08-04"
   },
@@ -42,6 +42,26 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "braket",
+    "name": "Amazon Braket",
+    "category": "compute",
+    "meters": ["time", "units"],
+    "oneLiner": "QPU work bills per task and then again per shot; simulators bill per minute of execution.",
+    "trap": "Shots dominate: one task with ten thousand shots is ten thousand shot charges, and IonQ error mitigation forces a 2,500-shot minimum. Hybrid jobs keep billing the classical instance while quantum tasks sit in the queue.",
+    "billOn": [
+      "Job-QPU-Task-IonQ-Aria-1",
+      "Job-QPU-Task-Shot-IonQ-Aria-1",
+      "Completed-Task-ExecutionDuration-SV1",
+      "Job-ExecutionDuration-ml.m5.xlarge"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/braket/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBraket/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "compute-optimizer",
     "name": "AWS Compute Optimizer",
     "category": "compute",
@@ -55,6 +75,27 @@
       "https://docs.aws.amazon.com/compute-optimizer/latest/ug/enhanced-infrastructure-metrics.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "deadline-cloud",
+    "name": "AWS Deadline Cloud",
+    "category": "compute",
+    "meters": ["time", "bytes"],
+    "oneLiner": "A per-worker-hour fee on top of the EC2 and EBS you render on, plus per-license-hour for apps.",
+    "trap": "Usage-based licensing meters per hour per application, so one job touching Maya, Arnold and Nuke stacks three license lines onto the instance hour. Customer-managed fleets bill connected workers, not busy ones.",
+    "billOn": [
+      "CMF-Worker-hours",
+      "CMF-AWS-Worker-hours",
+      "License-hours:Maya",
+      "License-hours:Nuke",
+      "BoxUsage:c5.large"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/deadline-cloud/pricing/",
+      "https://aws.amazon.com/deadline-cloud/"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "ec2",
@@ -196,6 +237,18 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "elastic-vmware-service",
+    "name": "Amazon Elastic VMware Service (Amazon EVS)",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "An hourly EVS control-plane charge per host, on top of the bare-metal EC2 instances underneath.",
+    "trap": "The EVS line is only the control plane. The real spend is the bare-metal instances at standard EC2 rates, plus a mandatory pair of VPC Route Server endpoints per environment and optional FSx for ONTAP.",
+    "billOn": ["EVSUsage", "EVSUsage-BYOS:i4i.metal"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/evs/pricing/", "https://aws.amazon.com/evs/"],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "fargate",
     "name": "AWS Fargate",
     "category": "compute",
@@ -214,6 +267,46 @@
       "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "gamelift",
+    "name": "Amazon GameLift Servers",
+    "category": "compute",
+    "meters": ["time", "units"],
+    "oneLiner": "Per instance-hour for hosting fleets, plus FlexMatch matchmaking hours and per-player packages.",
+    "trap": "Fleets hold instances at whatever minimum you configured whether players connect or not, so an empty fleet bills all night. Bandwidth is only free on sixth-generation and newer instance types.",
+    "billOn": [
+      "BoxUsage:c5.large",
+      "FlexMatchMatchmakingHrs",
+      "FlexMatchPlayerPackages",
+      "GLAServerProcessConnMin",
+      "GLAGameSessionsPlaced"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/gamelift/servers/pricing/",
+      "https://aws.amazon.com/gamelift/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "gamelift-streams",
+    "name": "Amazon GameLift Streams",
+    "category": "compute",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Per second of allocated stream capacity by stream class, plus per-GB-month for game content.",
+    "trap": "The meter is allocated capacity, not player minutes. Always-on capacity bills continuously, and the pre-warmed idle sessions you keep as a buffer bill at the same rate as sessions with players in them.",
+    "billOn": [
+      "GameLiftStreamsUsage:gen5n_high",
+      "GameLiftStreamsUsage:gen6n_ultra",
+      "GameLiftStreamsUsage:gen4n_win2022"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/gamelift/streams/pricing/",
+      "https://aws.amazon.com/gamelift/streams/"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "lambda",
@@ -263,6 +356,26 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "pcs",
+    "name": "AWS Parallel Computing Service (PCS)",
+    "category": "compute",
+    "meters": ["time", "bytes"],
+    "oneLiner": "An hourly controller fee plus a per-node management fee, both stacked on top of the EC2 bill.",
+    "trap": "The node management fee rides on every EC2 instance the cluster launches, at a higher tier for P and TRN families. The controller bills by the hour with an empty queue, and Slurm accounting adds hours and GB-months.",
+    "billOn": [
+      "PCSController:Slurm:Medium:RunningHours",
+      "PCSInstance:Slurm:StdNode:RunningHours",
+      "PCSAccountingUsage:Slurm:Small:RunningHours",
+      "PCSAccountingStorage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/pcs/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSPCS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "workdocs",
     "name": "Amazon WorkDocs",
     "category": "compute",
@@ -287,10 +400,45 @@
     "billOn": ["AW-HW-1", "AW-HW-1-AutoStop-Usage", "AW-HW-1-AutoStop-User"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/workspaces-family/workspaces/pricing/",
+      "https://aws.amazon.com/workspaces/desktop-as-a-service/pricing/",
       "https://aws.amazon.com/workspaces-family/workspaces/faqs/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "workspaces-core",
+    "name": "Amazon WorkSpaces Core",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "Managed instances bill per second with a one-minute minimum, or at a flat monthly rate per instance.",
+    "trap": "The instance rate covers compute only — EBS volumes, snapshots, dedicated-instance Region fees and Windows RDS user CALs are all yours. The monthly option carries built-in discounts, so Savings Plans do not apply.",
+    "billOn": [
+      "BoxUsage:m5.xlarge:WH-ManagedInstances:Hourly",
+      "BoxUsage:m5.xlarge:WH-ManagedInstances:Monthly",
+      "DedicatedUsage:m5.xlarge:WH-ManagedInstances:Hourly"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/workspaces/vdi-partners/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/1/amazon-workspaces-core-managed-instances-flexible-billing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesInstances/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "workspaces-thin-client",
+    "name": "Amazon WorkSpaces Thin Client",
+    "category": "compute",
+    "meters": ["time"],
+    "oneLiner": "A flat monthly management fee per activated device. The hardware is bought separately from Amazon Business.",
+    "trap": "The monthly fee is not prorated, so a device managed for one day of the month costs a full month. It keeps billing until you delete it from inventory, and re-enrolling in another Region can bill in both.",
+    "billOn": ["USE1-Amazon-WorkSpaces-Thin-Client-service"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/workspaces/thin-client/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesThinClient/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "workspaces-web",
@@ -302,7 +450,7 @@
     "billOn": ["WORKSPACES-WEB-ST", "WORKSPACES-WEB-ST-LARGE"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/workspaces-family/secure-browser/pricing/",
+      "https://aws.amazon.com/workspaces/secure-browser/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesWeb/current/us-east-1/index.json"
     ],
     "checked": "2026-08-04"

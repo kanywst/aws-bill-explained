@@ -15,6 +15,18 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "app-studio",
+    "name": "AWS App Studio",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Free to build and test; you pay per hour of end-user session time on published applications.",
+    "trap": "The meter is session-hours, not named users, so somebody who leaves the app open all day costs more than a heavy user who closes the tab. Building and testing stay free, which hides the cost until launch.",
+    "billOn": ["AppUserActiveUsage"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/appstudio/pricing/", "https://aws.amazon.com/appstudio/"],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "app2container",
     "name": "AWS App2Container",
     "category": "management",
@@ -42,6 +54,26 @@
       "https://aws.amazon.com/blogs/mt/aws-offerings-available-to-support-your-cloud-migration/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "billing-conductor",
+    "name": "AWS Billing Conductor",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Per month for each account inside a pro forma billing group, plus a fee per pro forma billing record.",
+    "trap": "The monthly fee applies to every account in a billing group, so a large organisation pays it hundreds of times just to reprice its own bill. Moving a billing group to another management account is a separate charge.",
+    "billOn": [
+      "Proforma-Accounts",
+      "ProFormaBillingRecords",
+      "CustomLineItems",
+      "Transfer-Billing-Groups"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/aws-cost-management/aws-billing-conductor/pricing/",
+      "https://docs.aws.amazon.com/billingconductor/latest/userguide/what-is-billingconductor.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "budgets",
@@ -148,7 +180,7 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/cloudwatch/pricing/",
-      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html"
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html"
     ],
     "checked": "2026-08-04"
   },
@@ -278,6 +310,22 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "codeguru-profiler",
+    "name": "Amazon CodeGuru Profiler",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per sampling hour: one profiler agent running on one instance or container for one hour.",
+    "trap": "The meter is agent uptime, not findings, so a profiling group left enabled across a fleet keeps billing. Charges stop above a monthly hour cap per profiling group. CodeGuru Reviewer takes no new repositories.",
+    "billOn": ["USE1-SamplingHours", "USE1-AbovePaidSamplingHours", "USE1-LambdaSamplingHours"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/codeguru/profiler/pricing/",
+      "https://docs.aws.amazon.com/codeguru/latest/reviewer-ug/codeguru-reviewer-availability-change.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CodeGuru/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "codepipeline",
     "name": "AWS CodePipeline",
     "category": "management",
@@ -353,6 +401,57 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "device-farm",
+    "name": "AWS Device Farm",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per device-minute of automated test or remote access, or a flat monthly rate for an unmetered slot.",
+    "trap": "Metered minutes count device time, not test time, so install, setup and teardown are billed with the run. An unmetered slot and a reserved private device bill every month whether or not you run a single test.",
+    "billOn": [
+      "Android-Device-Minute",
+      "iOS-Device-Minute",
+      "Android-Device-Slot-Month",
+      "iOS-RA-Minute",
+      "Android-Private-Device-200-Slot-Month"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/device-farm/pricing/",
+      "https://docs.aws.amazon.com/devicefarm/latest/developerguide/welcome.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "devops-agent",
+    "name": "AWS DevOps Agent",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per second of agent working time on investigations, evaluations and on-demand SRE tasks.",
+    "trap": "Idle and waiting time is free, but every tool the agent reaches for bills through its own service — CloudWatch Logs Insights queries and trace retrievals land separately. Paid Support plans earn monthly credits.",
+    "billOn": ["USE1-investigation", "USE1-evaluation", "USE1-on-demand", "USE1-chat-request"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/devops-agent/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/DevOpsAgent/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "devops-guru",
+    "name": "Amazon DevOps Guru",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Per resource-hour for every analysed resource, plus a per-call charge on DevOps Guru API requests.",
+    "trap": "Turning coverage on account-wide meters every supported resource every hour whether it ever produces an insight or not. The resource count rides your autoscaling, and Group B resources cost more than Group A.",
+    "billOn": ["ResourceGroup-A-usagehours", "ResourceGroup-B-usagehours", "DevOpsGuru-APICalls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/devops-guru/pricing/",
+      "https://docs.aws.amazon.com/devops-guru/latest/userguide/welcome.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "fis",
     "name": "AWS Fault Injection Service",
     "category": "management",
@@ -384,6 +483,26 @@
     "checked": "2026-08-07"
   },
   {
+    "slug": "kiro",
+    "name": "Kiro",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly per-user plan that includes a pool of credits. Every prompt and agent task spends credits.",
+    "trap": "Credits burn fractionally by request complexity, so a long spec run drains far more than a chat reply, and going over bills per extra credit. A user subscribed under two Kiro profiles is charged twice.",
+    "billOn": [
+      "USE1-KiroEnterprise-Pro",
+      "USE1-KiroEnterprise-ProPlus",
+      "USE1-KiroEnterprise-Power",
+      "USE1-KiroEnterprise-Credits"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/documentation-overview/kiro/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/Kiro/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "managed-grafana",
     "name": "Amazon Managed Grafana",
     "category": "management",
@@ -411,9 +530,24 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/prometheus/pricing/",
-      "https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-what-is.html"
+      "https://docs.aws.amazon.com/prometheus/latest/userguide/what-is-Amazon-Managed-Service-Prometheus.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "managed-services",
+    "name": "AWS Managed Services (AMS)",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly fee per managed account, set as a tiered percentage of the AWS spend under management.",
+    "trap": "The fee rides on the bill it manages, and an account minimum applies, so a lightly used managed account still carries a sizeable monthly charge. Extra operations work is bought in fixed blocks of engineer hours.",
+    "billOn": ["dollar", "AWSManagedServices-Aug2025-Jul2026-OOD-Block-20Hrs"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/managed-services/",
+      "https://docs.aws.amazon.com/managedservices/latest/userguide/what-is-ams.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "organizations",
@@ -431,6 +565,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "pricing-calculator",
+    "name": "AWS Pricing Calculator (in-console)",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Workload estimates are free; bill estimates are free for the first five a month, then billed per estimate.",
+    "trap": "The cost-planning tool has its own line item. After five bill estimates in a calendar month every further one is charged, including ones generated by the API. Failed estimates are neither counted nor billed.",
+    "billOn": ["BillEstimate"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/pricing-calculator.html",
+      "https://aws.amazon.com/aws-cost-management/aws-pricing-calculator/faqs/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "proton",
     "name": "AWS Proton",
     "category": "management",
@@ -444,6 +593,36 @@
       "https://docs.aws.amazon.com/proton/latest/userguide/proton-end-of-support.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "repost-private",
+    "name": "AWS re:Post Private",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A monthly charge per user who has created an account in your private re:Post space.",
+    "trap": "Billing follows registered users, not active ones, so pointing it at a large directory group bills a full month for everyone who signs in once. The free plan flips to paid once content passes ten GB.",
+    "billOn": ["USE1-SpaceInstance-Standard", "USE1-SpaceInstance-Free"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/repost-private/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/repostspace/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "resilience-hub",
+    "name": "AWS Resilience Hub",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A flat monthly charge for every application you have described to it.",
+    "trap": "The meter is registered applications, not assessments, so an app onboarded once and never re-assessed bills every month. The free trial covers only your first three apps for six months.",
+    "billOn": ["PaidTierApplication", "FreeTierApplication"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/resilience-hub/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSResilienceHub/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "resource-explorer",
@@ -489,6 +668,21 @@
       "https://aws.amazon.com/servicecatalog/faqs/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "support",
+    "name": "AWS Support",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A monthly subscription priced as the greater of a floor or a sliding percentage of your AWS spend.",
+    "trap": "The fee tracks usage, so any spike in the AWS bill enlarges the support charge sitting behind it. It lands with a usage type of Dollar, and Enterprise and Unified Operations aggregate spend across all linked accounts.",
+    "billOn": ["Dollar"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/premiumsupport/pricing/",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "swf",

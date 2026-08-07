@@ -12,6 +12,21 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "augmented-ai",
+    "name": "Amazon Augmented AI (A2I)",
+    "category": "analytics",
+    "meters": ["units"],
+    "oneLiner": "Per object routed to a human reviewer, on top of whatever the workforce itself charges.",
+    "trap": "The Mechanical Turk reward is baked into the usage type, so changing the price per task moves the charge to a different rate code entirely. A2I is now in maintenance and no longer accepts new customers.",
+    "billOn": ["A2ICustom", "A2IRek-CM-Img", "A2ITextract-AD-Form"],
+    "confidence": "medium",
+    "sources": [
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonA2I/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "bedrock",
     "name": "Amazon Bedrock",
     "category": "analytics",
@@ -30,6 +45,68 @@
       "https://docs.aws.amazon.com/bedrock/latest/userguide/cost-mgmt-understanding-cur-data.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "bedrock-agentcore",
+    "name": "Amazon Bedrock AgentCore",
+    "category": "analytics",
+    "meters": ["time", "units", "bytes"],
+    "oneLiner": "Runtime rents vCPU and memory by the hour; Gateway, Memory and each built-in tool meter separately.",
+    "trap": "Runtime charges memory for the whole session but vCPU only while the CPU is busy, so I/O wait is free. Gateway adds a monthly fee per indexed tool, and AgentCore observability lands on your CloudWatch bill instead.",
+    "billOn": [
+      "Runtime:Consumption-based:vCPU",
+      "Runtime:Consumption-based:Memory",
+      "Memory:Consumption-based:Short-Term-Memory",
+      "Gateway:Consumption-based:API-Invocations",
+      "BrowserTool:Consumption-based:vCPU"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/bedrock/agentcore/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrockAgentCore/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "bio-discovery",
+    "name": "Amazon Bio Discovery",
+    "category": "analytics",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly plan bundling a set number of Experiment Units. Extra experiments bill per unit.",
+    "trap": "Collaborators and result viewing are free, so cost tracks experiments rather than seats. Unit consumption scales with candidate count, sequence length and model choice, and wet-lab orders bill outside the plan.",
+    "billOn": [
+      "USE1-researchstudio-Starter",
+      "USE1-researchstudio-Pro",
+      "USE1-researchstudio-ProPlus"
+    ],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/biodiscovery/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/researchstudio/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "clean-rooms",
+    "name": "AWS Clean Rooms",
+    "category": "analytics",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Per CRPU-hour of query compute, per GB-month of intermediate tables, and per record for ML and matching.",
+    "trap": "Each query has a minimum billing duration: sixty seconds for Spark SQL, ten minutes for a PySpark job, so many tiny queries cost more than the work done. Compute bills whoever runs the query, not the data owner.",
+    "billOn": [
+      "CleanRooms-SQL-Compute",
+      "CleanRooms-SparkSQL-Compute",
+      "CleanRooms-PySpark-Compute",
+      "CleanRooms-Storage",
+      "NumberOfRecordsProcessed",
+      "StartAudienceExportJob"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/clean-rooms/pricing/",
+      "https://docs.aws.amazon.com/clean-rooms/latest/userguide/what-is.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "cloudsearch",
@@ -62,6 +139,54 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "comprehend-medical",
+    "name": "Amazon Comprehend Medical",
+    "category": "analytics",
+    "meters": ["units"],
+    "oneLiner": "Per unit of 100 characters, priced separately for entities, PHI, ICD-10, RxNorm and SNOMED CT.",
+    "trap": "Every request is rounded up to a 100-character minimum, so a stream of tiny calls costs far more than the raw character count suggests. Entity detection runs several times the rate of PHI detection.",
+    "billOn": [
+      "USE1-DetectEntities",
+      "USE1-DetectPHI",
+      "USE1-InferICD10CM",
+      "USE1-InferRxNorm",
+      "USE1-InferSNOMEDCT"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/comprehend/medical/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/comprehendmedical/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "data-exchange",
+    "name": "AWS Data Exchange",
+    "category": "analytics",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Per hour that each active data grant exists, plus per GB-month of data stored in Data Exchange.",
+    "trap": "AWS's own fee is trivial next to the third-party data subscription billed through it, which the provider prices and which usually runs on a fixed term you keep paying after you stop querying the data.",
+    "billOn": ["TimedActiveDataGrant-Hrs", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/data-exchange/pricing/",
+      "https://docs.aws.amazon.com/data-exchange/latest/userguide/what-is.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "datazone",
+    "name": "Amazon DataZone",
+    "category": "analytics",
+    "meters": ["units", "bytes"],
+    "oneLiner": "Per API request, per GB of catalog metadata, plus compute units and recommendation tokens.",
+    "trap": "The per-user subscription charge was removed in November 2024, so cost now tracks request volume. Background catalog runs, lineage and AI recommendations generate requests nobody attributes to a person.",
+    "billOn": ["DataZoneRequests", "DataZoneStorage", "DataZoneCompute", "DataZoneRecommendations"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/datazone/pricing/", "https://aws.amazon.com/datazone/"],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "elastic-transcoder",
     "name": "Amazon Elastic Transcoder",
     "category": "analytics",
@@ -90,6 +215,21 @@
       "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-longrunning-transient.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "entity-resolution",
+    "name": "AWS Entity Resolution",
+    "category": "analytics",
+    "meters": ["units"],
+    "oneLiner": "Per record processed or matched, plus a one-off fee for each data matching workflow you create.",
+    "trap": "You are billed on records fed in, not on matches found, so sweeping a whole table to catch a few duplicates costs the same as one that matches everything. Provider-based matching bills the records it prepares as well.",
+    "billOn": ["RecordsMatched", "KnownIdentifiers", "WorkflowFee"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/entity-resolution/pricing/",
+      "https://docs.aws.amazon.com/entityresolution/latest/userguide/what-is-service.html"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "forecast",
@@ -144,9 +284,30 @@
     "confidence": "medium",
     "sources": [
       "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management-public.html",
-      "https://aws.amazon.com/sagemaker-ai/pricing/"
+      "https://aws.amazon.com/sagemaker/ai/pricing/"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "healthomics",
+    "name": "AWS HealthOmics",
+    "category": "analytics",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Workflow compute per instance-hour, run storage per GB-hour, sequence stores per gigabase-month.",
+    "trap": "Sequence store storage meters per gigabase, not per GB, so compression does not save you. Static run storage is provisioned in fixed 1,200 GB increments and bills for the whole run, not the busy part.",
+    "billOn": [
+      "WorkflowType:Private-omics.m.large-hours",
+      "WorkflowType:Private-RunStorage-GB-hour",
+      "StorageClass:Active-Gigabase-hour",
+      "StorageClass:Archive-Gigabase-hour",
+      "AnalyticsType:Variant-Bytes-hour"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/healthomics/pricing/",
+      "https://aws.amazon.com/healthomics/"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "iot-analytics",
@@ -209,6 +370,26 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "lex",
+    "name": "Amazon Lex",
+    "category": "analytics",
+    "meters": ["units"],
+    "oneLiner": "Per request, priced differently for speech and text, and differently again for streaming turns.",
+    "trap": "In request-and-response mode every single user turn is a separate billable request, so a ten-turn conversation is ten charges. Speech requests cost several times a text request for the same turn.",
+    "billOn": [
+      "en-US-SpeechToText-Req",
+      "en-US-TextToText-Req",
+      "en-US-SpeechToSpeech-Str",
+      "en-US-DTMFToText-Str"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/lex/pricing/",
+      "https://docs.aws.amazon.com/lexv2/latest/dg/what-is.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "managed-flink",
     "name": "Amazon Managed Service for Apache Flink",
     "category": "analytics",
@@ -222,6 +403,26 @@
       "https://docs.aws.amazon.com/managed-flink/latest/java/how-pricing.html"
     ],
     "checked": "2026-08-04"
+  },
+  {
+    "slug": "mediaconnect",
+    "name": "AWS Elemental MediaConnect",
+    "category": "analytics",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Flows and outputs bill by the hour, and transport-stream data transfer bills per GB on top.",
+    "trap": "A flow charges hourly from start to stop with no source connected, and every output adds its own hourly rate. Only a flow left in standby is free. Reserved outbound bandwidth locks you into a 12-month commitment.",
+    "billOn": [
+      "Usage-Hours",
+      "DataTransfer-Out-Hours",
+      "DataTransfer-Out-Bytes",
+      "Reserved-DataTransfer-Out-Hours"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/mediaconnect/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMediaConnect/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
   },
   {
     "slug": "mediaconvert",
@@ -284,6 +485,22 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "nova-act",
+    "name": "Amazon Nova Act",
+    "category": "analytics",
+    "meters": ["time"],
+    "oneLiner": "Per agent hour, measured as real elapsed time while a browser automation agent is working.",
+    "trap": "Parallel agents each run their own clock, so a fleet multiplies the meter even on one workflow. Human-in-the-loop waiting is excluded, but S3 and the browser tooling the agent drives bill separately.",
+    "billOn": ["USE1-act"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/nova/pricing/",
+      "https://docs.aws.amazon.com/nova-act/latest/userguide/what-is-nova-act.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/NovaAct/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "opensearch",
     "name": "Amazon OpenSearch Service",
     "category": "analytics",
@@ -294,7 +511,7 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/opensearch-service/pricing/",
-      "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-capacity.html"
+      "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-scaling.html"
     ],
     "checked": "2026-08-04"
   },
@@ -352,6 +569,18 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "quick-suite",
+    "name": "Amazon Quick Suite",
+    "category": "analytics",
+    "meters": ["time", "bytes"],
+    "oneLiner": "A per-user monthly or annual subscription, plus pooled index storage per GB and per-hour agents.",
+    "trap": "Seats bill for the whole month even if the user never signs in, and the Professional and Enterprise plans add a flat monthly per-account infrastructure fee on top of every seat you buy.",
+    "billOn": ["QuickSuiteMonthly-QuickSuiteMonthlyTeam", "QuickSuiteYearly-QuickSuiteYearlyTeam"],
+    "confidence": "medium",
+    "sources": ["https://aws.amazon.com/quick/pricing/", "https://aws.amazon.com/quick/"],
+    "checked": "2026-08-07"
+  },
+  {
     "slug": "quicksight",
     "name": "Amazon QuickSight",
     "category": "analytics",
@@ -361,8 +590,8 @@
     "billOn": ["Author-Pro-Enterprise-Month", "Reader-Enterprise-Month", "QS-Enterprise-SPICE"],
     "confidence": "medium",
     "sources": [
-      "https://aws.amazon.com/quicksight/pricing/",
-      "https://docs.aws.amazon.com/quicksight/latest/user/spice.html"
+      "https://aws.amazon.com/quick/quicksight/pricing/",
+      "https://docs.aws.amazon.com/quick/latest/userguide/spice.html"
     ],
     "checked": "2026-08-04"
   },
@@ -396,7 +625,7 @@
     "billOn": ["Host:instanceType", "Train:instanceType", "Notebk:instanceType"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/sagemaker-ai/pricing/",
+      "https://aws.amazon.com/sagemaker/ai/pricing/",
       "https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html"
     ],
     "checked": "2026-08-04"
@@ -416,7 +645,7 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/textract/pricing/",
-      "https://docs.aws.amazon.com/textract/latest/dg/API_AnalyzeDocument.html"
+      "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html"
     ],
     "checked": "2026-08-04"
   },
