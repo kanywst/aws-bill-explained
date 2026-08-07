@@ -103,19 +103,13 @@
     "meters": ["bytes"],
     "oneLiner": "Per GB of traffic that leaves a Region, crosses Availability Zones, or goes out to the internet.",
     "trap": "Traffic that never leaves AWS still bills: cross-AZ chatter is charged per GB in both directions, and cross-Region copies are charged on the way out. Inbound from the internet is free, which is why egress is the shock.",
-    "billOn": [
-      "DataTransfer-Out-Bytes",
-      "DataTransfer-Regional-Bytes",
-      "DataTransfer-In-Bytes",
-      "USE1-USW2-AWS-Out-Bytes",
-      "USE1-CloudFront-Out-Bytes"
-    ],
+    "billOn": ["DataTransfer-Out-Bytes", "DataTransfer-Regional-Bytes", "USE1-USW2-AWS-Out-Bytes"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/ec2/pricing/on-demand/",
       "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "direct-connect",
@@ -336,7 +330,7 @@
     "name": "AWS RTB Fabric",
     "category": "networking",
     "meters": ["units", "bytes"],
-    "oneLiner": "Per billion bid transactions you send, plus payload above 2 KiB per transaction.",
+    "oneLiner": "Per billion bid transactions you send, plus a per-GB charge for payload beyond what a transaction includes.",
     "trap": "No-bid responses carry their own per-billion meter, and for most demand-side platforms no-bids are the bulk of traffic. Sending to partners not on the fabric costs more than internal traffic; what you receive is free.",
     "billOn": [
       "RTBFabric-Tx-Billion-Internal",
@@ -349,7 +343,7 @@
       "https://aws.amazon.com/rtb-fabric/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSRTBFabric/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "site-to-site-vpn",

@@ -54,14 +54,14 @@
     "category": "security",
     "meters": ["bytes", "units"],
     "oneLiner": "Per GB-month of directory data, plus per-request charges split by read consistency.",
-    "trap": "Writes and strongly consistent reads share the expensive request tier while eventually consistent reads sit in the cheap one, so a consistency flag decides the bill. Closed to new customers since October 7, 2025.",
+    "trap": "Writes and strongly consistent reads share the expensive request tier while eventually consistent reads sit in the cheap one, so a consistency flag decides the bill. Closed to new customers since November 7, 2025.",
     "billOn": ["TimedStorage-ByteHrs", "Requests-Tier1", "Requests-Tier2"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/cloud-directory/pricing/",
       "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "cloudhsm",
@@ -167,11 +167,8 @@
     "trap": "IAM itself never bills. Access Analyzer is the part that does, and it is a separate entry: unused-access and internal-access analysers charge per monitored resource per month.",
     "billOn": [],
     "confidence": "high",
-    "sources": [
-      "https://aws.amazon.com/iam/faqs/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIAMAccessAnalyzer/current/us-east-1/index.json"
-    ],
-    "checked": "2026-08-07"
+    "sources": ["https://aws.amazon.com/iam/faqs/"],
+    "checked": "2026-08-08"
   },
   {
     "slug": "iam-access-analyzer",
@@ -248,14 +245,14 @@
     "category": "security",
     "meters": ["time", "units"],
     "oneLiner": "Audit bills per device per month. Detect bills per metric datapoint reported, not per device.",
-    "trap": "ML Detect costs roughly eighty times Rules Detect per datapoint, and it bills from the moment datapoints arrive — including the two-week training window before the model can alert on anything.",
+    "trap": "ML Detect costs up to eighty times Rules Detect per datapoint at low volume, narrowing to about five times at scale, and it bills from the moment datapoints arrive — including the two-week training window.",
     "billOn": ["USE1-Audit", "USE1-Detect", "USE1-ML-Detect"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/iot-device-defender/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceDefender/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "kms",
@@ -393,13 +390,13 @@
     "meters": ["time"],
     "oneLiner": "Per task-hour of autonomous penetration testing. Task-hours accumulate across parallel work.",
     "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Threat modeling and code review are free only while in preview.",
-    "billOn": ["USE1-Penetration-Testing", "USE1-Threat-Modeling", "USE1-repository-code-review"],
+    "billOn": ["USE1-Penetration-Testing"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/security-agent/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/SecAgent/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "security-hub",

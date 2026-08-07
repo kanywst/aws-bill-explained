@@ -274,7 +274,7 @@
     "category": "compute",
     "meters": ["time", "units"],
     "oneLiner": "Per instance-hour for hosting fleets, plus FlexMatch matchmaking hours and per-player packages.",
-    "trap": "Fleets hold instances at whatever minimum you configured whether players connect or not, so an empty fleet bills all night. Bandwidth is only free on sixth-generation and newer instance types.",
+    "trap": "Fleets hold instances at whatever minimum you configured whether players connect or not, so an empty fleet bills all night. FlexMatch matchmaking bills by the hour on top, and player packages per player.",
     "billOn": [
       "BoxUsage:c5.large",
       "FlexMatchMatchmakingHrs",
@@ -287,7 +287,7 @@
       "https://aws.amazon.com/gamelift/servers/pricing/",
       "https://aws.amazon.com/gamelift/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "gamelift-streams",
@@ -361,7 +361,7 @@
     "category": "compute",
     "meters": ["time", "bytes"],
     "oneLiner": "An hourly controller fee plus a per-node management fee, both stacked on top of the EC2 bill.",
-    "trap": "The node management fee rides on every EC2 instance the cluster launches, at a higher tier for P and TRN families. The controller bills by the hour with an empty queue, and Slurm accounting adds hours and GB-months.",
+    "trap": "The node management fee rides on every EC2 instance the cluster launches, on a standard or advanced tier depending on the instance. The controller bills hourly with an empty queue, and Slurm accounting adds its own.",
     "billOn": [
       "PCSController:Slurm:Medium:RunningHours",
       "PCSInstance:Slurm:StdNode:RunningHours",
@@ -373,7 +373,7 @@
       "https://aws.amazon.com/pcs/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSPCS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "workdocs",
@@ -420,10 +420,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/workspaces/vdi-partners/pricing/",
-      "https://aws.amazon.com/about-aws/whats-new/2026/1/amazon-workspaces-core-managed-instances-flexible-billing/",
+      "https://aws.amazon.com/workspaces/vdi-partners/faqs/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesInstances/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "workspaces-thin-client",

@@ -25,14 +25,14 @@
     "category": "storage",
     "meters": ["time"],
     "oneLiner": "Per port-hour of a reserved slot at a physical AWS upload location; the data volume is not metered.",
-    "trap": "You book time, not bytes. Every reservation is charged at least one full port hour, two ports for an hour bills two, and the rate climbs when the terminal and the destination Region are on different continents.",
+    "trap": "You book time, not bytes. Two ports for an hour bills two port-hours, and the rate climbs when the terminal and the destination Region are on different continents.",
     "billOn": ["EQPA3-NA-PortUsage-100G", "NDCS2-EU-PortUsage-100G", "ATTC1-NA-PortUsage-100G"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/data-transfer-terminal/pricing/",
       "https://aws.amazon.com/data-transfer-terminal/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "datasync",
@@ -340,7 +340,7 @@
     "slug": "transform",
     "name": "AWS Transform",
     "category": "storage",
-    "meters": ["units"],
+    "meters": ["time"],
     "oneLiner": "Per agent-minute of active work. Assessment and several migration agents are free.",
     "trap": "Agent minutes are not wall-clock minutes: several agents can run in parallel on one task and each bills its own. Your idle time and local CLI work are excluded, and every run rounds up to a whole minute.",
     "billOn": ["AgentMinute"],
@@ -349,6 +349,6 @@
       "https://aws.amazon.com/transform/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransform/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   }
 ]

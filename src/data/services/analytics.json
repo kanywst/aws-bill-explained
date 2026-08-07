@@ -77,14 +77,15 @@
     "billOn": [
       "USE1-researchstudio-Starter",
       "USE1-researchstudio-Pro",
-      "USE1-researchstudio-ProPlus"
+      "USE1-researchstudio-ProPlus",
+      "USE1-researchstudio-ExperimentUnits"
     ],
     "confidence": "medium",
     "sources": [
       "https://aws.amazon.com/biodiscovery/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/researchstudio/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "clean-rooms",
@@ -92,7 +93,7 @@
     "category": "analytics",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Per CRPU-hour of query compute, per GB-month of intermediate tables, and per record for ML and matching.",
-    "trap": "Each query has a minimum billing duration: sixty seconds for Spark SQL, ten minutes for a PySpark job, so many tiny queries cost more than the work done. Compute bills whoever runs the query, not the data owner.",
+    "trap": "Each query has a minimum billing duration: sixty seconds for Spark SQL, ten minutes for PySpark. Compute bills whichever member the collaboration names as payer, which can be a data owner rather than the query runner.",
     "billOn": [
       "CleanRooms-SQL-Compute",
       "CleanRooms-SparkSQL-Compute",
@@ -106,7 +107,7 @@
       "https://aws.amazon.com/clean-rooms/pricing/",
       "https://docs.aws.amazon.com/clean-rooms/latest/userguide/what-is.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "cloudsearch",
@@ -164,7 +165,7 @@
     "name": "AWS Data Exchange",
     "category": "analytics",
     "meters": ["time", "bytes"],
-    "oneLiner": "Per hour that each active data grant exists, plus per GB-month of data stored in Data Exchange.",
+    "oneLiner": "Data senders pay per hour each accepted data grant stays active, plus per GB-month of data stored.",
     "trap": "AWS's own fee is trivial next to the third-party data subscription billed through it, which the provider prices and which usually runs on a fixed term you keep paying after you stop querying the data.",
     "billOn": ["TimedActiveDataGrant-Hrs", "TimedStorage-ByteHrs"],
     "confidence": "high",
@@ -172,7 +173,7 @@
       "https://aws.amazon.com/data-exchange/pricing/",
       "https://docs.aws.amazon.com/data-exchange/latest/userguide/what-is.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "datazone",
@@ -180,11 +181,11 @@
     "category": "analytics",
     "meters": ["units", "bytes"],
     "oneLiner": "Per API request, per GB of catalog metadata, plus compute units and recommendation tokens.",
-    "trap": "The per-user subscription charge was removed in November 2024, so cost now tracks request volume. Background catalog runs, lineage and AI recommendations generate requests nobody attributes to a person.",
+    "trap": "The per-user subscription charge went away in November 2024, so cost now tracks compute units and catalog storage rather than seats. Background catalog runs, lineage and AI recommendations all generate requests.",
     "billOn": ["DataZoneRequests", "DataZoneStorage", "DataZoneCompute", "DataZoneRecommendations"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/datazone/pricing/", "https://aws.amazon.com/datazone/"],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "elastic-transcoder",
@@ -294,7 +295,7 @@
     "category": "analytics",
     "meters": ["time", "bytes"],
     "oneLiner": "Workflow compute per instance-hour, run storage per GB-hour, sequence stores per gigabase-month.",
-    "trap": "Sequence store storage meters per gigabase, not per GB, so compression does not save you. Static run storage is provisioned in fixed 1,200 GB increments and bills for the whole run, not the busy part.",
+    "trap": "Sequence store storage meters per gigabase, not per GB, so compression does not save you. Static run storage bills for the whole run at the capacity you provisioned, not the busy part.",
     "billOn": [
       "WorkflowType:Private-omics.m.large-hours",
       "WorkflowType:Private-RunStorage-GB-hour",
@@ -307,7 +308,7 @@
       "https://aws.amazon.com/healthomics/pricing/",
       "https://aws.amazon.com/healthomics/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "iot-analytics",
@@ -410,7 +411,7 @@
     "category": "analytics",
     "meters": ["time", "bytes"],
     "oneLiner": "Flows and outputs bill by the hour, and transport-stream data transfer bills per GB on top.",
-    "trap": "A flow charges hourly from start to stop with no source connected, and every output adds its own hourly rate. Only a flow left in standby is free. Reserved outbound bandwidth locks you into a 12-month commitment.",
+    "trap": "A running flow charges hourly whether or not it is passing traffic, and every output adds its own hourly rate. Only a flow left in standby is free. Reserved outbound bandwidth locks you into a 12-month commitment.",
     "billOn": [
       "Usage-Hours",
       "DataTransfer-Out-Hours",
@@ -422,7 +423,7 @@
       "https://aws.amazon.com/mediaconnect/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMediaConnect/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "mediaconvert",
@@ -574,18 +575,23 @@
     "category": "analytics",
     "meters": ["time", "bytes"],
     "oneLiner": "A per-user monthly or annual subscription, plus pooled index storage per GB and per-hour agents.",
-    "trap": "Seats bill for the whole month even if the user never signs in, and the Professional and Enterprise plans add a flat monthly per-account infrastructure fee on top of every seat you buy.",
-    "billOn": ["QuickSuiteMonthly-QuickSuiteMonthlyTeam", "QuickSuiteYearly-QuickSuiteYearlyTeam"],
+    "trap": "Seats bill for the whole month even if the user never signs in, and the Professional and Enterprise plans add a flat monthly per-account infrastructure fee on top of the seats. Free and Plus plans carry no seat charge.",
+    "billOn": [
+      "QuickSuiteMonthly-QuickSuiteMonthlyTeam",
+      "QuickSuiteYearly-QuickSuiteYearlyTeam",
+      "USE1-IndexCapacity",
+      "USE1-AgentHour"
+    ],
     "confidence": "medium",
     "sources": ["https://aws.amazon.com/quick/pricing/", "https://aws.amazon.com/quick/"],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "quicksight",
     "name": "Amazon QuickSight",
     "category": "analytics",
     "meters": ["time", "bytes", "units"],
-    "oneLiner": "Seats billed monthly per named user, plus SPICE capacity by the GB.",
+    "oneLiner": "Now the Quick Sight part of Quick Suite. Seats billed monthly per named user, plus SPICE capacity by the GB.",
     "trap": "Author and reader seats bill the full month for someone who never logs in. SPICE is charged per GB-month on top, and the embedded capacity plans buy 30-minute sessions in blocks instead of seats.",
     "billOn": ["Author-Pro-Enterprise-Month", "Reader-Enterprise-Month", "QS-Enterprise-SPICE"],
     "confidence": "medium",
@@ -593,7 +599,7 @@
       "https://aws.amazon.com/quick/quicksight/pricing/",
       "https://docs.aws.amazon.com/quick/latest/userguide/spice.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-08-08"
   },
   {
     "slug": "rekognition",

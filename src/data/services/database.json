@@ -25,7 +25,7 @@
     "category": "database",
     "meters": ["bytes", "units"],
     "oneLiner": "Distributed Processing Units for read, write and query work, plus a per GB-month charge for storage.",
-    "trap": "No instance to size and no idle charge, but a multi-Region cluster meters replicated writes as extra DPUs in every peer Region, and turning on change data capture streaming adds DPUs again.",
+    "trap": "No instance to size and no idle charge, but a multi-Region cluster doubles the DPUs on every write, and the replica charge lands in the Region that originated it rather than the peer. CDC streaming adds DPUs again.",
     "billOn": [
       "USE1-DSQL-DistributedProcessingUnits",
       "USE1-DSQL-Storage-ByteHrs",
@@ -36,7 +36,7 @@
       "https://aws.amazon.com/rds/aurora/dsql/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AuroraDSQL/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "aurora-serverless-v2",
@@ -224,7 +224,7 @@
     "slug": "oracle-database-at-aws",
     "name": "Oracle Database@AWS",
     "category": "database",
-    "meters": ["time", "bytes"],
+    "meters": ["bytes"],
     "oneLiner": "An AWS Marketplace subscription for Oracle-run Exadata infrastructure, with rates set by Oracle.",
     "trap": "The bulk of the cost arrives under AWS Marketplace on your invoice, not as an ordinary service line. Only the zero-ETL side is AWS-metered, and change data capture transfer costs far more per GB than the initial load.",
     "billOn": ["USE1-ODB:CDC-DataTransfer", "USE1-ODB:DataExport"],
@@ -233,7 +233,7 @@
       "https://docs.aws.amazon.com/odb/latest/UserGuide/what-is-odb.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/OracleDbAtAWS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "rds",

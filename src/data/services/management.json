@@ -62,18 +62,13 @@
     "meters": ["time", "units"],
     "oneLiner": "Per month for each account inside a pro forma billing group, plus a fee per pro forma billing record.",
     "trap": "The monthly fee applies to every account in a billing group, so a large organisation pays it hundreds of times just to reprice its own bill. Moving a billing group to another management account is a separate charge.",
-    "billOn": [
-      "Proforma-Accounts",
-      "ProFormaBillingRecords",
-      "CustomLineItems",
-      "Transfer-Billing-Groups"
-    ],
+    "billOn": ["Proforma-Accounts", "ProFormaBillingRecords", "Transfer-Billing-Groups"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/aws-cost-management/aws-billing-conductor/pricing/",
       "https://docs.aws.amazon.com/billingconductor/latest/userguide/what-is-billingconductor.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "budgets",
@@ -428,13 +423,13 @@
     "meters": ["time"],
     "oneLiner": "Per second of agent working time on investigations, evaluations and on-demand SRE tasks.",
     "trap": "Idle and waiting time is free, but every tool the agent reaches for bills through its own service — CloudWatch Logs Insights queries and trace retrievals land separately. Paid Support plans earn monthly credits.",
-    "billOn": ["USE1-investigation", "USE1-evaluation", "USE1-on-demand", "USE1-chat-request"],
+    "billOn": ["USE1-investigation", "USE1-evaluation", "USE1-on-demand"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/devops-agent/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/DevOpsAgent/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "devops-guru",
@@ -472,7 +467,7 @@
     "category": "management",
     "meters": [],
     "oneLiner": "Free to read, both the public status page and your own account events.",
-    "trap": "The API is the gated part. Calling it from an account without Business Support+, Enterprise Support or Unified Operations returns SubscriptionRequiredException, so automation on Basic support cannot use it.",
+    "trap": "The API is the gated part. Calling it without Business Support+, Enterprise Support or Unified Operations — or the legacy Business and Enterprise On-Ramp, retired January 1, 2027 — returns SubscriptionRequiredException.",
     "billOn": [],
     "confidence": "high",
     "sources": [
@@ -480,7 +475,7 @@
       "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html",
       "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "kiro",
@@ -488,7 +483,7 @@
     "category": "management",
     "meters": ["time", "units"],
     "oneLiner": "A monthly per-user plan that includes a pool of credits. Every prompt and agent task spends credits.",
-    "trap": "Credits burn fractionally by request complexity, so a long spec run drains far more than a chat reply, and going over bills per extra credit. A user subscribed under two Kiro profiles is charged twice.",
+    "trap": "Credits burn fractionally by request complexity, so a long spec run drains far more than a chat reply, and going over your monthly pool bills per extra credit.",
     "billOn": [
       "USE1-KiroEnterprise-Pro",
       "USE1-KiroEnterprise-ProPlus",
@@ -500,7 +495,7 @@
       "https://aws.amazon.com/documentation-overview/kiro/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/Kiro/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "managed-grafana",
@@ -538,16 +533,16 @@
     "slug": "managed-services",
     "name": "AWS Managed Services (AMS)",
     "category": "management",
-    "meters": ["time", "units"],
+    "meters": ["time"],
     "oneLiner": "A monthly fee per managed account, set as a tiered percentage of the AWS spend under management.",
-    "trap": "The fee rides on the bill it manages, and an account minimum applies, so a lightly used managed account still carries a sizeable monthly charge. Extra operations work is bought in fixed blocks of engineer hours.",
-    "billOn": ["dollar", "AWSManagedServices-Aug2025-Jul2026-OOD-Block-20Hrs"],
+    "trap": "The fee rides on the bill it manages, so it grows with every other line. Extra operations work is bought in on-demand blocks of twenty engineer hours, and you are billed a minimum of one block a month.",
+    "billOn": ["UGE1-dollar"],
     "confidence": "medium",
     "sources": [
       "https://aws.amazon.com/managed-services/",
-      "https://docs.aws.amazon.com/managedservices/latest/userguide/what-is-ams.html"
+      "https://docs.aws.amazon.com/managedservices/latest/userguide/ops-on-demand.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "organizations",
@@ -600,29 +595,29 @@
     "category": "management",
     "meters": ["time"],
     "oneLiner": "A monthly charge per user who has created an account in your private re:Post space.",
-    "trap": "Billing follows registered users, not active ones, so pointing it at a large directory group bills a full month for everyone who signs in once. The free plan flips to paid once content passes ten GB.",
+    "trap": "Billing follows registered users, not active ones, so pointing it at a large directory group bills a full month for everyone who signs in once and never returns.",
     "billOn": ["USE1-SpaceInstance-Standard", "USE1-SpaceInstance-Free"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/repost-private/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/repostspace/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "resilience-hub",
     "name": "AWS Resilience Hub",
     "category": "management",
     "meters": ["time"],
-    "oneLiner": "A flat monthly charge for every application you have described to it.",
-    "trap": "The meter is registered applications, not assessments, so an app onboarded once and never re-assessed bills every month. The free trial covers only your first three apps for six months.",
+    "oneLiner": "A flat monthly charge per application, starting the first time you assess it.",
+    "trap": "Billing starts at the first assessment and then never stops on its own — an app assessed once and forgotten bills every month until you remove it. The free trial covers only your first three apps for six months.",
     "billOn": ["PaidTierApplication", "FreeTierApplication"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/resilience-hub/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSResilienceHub/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "resource-explorer",

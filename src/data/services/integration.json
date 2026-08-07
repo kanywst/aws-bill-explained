@@ -121,7 +121,7 @@
     "category": "integration",
     "meters": ["time", "units"],
     "oneLiner": "A monthly subscription per clinician for ambient documentation, plus per-action patient verification.",
-    "trap": "The seat fee covers a fixed monthly encounter allowance; past it, documentation bills per minute of captured audio. The Amazon Connect voice minutes carrying those patient calls bill separately.",
+    "trap": "The seat fee covers a fixed monthly allowance of documentation minutes, not encounters; past it, captured audio bills per minute. The Amazon Connect voice minutes carrying those patient calls bill separately.",
     "billOn": [
       "USE1-Subscription-Paid",
       "USE1-AmbientDocumentationMinutes:Overage",
@@ -133,7 +133,7 @@
       "https://docs.aws.amazon.com/connecthealth/latest/userguide/what-is-service.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/healthagent/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-08-08"
   },
   {
     "slug": "data-firehose",
