@@ -1,6 +1,16 @@
 ---
 import type { MeterId } from '../domain/meter';
 import { t, type Lang } from '../i18n/strings';
+import {
+  SEQ_COL_WIDTH,
+  SEQ_GUTTER_WIDTH,
+  SEQ_HEAD_HEIGHT,
+  seqCanvasHeight,
+  seqCanvasWidth,
+  seqLaneX,
+  seqLanesWidth,
+  seqStepY,
+} from '../lib/diagram-layout';
 
 /**
  * A sequence diagram with a billing gutter.
@@ -32,18 +42,26 @@ interface Props {
 const { actors, steps, caption, lang = 'en' } = Astro.props;
 const s = t(lang).diagram;
 
-const COL_W = 150;
-const PAD_X = 10;
-const HEAD_H = 42;
-const STEP_H = 58;
-const GUTTER_W = 178;
+// Geometry lives in lib/diagram-layout so it can be tested. This component used
+// to own it, which is why its off-canvas-arrow bug was invisible to the suite.
+const COL_W = SEQ_COL_WIDTH;
+const HEAD_H = SEQ_HEAD_HEIGHT;
+const GUTTER_W = SEQ_GUTTER_WIDTH;
 
-const laneX = (id: string) => PAD_X + actors.findIndex((a) => a.id === id) * COL_W + COL_W / 2;
-const stepY = (i: number) => HEAD_H + 34 + i * STEP_H;
+// findIndex returns -1 for an id that is not an actor, which would put the lane
+// at a negative x and draw the arrow off the left of the canvas — silently, and
+// only for the one step with the typo. Fail the build instead, the way
+// PathDiagram does for hops.
+const laneX = (id: string) => {
+  const i = actors.findIndex((a) => a.id === id);
+  if (i < 0) throw new Error(`SequenceDiagram: step references unknown actor id "${id}"`);
+  return seqLaneX(i);
+};
+const stepY = (i: number) => seqStepY(i);
 
-const LANES_W = PAD_X * 2 + actors.length * COL_W;
-const W = LANES_W + GUTTER_W;
-const H = HEAD_H + 34 + steps.length * STEP_H + 16;
+const LANES_W = seqLanesWidth(actors.length);
+const W = seqCanvasWidth(actors.length);
+const H = seqCanvasHeight(steps.length);
 
 const billed = steps.filter((s) => s.meter);
 ---

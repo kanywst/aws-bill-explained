@@ -10,6 +10,13 @@ import {
   PATH_MID_Y,
   pathCanvasHeight,
   pathCanvasWidth,
+  SEQ_COL_WIDTH,
+  SEQ_GUTTER_WIDTH,
+  seqCanvasHeight,
+  seqCanvasWidth,
+  seqLaneX,
+  seqLanesWidth,
+  seqStepY,
 } from './diagram-layout';
 
 describe('layoutRings', () => {
@@ -141,6 +148,51 @@ describe('path canvas', () => {
   it('grows with the node count and stays positive at one node', () => {
     expect(pathCanvasWidth(1)).toBeGreaterThan(0);
     expect(pathCanvasWidth(3)).toBeGreaterThan(pathCanvasWidth(2));
+  });
+});
+
+describe('sequence geometry', () => {
+  /**
+   * The bug this suite exists to prevent. An unknown actor id makes findIndex
+   * return -1, and the old inline version happily computed a negative x, so the
+   * arrow for that one step drew off the left edge of the canvas with no error.
+   * The same class of bug shipped once in BoundaryMap.
+   */
+  it('refuses a negative actor index instead of drawing off-canvas', () => {
+    expect(() => seqLaneX(-1)).toThrow(/unknown actor/);
+  });
+
+  it('keeps every lane on the canvas', () => {
+    for (let actors = 1; actors <= 6; actors += 1) {
+      for (let i = 0; i < actors; i += 1) {
+        expect(seqLaneX(i), `actor ${i} of ${actors}`).toBeGreaterThan(0);
+        expect(seqLaneX(i), `actor ${i} of ${actors}`).toBeLessThan(seqLanesWidth(actors));
+      }
+    }
+  });
+
+  it('spaces lanes by exactly one column', () => {
+    expect(seqLaneX(1) - seqLaneX(0)).toBe(SEQ_COL_WIDTH);
+    expect(seqLaneX(4) - seqLaneX(3)).toBe(SEQ_COL_WIDTH);
+  });
+
+  it('leaves the whole gutter free of lifelines, since that is where costs go', () => {
+    for (let actors = 1; actors <= 6; actors += 1) {
+      const gutterStart = seqCanvasWidth(actors) - SEQ_GUTTER_WIDTH;
+      expect(seqLaneX(actors - 1), `${actors} actors`).toBeLessThan(gutterStart);
+    }
+  });
+
+  it('grows the canvas with the steps and never crops the last one', () => {
+    for (let steps = 1; steps <= 8; steps += 1) {
+      expect(seqStepY(steps - 1), `${steps} steps`).toBeLessThan(seqCanvasHeight(steps));
+    }
+    expect(seqCanvasHeight(4)).toBeGreaterThan(seqCanvasHeight(3));
+  });
+
+  it('never overlaps two steps', () => {
+    expect(seqStepY(1)).toBeGreaterThan(seqStepY(0));
+    expect(seqStepY(2) - seqStepY(1)).toBe(seqStepY(1) - seqStepY(0));
   });
 });
 

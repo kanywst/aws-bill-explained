@@ -131,6 +131,46 @@ export function chipY(hop: Pick<HopLayout, 'y' | 'forward'>): number {
   return hop.forward ? hop.y - 30 : hop.y + 26;
 }
 
+/* ---- SequenceDiagram ----------------------------------------------------- */
+
+export const SEQ_COL_WIDTH = 150;
+export const SEQ_PAD_X = 10;
+export const SEQ_HEAD_HEIGHT = 42;
+export const SEQ_STEP_HEIGHT = 58;
+export const SEQ_GUTTER_WIDTH = 178;
+/** Gap between the actor headers and the first step's arrow. */
+export const SEQ_FIRST_STEP_OFFSET = 34;
+
+/**
+ * Centre of an actor's lifeline. Throws on an unknown actor for the same reason
+ * layoutHop does: a -1 index puts the lane at a negative x, and the arrow draws
+ * off the left of the canvas without erroring — visible only if you happen to
+ * look at that one step.
+ */
+export function seqLaneX(index: number): number {
+  if (index < 0) {
+    throw new Error(`step references an unknown actor (index ${index})`);
+  }
+  return SEQ_PAD_X + index * SEQ_COL_WIDTH + SEQ_COL_WIDTH / 2;
+}
+
+export function seqStepY(index: number): number {
+  return SEQ_HEAD_HEIGHT + SEQ_FIRST_STEP_OFFSET + index * SEQ_STEP_HEIGHT;
+}
+
+/** Width of the lifeline columns, before the gutter that holds the cost chips. */
+export function seqLanesWidth(actorCount: number): number {
+  return SEQ_PAD_X * 2 + actorCount * SEQ_COL_WIDTH;
+}
+
+export function seqCanvasWidth(actorCount: number): number {
+  return seqLanesWidth(actorCount) + SEQ_GUTTER_WIDTH;
+}
+
+export function seqCanvasHeight(stepCount: number): number {
+  return seqStepY(stepCount) + 16;
+}
+
 /* ---- Shared guard ------------------------------------------------------- */
 
 /**
