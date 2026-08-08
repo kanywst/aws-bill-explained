@@ -2,6 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    // Unit tests only. tests/ holds Playwright specs, which vitest's default
+    // pattern would otherwise pick up and run without a browser.
+    include: ['src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       // No 'html': the generated report is 6,000 lines of istanbul output

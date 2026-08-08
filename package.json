@@ -10,13 +10,14 @@
     "build": "astro build && node scripts/csp-hashes.mjs && node scripts/check-build.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "npm run lint && astro check && vitest run && npm run build",
+    "check": "npm run lint && astro check && vitest run && npm run build && npm run test:smoke",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "lint": "prettier --check . && markdownlint-cli2",
     "deploy": "npm run check && wrangler pages deploy dist --project-name=aws-bill-explained",
-    "preview:remote": "wrangler pages dev dist"
+    "preview:remote": "wrangler pages dev dist",
+    "test:smoke": "playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
     "@vitest/coverage-v8": "^4.1.10",
     "markdownlint-cli2": "^0.23.2",
     "prettier": "^3.9.6",

@@ -8,5 +8,5 @@
     "MD036": false,
     "MD041": false,
   },
-  "globs": ["**/*.md", "!node_modules", "!dist"],
+  "globs": ["**/*.md", "!node_modules", "!dist", "!test-results", "!playwright-report"],
 }
