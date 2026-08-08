@@ -110,7 +110,7 @@ Cost Explorer の追加分はオプトインかつ従量だ。月次粒度の多
 
 注意が2つ。`lineItem/ResourceId` は、実体を持たない usage type（データ転送、API リクエスト）では空になる。割引・クレジット・税も仕様として空だ。もう1つ、CUR 2.0 は全カラム名をスネークケースに改名した。`lineItem/UsageType` は `line_item_usage_type`、`product/instanceType` は `product_instance_type`。データは同じで綴りが違う。片方向けに書いたクエリはもう片方では動かない。
 
-### 請求書は使用量だけではない。charge type
+### 請求書は使用量だけではない: charge type
 
 合計がメーターの総和にならない理由を説明しているのが `lineItem/LineItemType` だ。AWS が定義している値。
 

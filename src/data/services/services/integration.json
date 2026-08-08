@@ -373,7 +373,7 @@
     "category": "integration",
     "meters": ["time", "bytes"],
     "oneLiner": "Hourly per environment by size, plus hourly per extra worker, scheduler and web server, plus DB storage.",
-    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button, you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
+    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button: you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
     "billOn": [
       "Airflow-SmallEnvironment",
       "Airflow-LargeWorker",

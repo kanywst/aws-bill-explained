@@ -41,7 +41,7 @@ The chunk size is different for every service, and it is not guessable:
 - **Amazon SNS**: 64 KB on the publish, and 64 KB again on each delivery.
 - **Amazon EventBridge**: 64 KB per custom event, so "an event with a 256 KB payload is
   billed as 4 events". Schema Discovery slices the same payload at 8 KB instead.
-- **Amazon API Gateway**: hTTP APIs are metered in 512 KB increments. WebSocket messages
+- **Amazon API Gateway**: HTTP APIs are metered in 512 KB increments. WebSocket messages
   are metered in 32 KB increments, "so a 33KB message is metered as two messages". REST
   APIs are the exception: one call is one call, whatever it weighs.
 - **AWS AppSync**: real-time messages are "charged per 5 KB payload of data delivered",
@@ -91,8 +91,8 @@ Chunking is only one of the three ways a call stops being a unit. The other two 
 class of the request and the number of things it fans out to.
 
 **Request classes are priced an order of magnitude apart.** S3 splits its requests into
-tiers and the gap is not subtle. In us-east-1, `Requests-Tier1`. PUT, COPY, POST and
-LIST (is $0.005 per 1,000, while `Requests-Tier2`) GET and everything else: is $0.0004
+tiers and the gap is not subtle. In us-east-1, `Requests-Tier1` (PUT, COPY, POST and
+LIST) is $0.005 per 1,000, while `Requests-Tier2` (GET and everything else) is $0.0004
 per 1,000. That is 12.5× for the privilege of writing instead of reading. DELETE and
 CANCEL are free outright. A crawler that LISTs a bucket per object is therefore paying
 write-tier prices to do nothing but read, which is the usual way this bites.

@@ -35,7 +35,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 どちらもメーターとしては **time** が回っている。このサイトの言い方でいえば、サブスクリプションが存在するから月単位で課金される、誰も使っていなくても課金される。珍しいのはメーターではない。**単価がレートカードに載っていない**ことのほうだ。
 
-**ここで、このサイトが読者に対して負っている訂正を1つ。** AWS Trusted Advisor と AWS Health Dashboard は「無料」と載せてあるが、それが本当なのは「目で見る側の半分」だけだ。Basic Support で見えるのは Service Limits カテゴリの全チェックと、Security / Fault Tolerance から選ばれた6件。EBS のパブリックスナップショット、RDS のパブリックスナップショット、S3 バケットのアクセス許可、root ユーザーの MFA、特定ポートが開放されたセキュリティグループ、リージョンをまたぐ STS グローバルエンドポイントの使用。自動更新も付かないので、Basic ではセキュリティチェックを手で refresh することになる。AWS 自身の Trusted Advisor ページが差を数えている。どのプランでも 56 チェック、Business Support+ 以上でさらに 426 チェックが開いて合計 482。Trusted Advisor API も有料プラン側だ。Health はもっと厳しく、Business Support+ / Enterprise Support / Unified Operations のどれも持たないアカウントから AWS Health API を叩くと `SubscriptionRequiredException` が返る。**コンソールは無料で、自動化は無料ではない。そして自動化の値段は、他の全支出に対するパーセンテージ**だ。
+**ここで、このサイトが読者に対して負っている訂正を1つ。** AWS Trusted Advisor と AWS Health Dashboard は「無料」と載せてあるが、それが本当なのは「目で見る側の半分」だけだ。Basic Support で見えるのは Service Limits カテゴリの全チェックと、Security / Fault Tolerance から選ばれた6件: EBS のパブリックスナップショット、RDS のパブリックスナップショット、S3 バケットのアクセス許可、root ユーザーの MFA、特定ポートが開放されたセキュリティグループ、リージョンをまたぐ STS グローバルエンドポイントの使用。自動更新も付かないので、Basic ではセキュリティチェックを手で refresh することになる。AWS 自身の Trusted Advisor ページが差を数えている。どのプランでも 56 チェック、Business Support+ 以上でさらに 426 チェックが開いて合計 482。Trusted Advisor API も有料プラン側だ。Health はもっと厳しく、Business Support+ / Enterprise Support / Unified Operations のどれも持たないアカウントから AWS Health API を叩くと `SubscriptionRequiredException` が返る。**コンソールは無料で、自動化は無料ではない。そして自動化の値段は、他の全支出に対するパーセンテージ**だ。
 
 <PathDiagram
   lang="ja"

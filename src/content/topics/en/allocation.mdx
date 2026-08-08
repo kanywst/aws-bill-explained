@@ -105,7 +105,7 @@ Cost categories are where you deal with what tags cannot divide. Categorise the 
 
 For a shared cluster there is a purpose-built answer instead. Split cost allocation data adds task-level and pod-level rows to the Cost and Usage Report for Amazon ECS and Amazon EKS, derived from the CPU and memory each container consumed on its EC2 instance, priced from the amortised instance cost, with the instance's unused capacity redistributed by utilisation. It supports user-defined cost allocation tags and Kubernetes primitives such as namespace and workload. Its cost is row count: two new usage records per task or pod per hour.
 
-Consolidated billing does the rest for free. Member account bills are, in AWS's phrasing, for informational purpose only, the management account pays. AWS shows each member account its charges as unblended costs, while still applying the organisation's tier and reservation benefits underneath.
+Consolidated billing does the rest for free. Member account bills are, in AWS's phrasing, for informational purpose only: the management account pays. AWS shows each member account its charges as unblended costs, while still applying the organisation's tier and reservation benefits underneath.
 
 ## Traps
 
