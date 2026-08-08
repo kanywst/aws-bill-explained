@@ -12,6 +12,11 @@ on:
     # fine for a weekly freshness sweep.
     - cron: '0 7 * * 1'
   workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: 'Force a failure, to prove the issue-filing path still works'
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -39,10 +44,22 @@ jobs:
         id: sources
         run: node scripts/check-sources.mjs 2>&1 | tee sources.log
 
+      # --strict here and nowhere else: age is enforced on a clock rather than
+      # on whoever happens to push. A pull request that touches one component
+      # should not fail on the age of an unrelated record.
       - name: Check how stale the claims are
         id: freshness
         if: always()
-        run: node scripts/check-freshness.mjs 2>&1 | tee freshness.log
+        run: node scripts/check-freshness.mjs --strict 2>&1 | tee freshness.log
+
+      # The notification path only runs when something is wrong, so it is the
+      # one part of this workflow that normal operation never exercises. This
+      # input exists to exercise it deliberately.
+      - name: Simulate a decayed claim
+        if: inputs.simulate_failure
+        run: |
+          echo "simulated failure: exercising the issue-filing path" | tee -a freshness.log
+          exit 1
 
       # A failing scheduled run notifies nobody by default — there is no pull
       # request to turn red. An issue is the only thing anyone will see.

@@ -1,0 +1,354 @@
+[
+  {
+    "slug": "backup",
+    "name": "AWS Backup",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Stored backups bill per GB-month, restores bill per GB, and cold storage ties data up for three months.",
+    "trap": "Warm-storage restores are free for EBS, RDS, Aurora and Redshift snapshots, but billed per GB for EFS, DynamoDB, S3 and all cold restores. Cold points carry a 90-day minimum; delete early and you pay the balance.",
+    "billOn": [
+      "WarmStorage-ByteHrs-EFS",
+      "ColdStorage-ByteHrs-EFS",
+      "Restore-WarmBytes-EFS",
+      "PartialRestore-Jobs-EFS"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/backup/pricing/",
+      "https://docs.aws.amazon.com/aws-backup/latest/devguide/metering-and-billing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "data-transfer-terminal",
+    "name": "AWS Data Transfer Terminal",
+    "category": "storage",
+    "meters": ["time"],
+    "oneLiner": "Per port-hour of a reserved slot at a physical AWS upload location; the data volume is not metered.",
+    "trap": "You book time, not bytes. Two ports for an hour bills two port-hours, and the rate climbs when the terminal and the destination Region are on different continents.",
+    "billOn": ["EQPA3-NA-PortUsage-100G", "NDCS2-EU-PortUsage-100G", "ATTC1-NA-PortUsage-100G"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/data-transfer-terminal/pricing/",
+      "https://aws.amazon.com/data-transfer-terminal/"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "datasync",
+    "name": "AWS DataSync",
+    "category": "storage",
+    "meters": ["bytes", "units"],
+    "oneLiner": "A flat per-GB toll on everything it moves, either direction, layered on whatever S3 and EFS already charge.",
+    "trap": "The per-GB fee ignores direction and is only DataSync's cut. S3 LIST, HEAD, GET and PUT requests plus any cross-Region transfer bill on top, and Enhanced mode adds a charge per task execution.",
+    "billOn": ["Transferred-Bytes", "Transferred-Bytes-Enhanced", "Task-Executions-Enhanced"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/datasync/pricing/",
+      "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "ebs",
+    "name": "Amazon Elastic Block Store (EBS)",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Provisioned size is what you pay for, used or not, and snapshots keep billing after the volume is gone.",
+    "trap": "A detached volume bills in full. gp3 charges separately for IOPS over 3,000 and throughput over 125 MB/s, the EBS direct APIs bill per request, and archived snapshots carry a 90-day minimum plus a retrieval fee.",
+    "billOn": [
+      "EBS:VolumeUsage.gp3",
+      "EBS:VolumeP-IOPS.gp3",
+      "EBS:SnapshotUsage",
+      "EBS:SnapshotArchiveStorage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ebs/pricing/",
+      "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-billing-usage-reports.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "efs",
+    "name": "Amazon Elastic File System (EFS)",
+    "category": "storage",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Storage is half of it. Under Elastic throughput every GB you read or write is metered too.",
+    "trap": "Elastic throughput meters data both directions, not just reads. IA and Archive add a per-GB access fee, and files under 128 KiB bill as 128 KiB — a floor on small files, not a rounding rule.",
+    "billOn": [
+      "TimedStorage-ByteHrs",
+      "IATimedStorage-ByteHrs",
+      "ETDataAccess-Bytes",
+      "ProvisionedTP-MiBpsHrs"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/efs/pricing/",
+      "https://docs.aws.amazon.com/efs/latest/ug/billing-usage-reports-understand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elastic-disaster-recovery",
+    "name": "AWS Elastic Disaster Recovery",
+    "category": "storage",
+    "meters": ["time"],
+    "oneLiner": "One flat hourly fee per source server. The real money is the EBS and EC2 it quietly runs for you.",
+    "trap": "That per-server hour is the small part. A staging EBS volume for every source disk, the point-in-time snapshots and the replication EC2 instances all bill under EBS and EC2, running even when you never fail over.",
+    "billOn": ["DRS-Replication"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/disaster-recovery/pricing/",
+      "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "file-cache",
+    "name": "Amazon File Cache",
+    "category": "storage",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Provisioned like a file system. You buy cache capacity by the GB-month, warm or empty.",
+    "trap": "Throughput has no line of its own; it scales with provisioned capacity, so wanting more MB/s means buying more GB. Cross-AZ and VPC-peering traffic is charged per GB in each direction.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/filecache/pricing/",
+      "https://docs.aws.amazon.com/fsx/latest/FileCacheGuide/what-is.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "fsx",
+    "name": "Amazon FSx",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Four different file systems share one name. SSD capacity, throughput and IOPS are each their own line item.",
+    "trap": "Throughput capacity and SSD IOPS are provisioned independently of storage. Once data sits in ONTAP capacity pool or in Lustre or OpenZFS Intelligent-Tiering, every read and write adds a request charge.",
+    "billOn": ["Storage", "ThroughputCapacity", "ProvisionedSSDIOPS", "Requests.MAZ:CPoolStdRd"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/fsx/netapp-ontap/pricing/",
+      "https://aws.amazon.com/fsx/lustre/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "healthimaging",
+    "name": "AWS HealthImaging",
+    "category": "storage",
+    "meters": ["bytes", "units", "time"],
+    "oneLiner": "Per GB-month in frequent-access or archive tiers, plus indexed metadata storage and API requests.",
+    "trap": "Importing is free, but everything imported carries a 30-day minimum storage charge and a 5 MB minimum per image set, so a study split into many small image sets bills well above its real byte count.",
+    "billOn": [
+      "TimedStorage-ActiveByteHrs",
+      "TimedStorage-ArchiveByteHrs",
+      "TimedStorage-IndexedByteHrs",
+      "API-Requests-Core",
+      "DataStore-Hours"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/healthimaging/pricing/",
+      "https://aws.amazon.com/healthimaging/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "mainframe-modernization",
+    "name": "AWS Mainframe Modernization",
+    "category": "storage",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Closed to new customers since November 2025; existing runtime environments still bill per vCPU-hour.",
+    "trap": "The runtime meter is per AWS CPU core per hour on a provisioned environment, so an idle developer environment costs what a busy one does. Getting mainframe data across is priced separately per GB and it stings.",
+    "billOn": ["BluAgeRuntime-Non-Managed-vCPU-Hours", "File-Transfer"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/mainframe-modernization/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSM2/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "mediastore",
+    "name": "AWS Elemental MediaStore",
+    "category": "storage",
+    "meters": ["units", "bytes", "time"],
+    "oneLiner": "AWS shut MediaStore off on November 13, 2025, so the only live question is what replaced it.",
+    "trap": "Support ended November 13, 2025 and the service is gone. While it ran it metered three ways at once: per request, per GB ingested and egressed, and per GB-month stored. Cost models built on it no longer apply.",
+    "billOn": ["APIRequest-GetObject", "Ingest-Optimized-Bytes", "Storage-S3"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/blogs/media/support-for-aws-elemental-mediastore-ending-soon/",
+      "https://docs.aws.amazon.com/managedservices/latest/userguide/elemental-media-store.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "mgn",
+    "name": "AWS Application Migration Service",
+    "category": "storage",
+    "meters": ["time"],
+    "oneLiner": "Free for 2,160 replication hours per server, then hourly.",
+    "trap": "The free window covers the MGN service fee only. Replication servers, EBS volumes and snapshots in the staging area bill from day one, and the clock starts when you install the agent, not at cutover.",
+    "billOn": ["MGN-Replication"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/application-migration-service/faqs/",
+      "https://docs.aws.amazon.com/mgn/latest/ug/migration_at_scale.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "migration-hub",
+    "name": "AWS Migration Hub",
+    "category": "storage",
+    "meters": [],
+    "oneLiner": "Free to use, and closed to new customers since November 7, 2025.",
+    "trap": "Migration Hub never lands on a bill of its own; the tools it tracks and the resources they provision do. It also stopped accepting new customers on November 7, 2025, so a fresh account cannot switch it on.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html",
+      "https://aws.amazon.com/about-aws/whats-new/2025/10/aws-service-availability/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "refactor-spaces",
+    "name": "AWS Migration Hub Refactor Spaces",
+    "category": "storage",
+    "meters": ["time", "units"],
+    "oneLiner": "An hourly charge per environment, plus a per-API-request fee on nearly every call.",
+    "trap": "The environment fee is the small half. Refactor Spaces provisions a Transit Gateway, API Gateway and load balancers into your account and each bills at its own rate. Closed to new customers since November 7, 2025.",
+    "billOn": ["EnvironmentHours", "API-Request"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/migrationhub-refactor-spaces/latest/userguide/migrationhub-availability-change.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMigrationHubRefactorSpaces/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "s3",
+    "name": "Amazon S3",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Storage is the dull part of the bill. Requests and outbound bytes are what actually surprise people.",
+    "trap": "PUT, COPY, POST and LIST run over ten times the per-request price of GET, and DELETE is free. Standard-IA rounds objects up to 128 KB and holds them 30 days; Glacier classes hold 90 days, Deep Archive 180.",
+    "billOn": [
+      "TimedStorage-ByteHrs",
+      "Requests-Tier1",
+      "Requests-Tier2",
+      "DataTransfer-Out-Bytes",
+      "EarlyDelete-SIA"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/aws-usage-report-understand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "s3-express-one-zone",
+    "name": "Amazon S3 Express One Zone",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Tuned for request-heavy work. Requests undercut S3 Standard by a wide margin; storage costs several times more.",
+    "trap": "On top of the per-request fee it charges per GB uploaded and per GB retrieved, and since April 2025 that applies to every byte rather than only the part of a request over 512 KB. Idle data here is expensive.",
+    "billOn": ["TimedStorage-XZ-ByteHrs", "Requests-XZ-Tier1", "Upload-XZ", "Retrieval-XZ"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/storage-classes/express-one-zone/",
+      "https://aws.amazon.com/blogs/aws/up-to-85-price-reductions-for-amazon-s3-express-one-zone/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "s3-glacier",
+    "name": "Amazon S3 Glacier",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Cheap to park. Getting it back usually costs per GB and per request — but not always.",
+    "trap": "Bulk retrieval from Glacier Flexible Retrieval is free on both counts, making it the cheapest way out. Expedited and Standard both bill. Delete inside 90 days (180 for Deep Archive) and you owe the balance.",
+    "billOn": [
+      "TimedStorage-GlacierByteHrs",
+      "Standard-Retrieval-Bytes",
+      "Requests-Tier3",
+      "EarlyDelete-ByteHrs"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "snow-family",
+    "name": "AWS Snow Family",
+    "category": "storage",
+    "meters": ["time", "bytes"],
+    "oneLiner": "A per-job fee covers the device plus fifteen days on site. Keep it longer and each extra day bills.",
+    "trap": "Import into S3 moves at no charge, but export jobs pay data transfer out per GB at the source Region's rate. Shipping is billed at carrier rates, and the S3 storage and requests underneath are yours too.",
+    "billOn": [
+      "Snowball-Service-Fee-N-Shipping",
+      "Snowball-Extra-Day-Charge",
+      "Snowball-Data-Transfer-Charge"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/snowball/pricing/",
+      "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "storage-gateway",
+    "name": "AWS Storage Gateway",
+    "category": "storage",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Two meters facing opposite ways, plus an hourly fee on the FSx File Gateway type.",
+    "trap": "The gateway fee counts gigabytes written up to AWS. Downloads back to an EC2-hosted gateway in the same Region are free. FSx File Gateway adds a per-hour charge the other types lack.",
+    "billOn": ["Uploaded-Bytes", "Retrieval-Bytes", "Gateway-Hrs"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/storagegateway/pricing/",
+      "https://aws.amazon.com/storagegateway/faqs/",
+      "https://repost.aws/knowledge-center/storage-gateway-bill-increasing"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "transfer-family",
+    "name": "AWS Transfer Family",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Every protocol you enable bills by the hour until you delete the server, plus a charge per GB moved.",
+    "trap": "StopServer pauses nothing. AWS bills from endpoint creation until deletion, once per protocol enabled, so a single server speaking SFTP, FTPS and FTP carries three hourly charges.",
+    "billOn": ["ProtocolHours", "UPLOAD", "DOWNLOAD", "SFTPConnector-SendBytes"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/aws-transfer-family/pricing/",
+      "https://docs.aws.amazon.com/transfer/latest/APIReference/API_StopServer.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "transform",
+    "name": "AWS Transform",
+    "category": "storage",
+    "meters": ["time"],
+    "oneLiner": "Per agent-minute of active work. Assessment and several migration agents are free.",
+    "trap": "Agent minutes are not wall-clock minutes: several agents can run in parallel on one task and each bills its own. Your idle time and local CLI work are excluded, and every run rounds up to a whole minute.",
+    "billOn": ["AgentMinute"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/transform/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransform/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  }
+]

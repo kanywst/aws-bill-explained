@@ -1,0 +1,344 @@
+[
+  {
+    "slug": "aurora",
+    "name": "Amazon Aurora",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Compute and a shared cluster volume. On Aurora Standard, every read and write I/O is its own metered request.",
+    "trap": "Moving a cluster to I/O-Optimized is allowed once every 30 days; moving back to Standard is unrestricted. Cross-AZ replication is free, but Global Database bills replicated write I/O per secondary Region.",
+    "billOn": [
+      "InstanceUsage",
+      "InstanceUsageIOOptimized",
+      "Aurora:StorageIOUsage",
+      "Aurora:ReplicatedWriteIO"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/aurora/pricing/",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "aurora-dsql",
+    "name": "Amazon Aurora DSQL",
+    "category": "database",
+    "meters": ["bytes", "units"],
+    "oneLiner": "Distributed Processing Units for read, write and query work, plus a per GB-month charge for storage.",
+    "trap": "No instance to size and no idle charge, but a multi-Region cluster doubles the DPUs on every write, and the replica charge lands in the Region that originated it rather than the peer. CDC streaming adds DPUs again.",
+    "billOn": [
+      "USE1-DSQL-DistributedProcessingUnits",
+      "USE1-DSQL-Storage-ByteHrs",
+      "Global-DSQL-DistributedProcessingUnits"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/aurora/dsql/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AuroraDSQL/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "aurora-serverless-v2",
+    "name": "Amazon Aurora Serverless v2",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Capacity bills by the ACU-second.",
+    "trap": "Your minimum ACU setting bills every second even with no traffic. Set the minimum to 0 and the cluster auto-pauses after an idle window you choose, from five minutes to a day. Storage and I/O bill as normal Aurora.",
+    "billOn": ["Aurora:ServerlessV2Usage", "Aurora:StorageUsage", "Aurora:StorageIOUsage"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_ServerlessV2ScalingConfigurationInfo.html",
+      "https://aws.amazon.com/blogs/database/introducing-scaling-to-0-capacity-with-amazon-aurora-serverless-v2/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "dax",
+    "name": "Amazon DynamoDB Accelerator (DAX)",
+    "category": "database",
+    "meters": ["time"],
+    "oneLiner": "Per node-hour for every node in the cluster, whether or not anything is hitting the cache.",
+    "trap": "DAX bills nodes, not cached reads, and a production cluster wants three nodes across AZs. The cluster keeps billing after traffic stops, and the DynamoDB reads it saves you are a separate, smaller line.",
+    "billOn": ["NodeUsage:dax.r5.large", "NodeUsage:dax.t3.small", "NodeUsage:dax.r7i.xlarge"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/dynamodb/pricing/",
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "dms",
+    "name": "AWS Database Migration Service",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Replication instances bill by the hour from creation to deletion, whatever the tasks are doing.",
+    "trap": "There is no data transfer charge on the DMS node itself, which lulls people. The instance is the meter and it runs until deleted. Zero-ETL integrations are the exception: priced per GB, CDC far above full load.",
+    "billOn": ["InstanceUsg:dms.c5.large", "DMS:GP2-Storage", "ZETLCDCUsg"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/dms/pricing/", "https://aws.amazon.com/dms/faqs/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "documentdb",
+    "name": "Amazon DocumentDB",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Billing mirrors Aurora: instance-hours, cluster storage, and I/O per million.",
+    "trap": "Cross-AZ replication inside a multi-AZ cluster is free. Elastic clusters bill vCPU-hours rather than instance-hours and Serverless bills DCU-hours, and an I/O-Optimized option removes the I/O meter entirely.",
+    "billOn": ["InstanceUsage", "InstanceUsageIOOptimized", "StorageIOUsage", "ElasticCPUUsage"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/documentdb/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDocDB/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "dynamodb",
+    "name": "Amazon DynamoDB",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Which meter applies depends entirely on the table's capacity mode.",
+    "trap": "Provisioned RCU/WCU bill hourly at zero traffic, so that side is Time. On-demand RRU/WRU bill per request, so that side is Calls. Same queries, different meter. Storage and PITR bill separately either way.",
+    "billOn": [
+      "ReadCapacityUnit-Hrs",
+      "ReadRequestUnits",
+      "TimedStorage-ByteHrs",
+      "TimedPITRStorage-ByteHrs"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-understanding-billing.html",
+      "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/on-demand-capacity-mode.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "elasticache",
+    "name": "Amazon ElastiCache",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Node-hours if you size the cluster yourself. Serverless swaps that for GB-hours of stored data plus ECPUs.",
+    "trap": "Serverless meters a storage floor on every cache even when it holds almost nothing: 1 GB for Redis OSS and Memcached, 100 MB for Valkey. On node clusters, cross-AZ traffic to the cache bills at EC2 rates.",
+    "billOn": ["NodeUsage", "ElastiCacheProcessingUnits", "CachedData"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/elasticache/pricing/",
+      "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.corecomponents.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "healthlake",
+    "name": "AWS HealthLake",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "An hourly charge per FHIR data store, plus stored GB, query overage, NLP characters and exports.",
+    "trap": "The data store bills by the hour from the moment it is created, empty or not, and there is no pause. Queries past the included hourly allowance, medical NLP per 100 characters and per-GB exports stack on top.",
+    "billOn": [
+      "FHIRDataStore",
+      "FHIRDataStorage",
+      "FHIRQueries",
+      "IntegratedMedicalNLP",
+      "FHIRDataExport"
+    ],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/healthlake/pricing/", "https://aws.amazon.com/healthlake/"],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "keyspaces",
+    "name": "Amazon Keyspaces",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Cassandra with DynamoDB's meters underneath: RRU/WRU on demand, hourly RCU/WCU when provisioned.",
+    "trap": "Consistency level moves the bill. One RRU covers a LOCAL_QUORUM read up to 4 KB, or two LOCAL_ONE reads. TTL deletes bill one unit per KB per row, and multi-Region writes bill WRUs in every Region.",
+    "billOn": ["ReadRequestUnits", "WriteRequestUnits", "TimedStorage-ByteHrs", "TTLDeletes"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/keyspaces/pricing/",
+      "https://docs.aws.amazon.com/keyspaces/latest/devguide/ReadWriteCapacityMode.OnDemand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "managed-blockchain",
+    "name": "Amazon Managed Blockchain",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Hourly membership and peer nodes for Fabric, node storage per GB, and per-request Access and Query.",
+    "trap": "A Hyperledger Fabric network bills the membership fee plus every peer node by the hour whether or not a transaction is ever submitted, and each member pays their own. Data written to the network meters separately.",
+    "billOn": [
+      "Member",
+      "Node:bc.m5.large",
+      "Node-Storage",
+      "Data-Written-To-Network",
+      "Access-Public-L",
+      "Query-Public-M"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/managed-blockchain/pricing/",
+      "https://aws.amazon.com/managed-blockchain/faqs/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "memorydb",
+    "name": "Amazon MemoryDB",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Writes are metered by the gigabyte. Reads are free, and node-hours run underneath both.",
+    "trap": "The data-written charge catches write-heavy workloads, metered on gigabytes written rather than operation count. In-Region traffic to other AWS services is free, so only Multi-Region replication crosses a paid boundary.",
+    "billOn": ["NodeUsage", "DataWritten", "SnapshotUsage"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/memorydb/pricing/",
+      "https://docs.aws.amazon.com/memorydb/latest/devguide/snapshots-costs.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "neptune",
+    "name": "Amazon Neptune",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Instance-hours or NCU-seconds on Serverless, plus storage and per-million I/O.",
+    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. You can switch between them only once per 30 days, in either direction — unlike Aurora.",
+    "billOn": [
+      "InstanceUsage",
+      "InstanceUsageIOOptimized",
+      "StorageIOUsage",
+      "Neptune:ServerlessUsage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/neptune/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2024/02/amazon-neptune-io-optimized/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "oracle-database-at-aws",
+    "name": "Oracle Database@AWS",
+    "category": "database",
+    "meters": ["bytes"],
+    "oneLiner": "An AWS Marketplace subscription for Oracle-run Exadata infrastructure, with rates set by Oracle.",
+    "trap": "The bulk of the cost arrives under AWS Marketplace on your invoice, not as an ordinary service line. Only the zero-ETL side is AWS-metered, and change data capture transfer costs far more per GB than the initial load.",
+    "billOn": ["USE1-ODB:CDC-DataTransfer", "USE1-ODB:DataExport"],
+    "confidence": "medium",
+    "sources": [
+      "https://docs.aws.amazon.com/odb/latest/UserGuide/what-is-odb.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/OracleDbAtAWS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "rds",
+    "name": "Amazon RDS",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "The instance clock runs from create to delete, with storage and backups alongside. I/O only meters on magnetic.",
+    "trap": "RDS does not charge on its own side of a cross-AZ hop, so an app reaching the DB across an AZ pays the EC2 side twice and the RDS side not at all. Multi-AZ still doubles the instance and storage lines.",
+    "billOn": ["InstanceUsage", "Multi-AZUsage", "RDS:GP3-Storage", "RDS:ChargedBackupUsage"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/pricing/",
+      "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/User_DBInstanceBilling.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "rds-proxy",
+    "name": "Amazon RDS Proxy",
+    "category": "database",
+    "meters": ["time"],
+    "oneLiner": "Charged against the size of the database it fronts. No per-request fee exists.",
+    "trap": "vCPU-hours of the underlying instance, or ACU-hours for Aurora Serverless, bill at zero connections. Billing runs per second with a 10-minute floor after a status change, and extra endpoints add PrivateLink charges.",
+    "billOn": ["RDS:ProxyUsage", "RDS:Proxy-ASv2-Usage"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/rds/proxy/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "redshift",
+    "name": "Amazon Redshift",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Cluster node-hours and managed storage carry the base cost. Spectrum queries against S3 meter on bytes scanned.",
+    "trap": "Spectrum rounds each query up to the next megabyte and applies a 10 MB floor per query, so many tiny scans add up. Concurrency Scaling earns one credit hour per 24 hours of cluster uptime, then bills per second.",
+    "billOn": ["Node", "RMS", "CS", "DataScanned"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/redshift/pricing/",
+      "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing-on-demand.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "redshift-serverless",
+    "name": "Amazon Redshift Serverless",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "RPU-hours tick per second while a query runs, and every run carries a 60-second floor.",
+    "trap": "A stream of sub-second queries bills at that 60-second minimum each time, far above real runtime. Spectrum and Concurrency Scaling fold into RPUs here, so no separate per-query line exists.",
+    "billOn": ["Redshift:ServerlessUsage", "RMS:Serverless"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing-on-demand.html",
+      "https://aws.amazon.com/redshift/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "schema-conversion-tool",
+    "name": "AWS Schema Conversion Tool",
+    "category": "database",
+    "meters": [],
+    "oneLiner": "The tool is free. Everything it touches is not.",
+    "trap": "SCT costs nothing to download or run, and managed DMS Schema Conversion is free too beyond the S3 storage it consumes. Real spend lands on EC2 hosts running data extraction agents and on the DMS instance.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html",
+      "https://aws.amazon.com/dms/faqs/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "simpledb",
+    "name": "Amazon SimpleDB",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Compute-hours that queries actually consume, plus GB-month of stored data. Both have a free allowance.",
+    "trap": "Legacy — no console, and DynamoDB superseded it — but an existing domain keeps billing. Compute meters the time a query consumes, not the request count, so one unindexed scan costs more than thousands of key reads.",
+    "billOn": ["BoxUsage", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/simpledb/pricing/",
+      "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/Welcome.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSimpleDB/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "timestream",
+    "name": "Amazon Timestream",
+    "category": "database",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Two products under one name. LiveAnalytics is closed to new customers, so InfluxDB is what you can start today.",
+    "trap": "LiveAnalytics stopped taking new customers on 2025-06-20. Its query meter is TCU-hours, writes round up to the nearest KiB, and magnetic store carries a 100 GB per-account per-Region minimum.",
+    "billOn": ["ClusterNodeUsage", "DataIngestion-Bytes", "QueryTCU", "MagneticStore-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/timestream/pricing/",
+      "https://docs.aws.amazon.com/timestream/latest/developerguide/AmazonTimestreamForLiveAnalytics-availability-change.html"
+    ],
+    "checked": "2026-08-04"
+  }
+]

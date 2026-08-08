@@ -1,0 +1,517 @@
+[
+  {
+    "slug": "api-gateway",
+    "name": "Amazon API Gateway",
+    "category": "integration",
+    "meters": ["units", "time", "bytes"],
+    "oneLiner": "REST and HTTP bill per request. WebSocket bills per message and per minute a socket stays open.",
+    "trap": "HTTP API requests meter in 512KB increments and WebSocket messages in 32KB, so one fat payload becomes several billed units. Connection minutes accrue on idle sockets carrying no traffic at all.",
+    "billOn": [
+      "ApiGatewayRequest",
+      "ApiGatewayHttpRequest",
+      "ApiGatewayMessage",
+      "ApiGatewayMinute"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/api-gateway/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "appflow",
+    "name": "AWS AppFlow",
+    "category": "integration",
+    "meters": ["units", "bytes"],
+    "oneLiner": "A flat charge per flow run, plus per GB moved. Schedule frequency is what drives the total.",
+    "trap": "Cost follows cadence rather than data size for most flows: a one-minute schedule is roughly 43,000 runs a month. Data landing at a destination outside AWS is charged at a higher per-GB rate.",
+    "billOn": ["FlowRun", "DataProcDestAWS-Bytes", "DataProcDestExt-Bytes"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/appflow/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AppFlow/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "appsync",
+    "name": "AWS AppSync",
+    "category": "integration",
+    "meters": ["units", "time", "bytes"],
+    "oneLiner": "Three meters: per GraphQL operation, per real-time update pushed, and per minute a client stays subscribed.",
+    "trap": "Real-time updates meter per 5KB of payload, so an 8KB push bills as two messages. Connection minutes tick while a subscriber sits idle and are entirely independent of how many updates you send.",
+    "billOn": ["GraphQLInvocation", "GraphQLNotification", "ConnectionDuration"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/appsync/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAppSync/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "b2b-data-interchange",
+    "name": "AWS B2B Data Interchange",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per hour that each trading partnership exists, plus a fee for every EDI document transformed.",
+    "trap": "Partnership hours accrue whether or not a document flows, so dormant partners still bill every month. Failed transformations are charged at the same rate as successful ones, and large documents cost more.",
+    "billOn": [
+      "PartnershipHours",
+      "PartnershipMonths",
+      "InboundTranslations",
+      "OutboundTranslations",
+      "FailedTransformations"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/b2b-data-interchange/pricing/",
+      "https://docs.aws.amazon.com/b2bi/latest/userguide/what-is-b2bi.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "chime-sdk",
+    "name": "Amazon Chime SDK",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Attendee-minutes and messages dominate; phone numbers rent monthly.",
+    "trap": "The Amazon Chime application hit end of support in February 2026. That did not touch the Chime SDK, which bills as normal. Separately, each provisioned DID costs a monthly rental at zero call volume.",
+    "billOn": ["Chime-SDK-attendee-minutes", "SDK-Messaging-Messages"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/chime/chime-sdk/pricing/",
+      "https://docs.aws.amazon.com/chime/latest/ag/doc-history.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "connect",
+    "name": "Amazon Connect",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per-minute and per-message usage, plus a daily rent on every claimed phone number.",
+    "trap": "People budget the per-minute voice rate and forget the number itself. A claimed DID or toll-free number accrues a daily charge until you release it back to inventory, even if nobody ever dials it.",
+    "billOn": ["end-customer-mins", "chat-message", "tasks"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/products/connect/customer/pricing/",
+      "https://docs.aws.amazon.com/connect/latest/adminguide/granular-billing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "connect-cases",
+    "name": "Amazon Connect Cases",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Billed per case created, from the agent application, the API, or a contact flow action.",
+    "trap": "A Create Case block in a flow bills every time it executes successfully, so a misrouted flow opens and charges for a case per contact. Tasks and Customer Profiles used alongside Cases meter separately.",
+    "billOn": ["us-east-1-case-created"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/products/connect/customer/pricing/appendix/",
+      "https://aws.amazon.com/products/connect/customer/pricing/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "connect-health",
+    "name": "Amazon Connect Health",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly subscription per clinician for ambient documentation, plus per-action patient verification.",
+    "trap": "The seat fee covers a fixed monthly allowance of documentation minutes, not encounters; past it, captured audio bills per minute. The Amazon Connect voice minutes carrying those patient calls bill separately.",
+    "billOn": [
+      "USE1-Subscription-Paid",
+      "USE1-AmbientDocumentationMinutes:Overage",
+      "USE1-Patient-Verification"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/products/connect/health/pricing/",
+      "https://docs.aws.amazon.com/connecthealth/latest/userguide/what-is-service.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/healthagent/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "data-firehose",
+    "name": "Amazon Data Firehose",
+    "category": "integration",
+    "meters": ["bytes", "time"],
+    "oneLiner": "Billed on bytes ingested rather than bytes delivered, with no shards to provision.",
+    "trap": "Direct PUT rounds each record up to the next 5KB multiple, so a 12KB record bills as 15KB and a million 1KB records bill as 5GB. MSK and vended logs as sources skip the rounding entirely.",
+    "billOn": ["BilledBytes", "DPBytesDelivered", "Firehose-VpcDelivery-Hours"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/firehose/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesisFirehose/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "eventbridge",
+    "name": "Amazon EventBridge",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Custom and partner events bill on ingestion. AWS service events land on the default bus for free.",
+    "trap": "A 200KB event is four billed events because each 64KB chunk counts as one, and Schema Discovery slices at 8KB. API destinations, Pipes and Scheduler invocations each carry their own per-million rate.",
+    "billOn": [
+      "Event-64K-Chunks",
+      "Invocation-64K-Chunks",
+      "ScheduledInvocation",
+      "ArchivedEvents-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/eventbridge/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEvents/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-core",
+    "name": "AWS IoT Core",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Messages meter in 5 KB blocks; connection minutes tick on their own.",
+    "trap": "An 8 KB publish bills as two messages and a 200 byte publish as one, so padding toward 5 KB is free but spilling past it is not. A triggered rule always meters at least one rule and one action, even if no action fires.",
+    "billOn": ["Messages", "ConnectionMinutes", "RulesTriggered", "ActionsExecuted"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-core/pricing/",
+      "https://aws.amazon.com/iot-core/pricing/additional-details/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-device-management",
+    "name": "AWS IoT Device Management",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Every fleet operation is a countable unit.",
+    "trap": "Fleet indexing meters index updates in 1 KB chunks, so one fat shadow document reindexes as several updates each time it changes. Jobs bill per remote action delivered to a device, which multiplies across a large fleet.",
+    "billOn": ["IndexedData", "Queries", "JobExecutions"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-device-management/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceManagement/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-events",
+    "name": "AWS IoT Events",
+    "category": "integration",
+    "meters": [],
+    "oneLiner": "Gone. Full shutdown on 20 May 2026; new customers were blocked a year earlier.",
+    "trap": "Not merely deprecated: AWS lists it under full shutdown, so it is gone from the portfolio and its pricing page redirects. While it ran, alarms billed monthly and messages per evaluation.",
+    "billOn": ["Alarms", "Messages"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/about-aws/whats-new/2025/05/aws-service-changes/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTEvents/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-fleetwise",
+    "name": "AWS IoT FleetWise",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per vehicle per month for every vehicle registered, plus per million data messages collected.",
+    "trap": "The vehicle fee counts everything registered that month, not the vehicles that actually reported. A broad signal collection campaign multiplies messages fast, and the data still lands in S3 or Timestream at its own cost.",
+    "billOn": ["vehicles", "Messages"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-fleetwise/pricing/",
+      "https://docs.aws.amazon.com/iot-fleetwise/latest/developerguide/what-is-iotfleetwise.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "iot-greengrass",
+    "name": "AWS IoT Greengrass",
+    "category": "integration",
+    "meters": ["time"],
+    "oneLiner": "A core device that authenticates once in a month bills for that whole month.",
+    "trap": "Only the core is metered. Devices talking to it over the local network cost nothing, but everything the core relays upward lands on IoT Core connection, messaging and shadow meters, which usually dwarf the per-core fee.",
+    "billOn": ["ActiveGGC-Devices"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/greengrass/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSGreengrass/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-sitewise",
+    "name": "AWS IoT SiteWise",
+    "category": "integration",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "All three shapes at once: per-message ingest, GB-hour storage tiers, per-GB scanned on every query.",
+    "trap": "ExecuteQuery bills by GB scanned, so a wide time window over a busy asset model can cost more than the ingest that produced the data. Hot tier storage meters by GB-hour and keeps running after the devices go quiet.",
+    "billOn": ["AWSIoTSiteWise-Messaging", "AWSIoTSiteWise-Storage", "AWSIoTSiteWise-Query"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-sitewise/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTSiteWise/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "iot-twinmaker",
+    "name": "AWS IoT TwinMaker",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Entities carry a monthly fee even when nobody opens the twin.",
+    "trap": "Entity count is the sticky line. Model a plant at fine granularity and you create thousands of entities that bill every month, while queries and unified data access calls only bill when someone actually reads.",
+    "billOn": ["IoTTwinMaker-Entities", "IoTTwinMaker-Queries"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/iot-twinmaker/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTTwinMaker/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "kinesis-data-streams",
+    "name": "Amazon Kinesis Data Streams",
+    "category": "integration",
+    "meters": ["time", "units", "bytes"],
+    "oneLiner": "Provisioned charges shard-hours plus 25KB PUT payload units. On-demand charges a stream-hour plus GB in and out.",
+    "trap": "The two modes meter differently. Provisioned rounds each record up to a 25KB payload unit, so a 1KB record is a full unit. On-demand charges per GB written, so ingress is not free here.",
+    "billOn": [
+      "Storage-ShardHour",
+      "PutRequestPayloadUnits",
+      "OnDemand-StreamHour",
+      "OnDemand-BilledIncomingBytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/kinesis/data-streams/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesis/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "kinesis-video-streams",
+    "name": "Amazon Kinesis Video Streams",
+    "category": "integration",
+    "meters": ["bytes", "units", "time"],
+    "oneLiner": "Per GB ingested, consumed and stored; WebRTC adds channels, signaling messages and TURN minutes.",
+    "trap": "Storage bills for the whole retention window set on the stream, so always-on cameras keep a rolling copy on the meter forever. Warm storage has a 30-day minimum and charges an early-delete fee.",
+    "billOn": [
+      "BytesIn",
+      "BytesOut",
+      "BytesHr",
+      "SignalingChannel",
+      "SignalingMessages",
+      "TURNMinutes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/kinesis/video-streams/pricing/",
+      "https://aws.amazon.com/kinesis/video-streams/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "location",
+    "name": "Amazon Location Service",
+    "category": "integration",
+    "meters": ["time", "units"],
+    "oneLiner": "Per thousand requests across maps, places and routes, with stored geofences ticking monthly.",
+    "trap": "A route matrix bills origins multiplied by destinations, so one call with 10 origins and 10 destinations is 100 routes. Asking for results you may store moves you onto a separate usage type costing several times more.",
+    "billOn": ["Usage-Default-Places-Core", "Usage-Default-Maps-Tiles", "GeofenceMonth"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/location/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLocationService/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "mq",
+    "name": "Amazon MQ",
+    "category": "integration",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Broker hours and storage, nothing per message.",
+    "trap": "No per-message or per-API charge exists in either engine, so throughput barely moves the bill. Active/standby doubles the instance hours and a three-node RabbitMQ cluster triples them.",
+    "billOn": ["Single-AZUsage:mq.m5.large", "Multi-AZUsage:mq.m5.large", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/amazon-mq/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMQ/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "msk",
+    "name": "Amazon Managed Streaming for Apache Kafka",
+    "category": "integration",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Kafka brokers by the hour plus storage. Serverless swaps that for cluster-hours and partition-hours.",
+    "trap": "Neither mode charges per message or per API call. Serverless bills every partition every hour, so an over-partitioned idle topic costs real money, and Express brokers add a per-GB-written fee.",
+    "billOn": [
+      "Kafka.m7g.large",
+      "Kafka.Storage.GP2",
+      "KafkaServerless-PartitionHours",
+      "Express.In-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/msk/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMSK/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "mwaa",
+    "name": "Amazon Managed Workflows for Apache Airflow (MWAA)",
+    "category": "integration",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Hourly per environment by size, plus hourly per extra worker, scheduler and web server, plus DB storage.",
+    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button — you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
+    "billOn": [
+      "Airflow-SmallEnvironment",
+      "Airflow-LargeWorker",
+      "Airflow-LargeScheduler",
+      "Airflow-StandardDatabaseStorage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/managed-workflows-for-apache-airflow/pricing/",
+      "https://docs.aws.amazon.com/mwaa/latest/userguide/what-is-mwaa.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "pinpoint",
+    "name": "Amazon Pinpoint",
+    "category": "integration",
+    "meters": ["units", "time"],
+    "oneLiner": "Per endpoint targeted each month, plus per message on whichever channel does the sending.",
+    "trap": "Monthly Targeted Audience counts every endpoint a campaign or journey touches, deliverable or not. Support ends 30 October 2026; SMS, voice, push and OTP move to AWS End User Messaging.",
+    "billOn": ["MonthlyTargetedAudience", "EventsRecorded", "Email_Sends"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/pinpoint/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPinpoint/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "q-in-connect",
+    "name": "Amazon Q in Connect",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Per voice minute, chat, email or task that the assistant touches inside Amazon Connect.",
+    "trap": "Cost and usage reports still tag it with the old product code AWSWisdom, so the line is easy to miss. Self-service and agent-assistance meter separately, and voice bills per minute of the contact rather than per contact.",
+    "billOn": [
+      "QinConnectAgentAssistanceVoice",
+      "QinConnectSelfServiceChat",
+      "QinConnectAgentAssistanceEmail",
+      "QinConnectAgentAssistanceTask"
+    ],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/products/connect/customer/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWisdom/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "ses",
+    "name": "Amazon SES",
+    "category": "integration",
+    "meters": ["units", "bytes", "time"],
+    "oneLiner": "Outbound meters per recipient. One send to fifty addresses is fifty charges.",
+    "trap": "Attachment bytes bill per GB on top of the recipient count. Receiving bills per email and again per 256KB chunk, so one big attachment hits twice. Pro and Enterprise plans add a fixed monthly fee.",
+    "billOn": ["Recipients", "AttachmentsSize-Bytes", "ReceivedChunk", "Pro-Plan-Hours"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/ses/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSES/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "sns",
+    "name": "Amazon SNS",
+    "category": "integration",
+    "meters": ["units", "bytes"],
+    "oneLiner": "Publishing costs money. So does delivery, but only to certain endpoint types.",
+    "trap": "SQS and Lambda deliveries are free. HTTP/S, mobile push and Firehose all bill per notification, and email is the priciest of the lot by a wide margin. SMS bills through AWS End User Messaging.",
+    "billOn": [
+      "Requests-Tier1",
+      "DeliveryAttempts-HTTP",
+      "DeliveryAttempts-SMTP",
+      "DeliveryAttempts-FIREHOSE"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/sns/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSNS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "sqs",
+    "name": "Amazon SQS",
+    "category": "integration",
+    "meters": ["units"],
+    "oneLiner": "Every API action counts as a request. Sends, receives, deletes and empty polls all bill the same.",
+    "trap": "A ReceiveMessage that returns nothing still bills, and payload chunks: a 1 MiB call bills as sixteen requests. Standard queue calls carrying a message group ID are charged fair-queue rates on top.",
+    "billOn": ["Requests-RBP", "Requests-FIFO-RBP", "Requests-Fair-RBP"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/sqs/pricing/", "https://aws.amazon.com/sqs/features/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "step-functions",
+    "name": "AWS Step Functions",
+    "category": "integration",
+    "meters": ["units", "time"],
+    "oneLiner": "Standard bills per state transition. Express swaps that for a per-start charge plus memory-seconds.",
+    "trap": "Standard counts every transition, retries included. Distributed Map bills one per iteration, an Inline Map none — so not every loop costs. Express bills duration times memory instead.",
+    "billOn": ["StateTransition", "StepFunctions-Request", "StepFunctions-GB-Second"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/step-functions/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "wickr",
+    "name": "AWS Wickr",
+    "category": "integration",
+    "meters": ["time"],
+    "oneLiner": "A monthly seat charge per user on the Standard or Premium plan.",
+    "trap": "Seats bill on provisioned users, not active ones, so dormant accounts keep charging. Guests are free only up to an allowance per paid seat, two on Standard and five on Premium; every guest past that bills as an add-on.",
+    "billOn": ["AWSWickr-Standard", "AWSWickr-Premium", "AWSWickr-GuestUsers"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/wickr/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWickr/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "workmail",
+    "name": "Amazon WorkMail",
+    "category": "integration",
+    "meters": ["time"],
+    "oneLiner": "Flat per-mailbox monthly seat, prorated by the hour.",
+    "trap": "Billing tracks active user accounts, not logins. Deactivating a user mid-month earns no credit for the remaining days, and the 50 GB per user is bundled, so there is no separate storage meter.",
+    "billOn": ["WorkMail-NormalTier-UserHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/workmail/faqs/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkMail/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  }
+]

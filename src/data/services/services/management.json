@@ -1,0 +1,758 @@
+[
+  {
+    "slug": "amplify-hosting",
+    "name": "AWS Amplify Hosting",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Build minutes, CDN storage, data served, and SSR request count plus duration all land as separate lines.",
+    "trap": "Server-rendered apps hit the compute meter twice, once per million requests and again per GB-hour of function duration. The managed WAF option adds a flat monthly fee per app on top of WAF's own charges.",
+    "billOn": ["BuildDuration", "DataStorage", "DataTransferOut", "HostingComputeRequestCount"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/amplify/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAmplify/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "app-studio",
+    "name": "AWS App Studio",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Free to build and test; you pay per hour of end-user session time on published applications.",
+    "trap": "The meter is session-hours, not named users, so somebody who leaves the app open all day costs more than a heavy user who closes the tab. Building and testing stay free, which hides the cost until launch.",
+    "billOn": ["AppUserActiveUsage"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/appstudio/pricing/", "https://aws.amazon.com/appstudio/"],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "app2container",
+    "name": "AWS App2Container",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "The containerization tool is free. What it provisions is not.",
+    "trap": "A2C closed to new customers on November 7, 2025, and AWS now points newcomers at AWS Transform. The tool never metered, yet it stands up ECR repos, ECS or EKS resources and CloudFormation stacks that do.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://docs.aws.amazon.com/app2container/latest/UserGuide/dotnet-modernization-tools-availability-change.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "application-discovery-service",
+    "name": "AWS Application Discovery Service",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Discovery costs nothing, and it is closed to new customers anyway.",
+    "trap": "Free, and no longer open to new accounts; AWS points newcomers at AWS Transform. Discovery Connector support ended in November 2025, leaving the Agentless Collector and the agent as the ways in.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://docs.aws.amazon.com/application-discovery/latest/userguide/what-is-appdiscovery.html",
+      "https://aws.amazon.com/blogs/mt/aws-offerings-available-to-support-your-cloud-migration/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "billing-conductor",
+    "name": "AWS Billing Conductor",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Per month for each account inside a pro forma billing group, plus a fee per pro forma billing record.",
+    "trap": "The monthly fee applies to every account in a billing group, so a large organisation pays it hundreds of times just to reprice its own bill. Moving a billing group to another management account is a separate charge.",
+    "billOn": ["Proforma-Accounts", "ProFormaBillingRecords", "Transfer-Billing-Groups"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/aws-cost-management/aws-billing-conductor/pricing/",
+      "https://docs.aws.amazon.com/billingconductor/latest/userguide/what-is-billingconductor.html"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "budgets",
+    "name": "AWS Budgets",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Watching spend is free. Budgets that take automated actions are the paid tier.",
+    "trap": "Monitoring budgets are unlimited. After the first two action-enabled budgets you pay per budget per day, no matter how many actions each one carries, and delivered budget reports bill per report.",
+    "billOn": ["BudgetsUsage", "ActionEnabledBudgetsUsage", "BudgetsReports"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/aws-cost-management/aws-budgets/pricing/",
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cdk",
+    "name": "AWS Cloud Development Kit (CDK)",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Framework and CLI are free. It compiles down to CloudFormation, which is also free.",
+    "trap": "cdk bootstrap provisions an S3 bucket, an ECR repository and IAM roles in every account and Region you deploy to. The bucket and any images pushed to it keep billing long after the project goes quiet.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudformation/pricing/",
+      "https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cli",
+    "name": "AWS Command Line Interface",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "The CLI is free. Whatever service answers the call does the billing.",
+    "trap": "Nothing meters at the CLI layer. Cost tracks the command: an s3 sync pulls S3 request and transfer charges, a logs tail pulls CloudWatch Logs charges, and a polling loop in CI can do both all day.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/cli/",
+      "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloud9",
+    "name": "AWS Cloud9",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "The IDE adds nothing to your bill. Its EC2 instance and EBS volume bill at normal rates.",
+    "trap": "Autohibernation is the entire cost control here. Switch it off and the backing EC2 instance runs around the clock. Cloud9 also stopped taking new customers in July 2024, so fresh accounts cannot use it.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloud9/pricing/",
+      "https://docs.aws.amazon.com/cloud9/latest/user-guide/history.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudformation",
+    "name": "AWS CloudFormation",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Free for AWS:: and Alexa:: types. Third-party extensions and Hooks bill per handler operation.",
+    "trap": "Handler operations get 1,000 free per account per month, then bill per operation plus per second beyond thirty. The stack contents are the real cost, and orphans outlive a failed delete.",
+    "billOn": ["Resource-Invocation-Count", "Resource-Processing-Time", "Hook-Invocation-Count"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudformation/pricing/",
+      "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/registry.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudtrail",
+    "name": "AWS CloudTrail",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "One free copy of management events per Region. Data events, extra trails and Lake are where the bill comes from.",
+    "trap": "A second trail logging the same management events in a Region is charged in full. Data events bill per event, CloudTrail Lake bills per GB ingested and retained, and S3 charges for the log files.",
+    "billOn": ["FreeEventsRecorded", "PaidEventsRecorded", "DataEventsRecorded", "Ingestion-Bytes"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudtrail/pricing/",
+      "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-costs.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudwatch-alarms",
+    "name": "Amazon CloudWatch Alarms",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Each alarm metric is a small monthly rent.",
+    "trap": "The unit is the alarm metric, so a metric-math alarm referencing ten metrics costs ten times a plain one. Composite alarms bill per alarm. Sitting in INSUFFICIENT_DATA changes nothing.",
+    "billOn": [
+      "CW:AlarmMonitorUsage",
+      "CW:HighResAlarmMonitorUsage",
+      "CW:CompositeAlarmMonitorUsage"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudwatch-dashboards",
+    "name": "Amazon CloudWatch Dashboards",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Custom dashboards rent by the month, prorated hourly. Automatic dashboards are free.",
+    "trap": "Free tier is three custom dashboards of up to 50 metrics each. Past that you pay per dashboard, and GetMetricWidgetImage, which embedded widgets call, is never covered by the free request tier.",
+    "billOn": ["DashboardsUsageHour", "DashboardsUsageHour-Basic", "CW:GMWI-Metrics"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudwatch-logs",
+    "name": "Amazon CloudWatch Logs",
+    "category": "management",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Ingest, store, query. Each one is its own per-GB charge, and ingestion is far the largest of the three.",
+    "trap": "Shortening retention only trims the storage line. The gigabytes you ingested are already paid for, and every Logs Insights run charges again for the data it scans.",
+    "billOn": [
+      "DataProcessing-Bytes",
+      "TimedStorage-ByteHrs",
+      "DataScanned-Bytes",
+      "VendedLog-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_billing.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cloudwatch-metrics",
+    "name": "Amazon CloudWatch Metrics",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Basic AWS metrics are free. Detailed monitoring and anything you publish yourself rent monthly.",
+    "trap": "Billing counts every unique dimension combination as its own metric, so one high-cardinality dimension mints thousands. EC2 detailed monitoring is AWS-published and still billed.",
+    "billOn": ["CW:MetricMonitorUsage", "CW:GMD-Metrics", "CW:Requests", "CW:MetricStreamUsage"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://repost.aws/knowledge-center/optimize-cloudwatch-custom-metrics"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codeartifact",
+    "name": "AWS CodeArtifact",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Storage, requests and bandwidth meter separately, and upstream fetches count as requests.",
+    "trap": "Assets CodeArtifact pulls from npm, Maven Central or PyPI count toward your request total, so a cold CI cache multiplies request charges. Same-Region traffic to other AWS services is exempt from transfer fees.",
+    "billOn": ["Requests", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/codeartifact/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCodeArtifact/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codebuild",
+    "name": "AWS CodeBuild",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Every second a build, sandbox, or fleet instance stays alive becomes a line item.",
+    "trap": "Reserved capacity fleets bill from provisioning, not from when a build starts, with a 60-minute minimum per instance. Free-tier minutes cover on-demand small compute only, never fleets or sandboxes.",
+    "billOn": ["Build-Min:Linux:g1.small", "Build-Sec:Lambda.1GB", "Sandbox-Sec:ARM:g1.2xlarge"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/codebuild/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CodeBuild/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codecatalyst",
+    "name": "Amazon CodeCatalyst",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Closed to new signups since November 2025. Existing spaces bill seats, compute minutes and storage.",
+    "trap": "Paid seats bill per user per month even for someone who never opens the space. Each seat carries a bundled allowance of compute minutes and Dev Environment hours, and unused allowance does not roll over.",
+    "billOn": ["Standard-User-Billed", "DevEnvironment-Storage"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/codecatalyst/",
+      "https://docs.aws.amazon.com/codecatalyst/latest/userguide/migration.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codeconnections",
+    "name": "AWS CodeConnections",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Connections cost nothing. The pipelines hanging off them do.",
+    "trap": "AWS publishes no pricing page and no Price List offer for CodeConnections, so holding a connection is free. Cost lands downstream in whatever CodePipeline, CodeBuild or CodeDeploy runs when it fires.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://docs.aws.amazon.com/dtconsole/latest/userguide/welcome-connections.html",
+      "https://aws.amazon.com/codepipeline/pricing/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codedeploy",
+    "name": "AWS CodeDeploy",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Deployments to EC2, Lambda and ECS cost nothing. On-premises instances are charged per instance update.",
+    "trap": "People repeat that CodeDeploy is entirely free. That holds for EC2, Lambda and ECS only. Registered on-premises instances carry a per-update charge, and the meter counts instance updates, not deployments.",
+    "billOn": ["On-Premises-Instance"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/codedeploy/faqs/",
+      "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "codeguru-profiler",
+    "name": "Amazon CodeGuru Profiler",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per sampling hour: one profiler agent running on one instance or container for one hour.",
+    "trap": "The meter is agent uptime, not findings, so a profiling group left enabled across a fleet keeps billing. Charges stop above a monthly hour cap per profiling group. CodeGuru Reviewer takes no new repositories.",
+    "billOn": ["USE1-SamplingHours", "USE1-AbovePaidSamplingHours", "USE1-LambdaSamplingHours"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/codeguru/profiler/pricing/",
+      "https://docs.aws.amazon.com/codeguru/latest/reviewer-ug/codeguru-reviewer-availability-change.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CodeGuru/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "codepipeline",
+    "name": "AWS CodePipeline",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "V1 charges per active pipeline per month, V2 per action execution minute.",
+    "trap": "An active V1 pipeline means one over 30 days old that had at least one change run through it that month, so a genuinely idle pipeline bills nothing. V2 drops that rule and meters action minutes instead.",
+    "billOn": ["activePipeline", "actionExecutionMinute"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/codepipeline/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCodePipeline/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "config",
+    "name": "AWS Config",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Configuration items recorded and rule evaluations run. Churny resources dominate.",
+    "trap": "Recording all resource types bills a configuration item on every change to noisy resources. Conformance packs bill per resource per rule, so one pack rolled out org-wide multiplies fast.",
+    "billOn": ["ConfigurationItemRecorded", "ConfigRuleEvaluations", "ConformancePackEvaluations"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/config/pricing/",
+      "https://repost.aws/knowledge-center/optimize-aws-config"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "control-tower",
+    "name": "AWS Control Tower",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Control Tower adds nothing to the bill. Its landing zone does.",
+    "trap": "Enrolling accounts turns on Config recorders and an organization CloudTrail in every account and Region, plus the S3 log archive, SNS and Service Catalog. Config is usually the biggest line.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/controltower/pricing/",
+      "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "copilot-cli",
+    "name": "AWS Copilot CLI",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Free CLI. The ECS and Fargate stack it creates is not.",
+    "trap": "A single copilot init provisions a VPC, load balancer, ECR repository and Fargate service. The ALB and any NAT gateways in the default environment keep billing hourly long after you stop deploying.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/containers/copilot/",
+      "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/additional-deployment-services.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "cost-explorer",
+    "name": "AWS Cost Explorer",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Console browsing is free. The API bills per request.",
+    "trap": "Pagination counts: every page of a Cost Explorer API response is a separate billable request, so an unbounded reporting script can outcost what it reports on. Hourly granularity bills daily per usage record.",
+    "billOn": ["APIRequest", "CostDataStorage", "AdditionalSourceViews"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/pricing/",
+      "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/faqs/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "device-farm",
+    "name": "AWS Device Farm",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per device-minute of automated test or remote access, or a flat monthly rate for an unmetered slot.",
+    "trap": "Metered minutes count device time, not test time, so install, setup and teardown are billed with the run. An unmetered slot and a reserved private device bill every month whether or not you run a single test.",
+    "billOn": [
+      "Android-Device-Minute",
+      "iOS-Device-Minute",
+      "Android-Device-Slot-Month",
+      "iOS-RA-Minute",
+      "Android-Private-Device-200-Slot-Month"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/device-farm/pricing/",
+      "https://docs.aws.amazon.com/devicefarm/latest/developerguide/welcome.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "devops-agent",
+    "name": "AWS DevOps Agent",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per second of agent working time on investigations, evaluations and on-demand SRE tasks.",
+    "trap": "Idle and waiting time is free, but every tool the agent reaches for bills through its own service — CloudWatch Logs Insights queries and trace retrievals land separately. Paid Support plans earn monthly credits.",
+    "billOn": ["USE1-investigation", "USE1-evaluation", "USE1-on-demand"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/devops-agent/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/DevOpsAgent/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "devops-guru",
+    "name": "Amazon DevOps Guru",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "Per resource-hour for every analysed resource, plus a per-call charge on DevOps Guru API requests.",
+    "trap": "Turning coverage on account-wide meters every supported resource every hour whether it ever produces an insight or not. The resource count rides your autoscaling, and Group B resources cost more than Group A.",
+    "billOn": ["ResourceGroup-A-usagehours", "ResourceGroup-B-usagehours", "DevOpsGuru-APICalls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/devops-guru/pricing/",
+      "https://docs.aws.amazon.com/devops-guru/latest/userguide/welcome.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "fis",
+    "name": "AWS Fault Injection Service",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Meter runs only while an action is actively injecting a fault.",
+    "trap": "The unit is action-minutes, not experiment-minutes. Five actions running in parallel bill five times the clock, and every extra target account in a multi-account experiment adds its own action-minutes.",
+    "billOn": ["ActionMinute", "ActionMinuteAccount"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/fis/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSFIS/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "health-dashboard",
+    "name": "AWS Health Dashboard",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Free to read, both the public status page and your own account events.",
+    "trap": "The API is the gated part. Calling it without Business Support+, Enterprise Support or Unified Operations — or the legacy Business and Enterprise On-Ramp, retired January 1, 2027 — returns SubscriptionRequiredException.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/health/latest/APIReference/Welcome.html",
+      "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "kiro",
+    "name": "Kiro",
+    "category": "management",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly per-user plan that includes a pool of credits. Every prompt and agent task spends credits.",
+    "trap": "Credits burn fractionally by request complexity, so a long spec run drains far more than a chat reply, and going over your monthly pool bills per extra credit.",
+    "billOn": [
+      "USE1-KiroEnterprise-Pro",
+      "USE1-KiroEnterprise-ProPlus",
+      "USE1-KiroEnterprise-Power",
+      "USE1-KiroEnterprise-Credits"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/documentation-overview/kiro/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/Kiro/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "managed-grafana",
+    "name": "Amazon Managed Grafana",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "Per active user per month, split into viewer and editor/admin licences. No workspace fee.",
+    "trap": "One login or one API request in a billing cycle makes a user active for the whole month. API keys and service accounts each consume a licence, and every workspace needs at least one editor.",
+    "billOn": ["Grafana:EditorUser", "Grafana:ViewerUser", "Grafana:EnterprisePluginsUser"],
+    "confidence": "high",
+    "sources": ["https://aws.amazon.com/grafana/pricing/", "https://aws.amazon.com/grafana/faqs/"],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "managed-service-prometheus",
+    "name": "Amazon Managed Service for Prometheus",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Samples ingested, GB stored, samples processed by queries. Ingestion usually dominates.",
+    "trap": "Alerting and recording rules run as queries, so a busy rule set bills query samples on every evaluation. AWS managed collectors add an hourly charge. There is no data-transfer-in charge.",
+    "billOn": [
+      "AMP:MetricSampleCount",
+      "AMP:MetricStorageByteHrs",
+      "AMP:QuerySamplesProcessed",
+      "AMP:CollectorHours"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/prometheus/pricing/",
+      "https://docs.aws.amazon.com/prometheus/latest/userguide/what-is-Amazon-Managed-Service-Prometheus.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "managed-services",
+    "name": "AWS Managed Services (AMS)",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A monthly fee per managed account, set as a tiered percentage of the AWS spend under management.",
+    "trap": "The fee rides on the bill it manages, so it grows with every other line. Extra operations work is bought in on-demand blocks of twenty engineer hours, and you are billed a minimum of one block a month.",
+    "billOn": ["UGE1-dollar"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/managed-services/",
+      "https://docs.aws.amazon.com/managedservices/latest/userguide/ops-on-demand.html"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "organizations",
+    "name": "AWS Organizations",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "No charge. Accounts, OUs, SCPs and consolidated billing are all free.",
+    "trap": "What costs money is what Organizations makes easy to switch on everywhere. Org-wide CloudTrail, Config recorders and GuardDuty land in every member account at once.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/organizations/latest/userguide/pricing.html",
+      "https://aws.amazon.com/organizations/faqs/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "pricing-calculator",
+    "name": "AWS Pricing Calculator (in-console)",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Workload estimates are free; bill estimates are free for the first five a month, then billed per estimate.",
+    "trap": "The cost-planning tool has its own line item. After five bill estimates in a calendar month every further one is charged, including ones generated by the API. Failed estimates are neither counted nor billed.",
+    "billOn": ["BillEstimate"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/cost-management/latest/userguide/pricing-calculator.html",
+      "https://aws.amazon.com/aws-cost-management/aws-pricing-calculator/faqs/"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "proton",
+    "name": "AWS Proton",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "No charge of its own, and support ends October 7, 2026.",
+    "trap": "Proton meters nothing; the CloudFormation stacks its templates deploy meter everything. When support ends the console and Proton resources go away, while the infrastructure it deployed keeps running and billing.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/proton/pricing/",
+      "https://docs.aws.amazon.com/proton/latest/userguide/proton-end-of-support.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "repost-private",
+    "name": "AWS re:Post Private",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A monthly charge per user who has created an account in your private re:Post space.",
+    "trap": "Billing follows registered users, not active ones, so pointing it at a large directory group bills a full month for everyone who signs in once and never returns.",
+    "billOn": ["USE1-SpaceInstance-Standard", "USE1-SpaceInstance-Free"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/repost-private/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/repostspace/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "resilience-hub",
+    "name": "AWS Resilience Hub",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A flat monthly charge per application, starting the first time you assess it.",
+    "trap": "Billing starts at the first assessment and then never stops on its own — an app assessed once and forgotten bills every month until you remove it. The free trial covers only your first three apps for six months.",
+    "billOn": ["PaidTierApplication", "FreeTierApplication"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/resilience-hub/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSResilienceHub/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
+    "slug": "resource-explorer",
+    "name": "AWS Resource Explorer",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Nothing to pay for indexes, views or searches.",
+    "trap": "Its dependencies still bill. AWS Config usage and the List/Describe calls it makes against services that charge for those operations show up on your bill as normal.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/resourceexplorer/pricing/",
+      "https://docs.aws.amazon.com/resource-explorer/latest/userguide/welcome.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "sam",
+    "name": "AWS Serverless Application Model",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Open source tooling with nothing to meter.",
+    "trap": "SAM has no Price List entry at all. It compiles down to CloudFormation, so cost comes from the Lambda functions, API Gateway APIs and S3 deployment buckets in the template, plus log groups with no retention.",
+    "billOn": [],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/serverless/sam/",
+      "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "service-catalog",
+    "name": "AWS Service Catalog",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Priced on API calls to Service Catalog, with a monthly free allowance per account per Region.",
+    "trap": "API calls are the meter. Automation that lists portfolios in a loop can outcost the products it manages, and anything Service Catalog provisions bills separately on its own services.",
+    "billOn": ["SC-API-Calls", "AR-App-API-Calls"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/servicecatalog/pricing/",
+      "https://aws.amazon.com/servicecatalog/faqs/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "support",
+    "name": "AWS Support",
+    "category": "management",
+    "meters": ["time"],
+    "oneLiner": "A monthly subscription priced as the greater of a floor or a sliding percentage of your AWS spend.",
+    "trap": "The fee tracks usage, so any spike in the AWS bill enlarges the support charge sitting behind it. It lands with a usage type of Dollar, and Enterprise and Unified Operations aggregate spend across all linked accounts.",
+    "billOn": ["Dollar"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/premiumsupport/pricing/",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "swf",
+    "name": "Amazon Simple Workflow Service",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Long-running and retained workflows keep accruing per-day charges after the work stops.",
+    "trap": "Retention is a meter. A completed execution keeps billing workflow-days for as long as you retain its history, so a long retention window on a high-volume workflow can cost more than running it did.",
+    "billOn": ["InitiatedWorkflows", "OpenWorkflowDays", "ClosedRetainedWorkflowDays"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/swf/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSWF/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "systems-manager",
+    "name": "AWS Systems Manager",
+    "category": "management",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Free on EC2, and free on hybrid nodes too since AWS dropped the Advanced Instances Tier.",
+    "trap": "The per-instance charge for on-premises and multicloud nodes ended on 30 June 2026, and Session Manager on them is unbilled until 30 September 2026. Advanced parameters still bill monthly.",
+    "billOn": ["PS-Advanced-Param-Tier1", "OC-OpsItems-Tier1"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/systems-manager/pricing/",
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "trusted-advisor",
+    "name": "AWS Trusted Advisor",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Never a line item. Your Support plan decides how much of it you can see.",
+    "trap": "56 checks are open to every account. The other 426, the Trusted Advisor API and Priority need Business Support+, Enterprise Support or Unified Operations, which is billed as part of that plan.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/",
+      "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html",
+      "https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html"
+    ],
+    "checked": "2026-08-07"
+  },
+  {
+    "slug": "well-architected-tool",
+    "name": "AWS Well-Architected Tool",
+    "category": "management",
+    "meters": [],
+    "oneLiner": "Free to use.",
+    "trap": "Nothing to watch on the bill here. The real cost is human time spent on reviews and milestones, plus whatever you go on to provision after acting on the findings.",
+    "billOn": [],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/well-architected-tool/pricing/",
+      "https://aws.amazon.com/well-architected-tool/faqs/"
+    ],
+    "checked": "2026-08-04"
+  },
+  {
+    "slug": "x-ray",
+    "name": "AWS X-Ray",
+    "category": "management",
+    "meters": ["units"],
+    "oneLiner": "Traces cost when they are recorded, and again when something reads them.",
+    "trap": "Sampling is the only real lever, because the charge lands the moment a trace is forwarded. Deleting traces later refunds nothing. X-Ray is now priced on the CloudWatch pricing page.",
+    "billOn": ["XRay-TracesStored", "XRay-TracesAccessed", "XRay-InsightsTracesStored"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/cloudwatch/pricing/",
+      "https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html"
+    ],
+    "checked": "2026-08-04"
+  }
+]

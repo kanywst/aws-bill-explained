@@ -108,6 +108,32 @@ test('a topic page renders its diagrams and loads clean', async ({ page }) => {
   expect(problems).toEqual([]);
 });
 
+/**
+ * The defect axe cannot see, pinned by hand.
+ *
+ * BoundaryMap receives its rings outermost-first, because that is the order the
+ * boxes have to be drawn in. The sentence above the list says "from the inside
+ * out" and the diagram's argument is that the centre is free and every ring you
+ * cross outward is a toll. Announcing them in prop order told a screen reader
+ * the innermost boundary was the internet at nine cents a gigabyte — the thesis
+ * inverted, for exactly the readers who cannot see the picture that contradicts
+ * it. Every sentence was correct; only the order was wrong, which is why no
+ * automated audit flagged it and why this test exists.
+ */
+test('the boundary diagram is announced from the free centre outwards', async ({ page }) => {
+  await page.goto('/topics/boundaries/');
+
+  const items = await page.locator('ol.sr').first().locator('li').allInnerTexts();
+  expect(items.length).toBeGreaterThan(2);
+
+  const free = items.findIndex((t) => /free/i.test(t));
+  expect(free, 'no ring is described as free').toBeGreaterThanOrEqual(0);
+  expect(free, 'the free ring must be announced first, as the centre').toBe(0);
+
+  // And the internet — the most expensive crossing — must be announced last.
+  expect(items.at(-1), 'the outermost ring should be the internet').toMatch(/internet/i);
+});
+
 const TOPICS = [
   'reading-a-bill',
   'free-tier',
