@@ -1,0 +1,107 @@
+name: Claude review
+
+# CI answers "does it build and do the tests pass". This asks the question no
+# script here can: is the claim true, and does the Japanese still say what the
+# English says. Those are the two ways this site actually breaks — a count that
+# drifted away from the catalogue, a rename one locale missed — and both ship
+# green today.
+#
+# It reviews, it does not gate. Nothing here is a required check.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions: {}
+
+# One review per pull request. A rapid re-push cancels the run it superseded
+# rather than paying for a review of a diff that no longer exists.
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # A pull request from a fork gets no secrets, so the job would fail on
+    # authentication rather than say anything useful. Drafts are skipped until
+    # they are marked ready, which is what the ready_for_review trigger is for.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      # Required by the action's default GitHub App authentication.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@6b082c41935b4c8a3b8b0ef85ba4ba4d9eeb8975 # v1
+        with:
+          # A subscription token, not an API key: runs bill against the Claude
+          # plan instead of API credits. Generate it with `claude setup-token`.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR: ${{ github.event.pull_request.number }}
+
+            This is an unofficial site that classifies AWS services against
+            three billing meters (Time, Bytes, Units). Its whole value is that
+            the claims are true and dated. Review this pull request with that
+            as the standard.
+
+            Do not repeat what CI already does. Prettier, markdownlint,
+            actionlint, `astro check`, vitest, the build guards in
+            scripts/check-build.mjs, the link check in check-sources.mjs and
+            the staleness check in check-freshness.mjs all run on this PR
+            already. Formatting, types, dead links and lint are covered.
+
+            Look for the things only a reader can catch:
+
+            1. **Locale divergence.** Every topic exists as
+               `src/content/topics/en/<x>.mdx` and `.../ja/<x>.mdx`, and the
+               two READMEs mirror each other. check-build.mjs enforces that the
+               keys match; nothing enforces that the prose still means the same
+               thing. If this PR changes one locale, check whether the other
+               now disagrees, and say exactly where.
+
+            2. **Numbers that are not derived.** Counts quoted in prose ("of
+               the N services indexed on this site...") come from the
+               catalogue in `src/data/services/`. `src/content/topic-counts.test.ts`
+               pins some of them; anything it does not pin can drift silently.
+               If this PR adds a count, ask whether it is derivable and whether
+               a test holds it. If it adds a service, check every quoted total.
+
+            3. **Claims wider than their evidence.** A universal ("every AWS
+               meter", "必ず", "常に") needs to survive a counterexample. Flag
+               a sentence that overclaims relative to the source it cites, or
+               relative to the very next sentence in the same paragraph.
+
+            4. **Sources and dates.** Every service record and topic carries a
+               `checked` date and an AWS source. A `checked` date moved without
+               a corresponding change to the claim is worth a question — the
+               date is supposed to mean someone re-read the page.
+
+            5. **Rates in the dataset.** `src/data/services/` must not quote
+               dollar amounts; the `Service` constructor rejects that. Topic
+               prose may quote rates, but a rate in prose is a claim like any
+               other and needs a source.
+
+            6. **Colour alone.** Diagrams encode billed vs free. Colour is
+               never allowed to be the only signal — it has to work in
+               greyscale and for a screen reader.
+
+            Post findings as inline comments on the lines they concern. Use one
+            top-level comment for the summary. Be specific and cite
+            `file:line`. If the diff is clean against all of the above, say so
+            in one line rather than manufacturing nits — this repo already has
+            another reviewer generating those.
+
+            Write the review in Japanese.
+          claude_args: |
+            --max-turns 30
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*)"
