@@ -35,13 +35,13 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 どちらもメーターとしては **time** が回っている。このサイトの言い方でいえば、サブスクリプションが存在するから月単位で課金される、誰も使っていなくても課金される。珍しいのはメーターではない。**単価がレートカードに載っていない**ことのほうだ。
 
-**ここで、このサイトが読者に対して負っている訂正を1つ。** AWS Trusted Advisor と AWS Health Dashboard は「無料」と載せてあるが、それが本当なのは「目で見る側の半分」だけだ。Basic Support で見えるのは Service Limits カテゴリの全チェックと、Security / Fault Tolerance から選ばれた6件 — EBS のパブリックスナップショット、RDS のパブリックスナップショット、S3 バケットのアクセス許可、root ユーザーの MFA、特定ポートが開放されたセキュリティグループ、リージョンをまたぐ STS グローバルエンドポイントの使用。自動更新も付かないので、Basic ではセキュリティチェックを手で refresh することになる。AWS 自身の Trusted Advisor ページが差を数えている。どのプランでも 56 チェック、Business Support+ 以上でさらに 426 チェックが開いて合計 482。Trusted Advisor API も有料プラン側だ。Health はもっと厳しく、Business Support+ / Enterprise Support / Unified Operations のどれも持たないアカウントから AWS Health API を叩くと `SubscriptionRequiredException` が返る。**コンソールは無料で、自動化は無料ではない。そして自動化の値段は、他の全支出に対するパーセンテージ**だ。
+**ここで、このサイトが読者に対して負っている訂正を1つ。** AWS Trusted Advisor と AWS Health Dashboard は「無料」と載せてあるが、それが本当なのは「目で見る側の半分」だけだ。Basic Support で見えるのは Service Limits カテゴリの全チェックと、Security / Fault Tolerance から選ばれた6件。EBS のパブリックスナップショット、RDS のパブリックスナップショット、S3 バケットのアクセス許可、root ユーザーの MFA、特定ポートが開放されたセキュリティグループ、リージョンをまたぐ STS グローバルエンドポイントの使用。自動更新も付かないので、Basic ではセキュリティチェックを手で refresh することになる。AWS 自身の Trusted Advisor ページが差を数えている。どのプランでも 56 チェック、Business Support+ 以上でさらに 426 チェックが開いて合計 482。Trusted Advisor API も有料プラン側だ。Health はもっと厳しく、Business Support+ / Enterprise Support / Unified Operations のどれも持たないアカウントから AWS Health API を叩くと `SubscriptionRequiredException` が返る。**コンソールは無料で、自動化は無料ではない。そして自動化の値段は、他の全支出に対するパーセンテージ**だ。
 
 <PathDiagram
   lang="ja"
   caption="課金がどこにぶら下がるか。ワークロードはタグが付き、消せる。その上の2つはどちらでもなく、存在するだけで毎月課金される。下のアカウントは計算の出発点でしかない。"
   nodes={[
-    { id: 'work', label: 'ワークロード', sub: 'EC2 / S3 / RDS — タグ可', charges: ['time'] },
+    { id: 'work', label: 'ワークロード', sub: 'EC2 / S3 / RDS。タグ可', charges: ['time'] },
     { id: 'acct', label: 'アカウント', sub: 'AWS Support サブスクリプション', charges: ['time'] },
     {
       id: 'payer',
@@ -62,9 +62,9 @@ Support のラインナップは変わった。記憶で答えると古いほう
 
 どのプランも「最低額と帯計算の**大きいほう**」を取る。
 
-- **Business Support+** — アカウントあたり $29/月、または月間 AWS 利用料の $10K までが 9%、$10K〜$80K が 7%、$80K〜$250K が 5%、$250K 超が 3%。計算はアカウント単位。
-- **Enterprise Support** — $5,000/月、または $150K までが 10%、$150K〜$500K が 7%、$500K〜$1M が 5%、$1M 超が 3%。加入している全アカウント ID の gross charges を合算して計算する。
-- **Unified Operations** — $50,000/月、または $1M までが 10%、$1M〜$5M が 6%、$5M 超が 5%。こちらも合算。
+- **Business Support+**。アカウントあたり $29/月、または月間 AWS 利用料の $10K までが 9%、$10K〜$80K が 7%、$80K〜$250K が 5%、$250K 超が 3%。計算はアカウント単位。
+- **Enterprise Support**: $5,000/月、または $150K までが 10%、$150K〜$500K が 7%、$500K〜$1M が 5%、$1M 超が 3%。加入している全アカウント ID の gross charges を合算して計算する。
+- **Unified Operations**: $50,000/月、または $1M までが 10%、$1M〜$5M が 6%、$5M 超が 5%。こちらも合算。
 
 計算の基礎は「割引やクレジットを適用する**前**の (before any discounts or credits are applied)」gross charges だ。ここは2度読む価値がある。**交渉した割引はサポート費用を減らさない。** 基礎から除外されるサービスも明示されていて、AWS Support 自身、AWS Marketplace、AWS Managed Services、AWS Professional Services、Amazon EKS Anywhere、VMware Cloud on AWS などが入る。コミットメントは逆に算入される。Savings Plans と Reserved Instance の前払いは購入した月に、リカーリング費用は発生した月に基礎へ入る。最低契約期間は 30 日、Unified Operations だけ 90 日。アドオンも同じ形をしていて、AWS Countdown Premium が 1プロジェクトあたり $10K/月、AWS Incident Detection and Response が登録アカウントの合算月額に対して最低 $7K または 2%。
 
@@ -95,7 +95,7 @@ Support のラインナップは変わった。記憶で答えると古いほう
 
 ## 例外と罠
 
-**コスト削減プロジェクトは自分のサポート費用も削るが、そこを見積もりに入れる人がいない。** AWS の Enterprise の例では月間 $750K の利用料に対してサポート費用が $52K。そこから上の帯の $100K を落とせば、ワークロードに一切触らずにその 7%、月 $7K も一緒に落ちる。支出が増える移行では逆に効く。ただし歯止めが2つある。**削減効果は最低額で止まる** — Enterprise Support ならどれだけ削っても $5,000 の下限は払う。そして基礎は gross なので、**クレジットはサポート費用を1ドルも減らさない**。
+**コスト削減プロジェクトは自分のサポート費用も削るが、そこを見積もりに入れる人がいない。** AWS の Enterprise の例では月間 $750K の利用料に対してサポート費用が $52K。そこから上の帯の $100K を落とせば、ワークロードに一切触らずにその 7%、月 $7K も一緒に落ちる。支出が増える移行では逆に効く。ただし歯止めが2つある。**削減効果は最低額で止まる**。Enterprise Support ならどれだけ削っても $5,000 の下限は払う。そして基礎は gross なので、**クレジットはサポート費用を1ドルも減らさない**。
 
 **素朴な showback は、全チームを同じ割合だけ過少報告する。** AWS は明言している。「AWS Support や AWS Marketplace の月額料金のようなサブスクリプション型の課金は割り当てできない (can't be allocated)」。コスト配分タグをぶら下げるリソース ID が存在しないからだ。だからタグ付きコストを合計しても請求書とは合わないし、その差はランダムではない。**おおよそ「サポートのパーセンテージ + タグの付かないサブスクリプション」**だ。ならば意図的に配賦するしかない。Cost Categories の split charge rules は3つの方式を持っていて、ターゲットごとの加重コストに比例する Proportional、割合を自分で決める Fixed、均等割りの Even。ソースに空文字列を指定すると未分類コストを意味する。Enterprise Support なら Billing API の `GetEnterpriseSupportChargeSummary` が `supportChargePercentage`、`totalSupportEligibleSpend`、アカウントごとの `supportCharge` をそのまま返すので、推定ではなく **AWS 自身の計算式から配賦を組み直せる**。
 

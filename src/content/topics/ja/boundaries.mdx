@@ -25,7 +25,7 @@ import PathDiagram from '../../../components/PathDiagram.astro';
 
 ほとんどの人は境界を1枚だと思っている。AWS の中か、インターネットか。想定外の請求が生まれるのはこのモデルのせいで、実際にはリングは4枚あり、そのうち3枚は越えると金が出る。
 
-リングは入れ子になっていて、それぞれが**外向きにだけ**関所になっている。内向きに落ちてくる分 — 届くリクエストや、外側のリングから返ってくるレスポンス — はそれ単体では課金されない。
+リングは入れ子になっていて、それぞれが**外向きにだけ**関所になっている。内向きに落ちてくる分 (届くリクエストや、外側のリングから返ってくるレスポンス) はそれ単体では課金されない。
 
 <BoundaryMap
   lang="ja"
@@ -51,8 +51,8 @@ import PathDiagram from '../../../components/PathDiagram.astro';
 
 そもそもレート表より usage type のほうが実用的だ。Cost Explorer で実際に検索できるのはこっちだから。
 
-- `<Region>-DataTransfer-Out-Bytes` — インターネットへ出ていく分。`USE2-DataTransfer-Out-Bytes` ならオハイオからインターネット。リージョン接頭辞がない usage type は us-east-1 を指す。
-- `<Region>-DataTransfer-Regional-Bytes` — 同一リージョン内の AZ 跨ぎ。1回の転送につき2本立つと思っておく。
+- `<Region>-DataTransfer-Out-Bytes`。インターネットへ出ていく分。`USE2-DataTransfer-Out-Bytes` ならオハイオからインターネット。リージョン接頭辞がない usage type は us-east-1 を指す。
+- `<Region>-DataTransfer-Regional-Bytes`。同一リージョン内の AZ 跨ぎ。1回の転送につき2本立つと思っておく。
 
 インターネットから入ってくる分の usage type は存在しない。課金されないので、数える必要がないからだ。
 

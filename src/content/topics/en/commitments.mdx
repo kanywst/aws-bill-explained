@@ -26,19 +26,19 @@ import PathDiagram from '../../../components/PathDiagram.astro';
 
 A Savings Plan does not reserve anything. It is a promise to spend a fixed number of dollars
 every hour, for one or three years, against whatever eligible usage you happen to have. AWS
-defines it as a commitment "measured in $/hour" — the plan names a dollar figure, not an
+defines it as a commitment "measured in $/hour": the plan names a dollar figure, not an
 instance. One year means 365 days. Three years means 1,095 days. The smallest commitment AWS
 will sell you is $0.00001 per hour.
 
 That is why a Savings Plan looks wrong on a bill. There is no plan-shaped object anywhere in
 your account. No resource points at it, and it points at no resource. It arrives on the invoice
-as a fee identified by a plan ARN, and the discount it produces lands somewhere else entirely —
+as a fee identified by a plan ARN, and the discount it produces lands somewhere else entirely,
 possibly in a different account.
 
 A Reserved Instance is the older idea and a different one. You name attributes: instance family,
 size, platform, tenancy, and either a Region or one specific Availability Zone. AWS then
 discounts usage that matches. Whether you also get capacity depends entirely on that last
-choice, and it is the thing people buy wrong. A **regional** RI does not reserve capacity — AWS
+choice, and it is the thing people buy wrong. A **regional** RI does not reserve capacity: AWS
 says so in as many words; it is a price, nothing more. A **zonal** RI does reserve capacity, in
 the Availability Zone you named. If you bought RIs so that a launch would never fail, and you
 bought them regional, you bought a discount and no insurance.
@@ -46,14 +46,14 @@ bought them regional, you bought a discount and no insurance.
 There are four Savings Plan types, not three. Database Savings Plans arrived at re:Invent 2025
 and the older pages have not all caught up:
 
-- **Compute Savings Plans** — EC2 in any family, any size, any Region, any OS, any tenancy, plus
+- **Compute Savings Plans**: EC2 in any family, any size, any Region, any OS, any tenancy, plus
   Fargate and Lambda. Up to 66% off On-Demand.
-- **EC2 Instance Savings Plans** — one instance family in one Region, with size, OS and tenancy
+- **EC2 Instance Savings Plans**: one instance family in one Region, with size, OS and tenancy
   still flexible inside it. Up to 72% off.
-- **Database Savings Plans** — Aurora, RDS, DynamoDB, ElastiCache, DocumentDB, Neptune,
+- **Database Savings Plans**: aurora, RDS, DynamoDB, ElastiCache, DocumentDB, Neptune,
   Timestream, Keyspaces, DMS and OpenSearch Service. Latest provisioned generations plus
   serverless usage. Up to 35% off, one-year term, no upfront.
-- **SageMaker AI Savings Plans** — SageMaker AI instance usage across family, size, Region and
+- **SageMaker AI Savings Plans**: SageMaker AI instance usage across family, size, Region and
   component. Up to 64% off.
 
 Read that list top to bottom and the trade is obvious: the narrower the plan, the deeper the
@@ -61,7 +61,7 @@ discount. You are paid for giving up optionality.
 
 Now the mechanic that produces the confusing lines. Every hour, independently, AWS sorts your
 eligible usage and spends the commitment on it. Free Tier is applied first, then Reserved
-Instances, then Savings Plans — EC2 Instance plans before Compute plans, because Compute plans
+Instances, then Savings Plans: EC2 Instance plans before Compute plans, because Compute plans
 are broader and are worth saving for usage the narrow ones cannot touch. Within what is left,
 AWS calculates the savings percentage of every eligible combination and applies the commitment
 to the highest percentage first, breaking ties by the lowest plan rate. It continues until the
@@ -69,7 +69,7 @@ usage runs out or the commitment does. Whatever remains is billed on demand.
 
 Two things follow immediately. The hour is the unit of accounting, so commitment left unspent at
 14:00 is not available at 15:00. And nothing in that sort is scoped to an account: a plan can be
-purchased in any account in the organisation, and with sharing on — the default — it covers the
+purchased in any account in the organisation, and with sharing on (the default) it covers the
 purchasing account's usage first and then everyone else's, chasing the largest calculated
 saving. The fee stays with the buyer. The benefit goes wherever the discount is deepest. That is
 the whole explanation for a fee sitting alone in the management account while the savings show
@@ -77,7 +77,7 @@ up in a team's account three levels down.
 
 <PathDiagram
   lang="en"
-  caption="The same hour, before and after a Compute Savings Plan (m5.xlarge Linux, us-east-1). Time is the meter on both sides of the plan. Only the number changes — and the plan's own hourly fee is charged whether the hour arrives or not."
+  caption="The same hour, before and after a Compute Savings Plan (m5.xlarge Linux, us-east-1). Time is the meter on both sides of the plan. Only the number changes, and the plan's own hourly fee is charged whether the hour arrives or not."
   nodes={[
     { id: 'hour', label: 'One instance-hour', sub: 'm5.xlarge, Linux', charges: ['time'] },
     { id: 'plan', label: 'Compute Savings Plan', sub: '1 yr, no upfront', charges: ['time'] },
@@ -98,16 +98,16 @@ up in a team's account three levels down.
 ## What it costs
 
 The commitment is dollars per hour; what you get for it depends on which plan and how long you
-sign for. One instance — m5.xlarge, Linux, shared tenancy, us-east-1 — priced from AWS's own
+sign for. One instance (m5.xlarge, Linux, shared tenancy, us-east-1) priced from AWS's own
 Price List API, published 5 August 2026:
 
-- **On-Demand** — $0.192 per hour.
-- **Compute Savings Plan, 1 year, no upfront** — $0.141. About 27% off, and the rate follows you
+- **On-Demand**: $0.192 per hour.
+- **Compute Savings Plan, 1 year, no upfront**: $0.141. About 27% off, and the rate follows you
   to any family, size or Region.
-- **EC2 Instance Savings Plan, 1 year, no upfront, m5 in us-east-1** — $0.121. About 37% off,
+- **EC2 Instance Savings Plan, 1 year, no upfront, m5 in us-east-1**: $0.121. About 37% off,
   and it follows you nowhere.
-- **Compute Savings Plan, 3 years, all upfront** — $0.088. About 54% off.
-- **EC2 Instance Savings Plan, 3 years, all upfront** — $0.072. That is 62.5%, and it is the
+- **Compute Savings Plan, 3 years, all upfront**: $0.088. About 54% off.
+- **EC2 Instance Savings Plan, 3 years, all upfront**: $0.072. That is 62.5%, and it is the
   deepest rate this instance can reach in a product advertised as "up to 72%". The headline
   percentage is a ceiling across the whole catalogue, not a number you can apply to your
   instance.
@@ -116,22 +116,22 @@ None of that is what confuses people. The line items are. A bill with commitment
 charge types that a bill without them never shows, and several of them are designed to cancel
 each other out:
 
-- **`SavingsPlanUpfrontFee`** — the one-time payment for an All Upfront or Partial Upfront plan,
+- **`SavingsPlanUpfrontFee`**, the one-time payment for an All Upfront or Partial Upfront plan,
   charged on the day of purchase.
-- **`SavingsPlanRecurringFee`** — the hourly charge for a No Upfront or Partial Upfront plan,
+- **`SavingsPlanRecurringFee`**, the hourly charge for a No Upfront or Partial Upfront plan,
   added every hour of the term. On an All Upfront plan this line still appears, and there it
   reports the portion of the plan you did **not** use during the billing period.
-- **`SavingsPlanCoveredUsage`** — the usage that received the benefit. Its unblended cost is what
+- **`SavingsPlanCoveredUsage`**, the usage that received the benefit. Its unblended cost is what
   On-Demand _would_ have been, which is why this row looks like you saved nothing.
-- **`SavingsPlanNegation`** — the offsetting negative. AWS groups it hourly by plan ARN,
+- **`SavingsPlanNegation`**, the offsetting negative. AWS groups it hourly by plan ARN,
   operation, usage type and Availability Zone, so one negation row can cancel several covered-usage
   rows and the counts will not match. The real number is in
   `savingsPlan/SavingsPlanEffectiveCost`, not in either row.
-- **`RIFee`** — the recurring subscription fee for a Reserved Instance. It is monthly, unlike the
+- **`RIFee`**, the recurring subscription fee for a Reserved Instance. It is monthly, unlike the
   Savings Plans recurring fee, which is hourly. It appears even for All Upfront RIs where it is
   $0.00, because AWS uses that row to carry `reservation/AmortizedUpfrontFeeForBillingPeriod` and
   `reservation/ReservationARN`. A $0.00 RIFee is not a bug; it is a container.
-- **`DiscountedUsage`** — instance usage covered by an RI. AWS documents that the unblended rate
+- **`DiscountedUsage`**, instance usage covered by an RI. AWS documents that the unblended rate
   on these lines is zero. Those are your $0.00 rows, and they mean covered, not free.
 
 Which brings you to the three cost columns, which disagree with each other on purpose:
@@ -154,7 +154,7 @@ turns **units**. The plan sits beside the meter and edits the price.
 
 The Lambda rate card makes it literal. A Compute Savings Plan covers Lambda, and its us-east-1
 rate card lists both meters: duration at $0.0000147 per GB-second, and requests at $0.0000002
-each — which is the On-Demand request price. The units meter is inside the plan's scope and
+each, which is the On-Demand request price. The units meter is inside the plan's scope and
 discounted by nothing, and AWS's own worked example scores Lambda requests at zero percent
 savings. Same meter, same count, same rate, plan or no plan.
 
@@ -162,13 +162,13 @@ savings. Same meter, same count, same rate, plan or no plan.
 
 **Unused commitment is spent, not saved.** The commitment is a floor on your spend, not a
 voucher you draw down. Commit to $10 an hour, run $6 of eligible usage in some hour, and the
-other $4 is gone — AWS is explicit that unused benefit does not carry into the next hour. This is
+other $4 is gone. AWS is explicit that unused benefit does not carry into the next hour. This is
 what makes a plan sized on peak usage expensive: you pay for the peak in every trough. On an All
 Upfront plan you can read the damage directly, because the `SavingsPlanRecurringFee` line reports
 exactly the unused portion for the period.
 
 **Coverage is not utilisation, and the fix for one is the opposite of the fix for the other.**
-Utilisation is the percentage of your commitment that got used — $9.80 of usage against a $10
+Utilisation is the percentage of your commitment that got used: $9.80 of usage against a $10
 commitment is 98%. Coverage is the percentage of your eligible usage that a plan paid for. High
 utilisation with low coverage means you under-committed and should buy more. Low utilisation
 means you over-committed and there is nothing to do but wait. A dashboard showing one number
@@ -179,6 +179,6 @@ purchase; you can only buy additional plans on top. The escape hatch is narrow a
 every edge of it: a plan can be returned only if its hourly commitment is $100 or less, only
 within seven days of purchase, only within the same calendar month, and only up to ten returns
 per management account per calendar year. Migrate the account into a different organisation and
-even that closes — AWS states you cannot return the plan from the new organisation regardless of
+even that closes. AWS states you cannot return the plan from the new organisation regardless of
 the seven-day window. A three-year plan is three years of a spending decision made by whoever ran
 the numbers on a workload that may not exist next quarter.

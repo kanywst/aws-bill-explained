@@ -8,7 +8,7 @@ import { layoutRings } from '../lib/diagram-layout';
  * "Data transfer out" only makes sense once you know what counts as "out", and
  * that is the thing people get wrong: they picture one boundary (the internet)
  * when there are several nested ones. Drawing them inside each other makes the
- * nesting the message — every ring you cross outward is a toll gate, and the
+ * nesting the message: every ring you cross outward is a toll gate, and the
  * innermost ring is free.
  *
  * Labels sit *inside* each ring rather than straddling its edge, so nothing has
@@ -54,7 +54,7 @@ const geom = rings.map((r, i) => ({
  * role="img" kept all of it inside the SVG where assistive tech cannot reach.
  *
  * The list is REVERSED. `rings` arrives outermost-first because that is the
- * order the boxes have to be drawn in, but the argument runs the other way —
+ * order the boxes have to be drawn in, but the argument runs the other way:
  * the centre is free and each ring you cross outward is a toll. Announcing
  * them in prop order told a screen reader the innermost boundary was the
  * internet, inverting the thesis for exactly the readers who could not see the
@@ -102,7 +102,7 @@ const ringAlt = (r: (typeof rings)[number]) =>
               {r.label}
             </text>
 
-            {/* The toll, inside the bottom edge — you pay on the way out. */}
+            {/* The toll, inside the bottom edge, you pay on the way out. */}
             <text x={r.x + 16} y={r.y + r.h - 13} class="bm-toll">
               <tspan class="bm-arrow" fill={r.colour}>
                 ↑

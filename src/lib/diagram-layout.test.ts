@@ -24,8 +24,8 @@ import {
 describe('layoutRings', () => {
   /**
    * The regression this file exists for. The boundary map shipped with
-   * height="-40" on its innermost ring, so the free centre — the point of the
-   * whole diagram — was never drawn.
+   * height="-40" on its innermost ring, so the free centre, the point of the
+   * whole diagram. Was never drawn.
    */
   it('never produces a ring that SVG refuses to render', () => {
     for (let count = 1; count <= 12; count += 1) {
@@ -165,7 +165,7 @@ describe('sequence geometry', () => {
   });
 
   /*
-   * These two are the path production actually takes — the components call them
+   * These two are the path production actually takes, the components call them
    * with an id. The index guard above can only be reached by a caller that has
    * already resolved the id itself, which is why it was possible for the tested
    * guard and the useful error message to live in different places.

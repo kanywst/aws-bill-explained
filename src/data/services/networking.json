@@ -393,7 +393,7 @@
     "category": "networking",
     "meters": ["time"],
     "oneLiner": "Almost nothing bills for the VPC itself; nearly every charge belongs to something you attached.",
-    "trap": "The exception is Encryption Controls, billed per hour per non-empty VPC — and incurred on any VPC attached to an encryption-capable Transit Gateway whether or not you turned it on.",
+    "trap": "The exception is Encryption Controls, billed per hour per non-empty VPC, and incurred on any VPC attached to an encryption-capable Transit Gateway whether or not you turned it on.",
     "billOn": [],
     "confidence": "high",
     "sources": [

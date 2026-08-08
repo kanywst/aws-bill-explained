@@ -75,7 +75,7 @@
     "category": "storage",
     "meters": ["time", "bytes"],
     "oneLiner": "Storage is half of it. Under Elastic throughput every GB you read or write is metered too.",
-    "trap": "Elastic throughput meters data both directions, not just reads. IA and Archive add a per-GB access fee, and files under 128 KiB bill as 128 KiB — a floor on small files, not a rounding rule.",
+    "trap": "Elastic throughput meters data both directions, not just reads. IA and Archive add a per-GB access fee, and files under 128 KiB bill as 128 KiB: a floor on small files, not a rounding rule.",
     "billOn": [
       "TimedStorage-ByteHrs",
       "IATimedStorage-ByteHrs",
@@ -271,7 +271,7 @@
     "name": "Amazon S3 Glacier",
     "category": "storage",
     "meters": ["time", "bytes", "units"],
-    "oneLiner": "Cheap to park. Getting it back usually costs per GB and per request — but not always.",
+    "oneLiner": "Cheap to park. Getting it back usually costs per GB and per request, but not always.",
     "trap": "Bulk retrieval from Glacier Flexible Retrieval is free on both counts, making it the cheapest way out. Expedited and Standard both bill. Delete inside 90 days (180 for Deep Archive) and you owe the balance.",
     "billOn": [
       "TimedStorage-GlacierByteHrs",

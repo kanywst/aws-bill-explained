@@ -99,5 +99,5 @@ for (const [category, rows] of files) {
 }
 
 const total = [...files.values()].reduce((n, rows) => n + rows.length, 0);
-console.log(`added ${added}, replaced ${replaced}, skipped ${skipped.length} — ${total} total`);
+console.log(`added ${added}, replaced ${replaced}, skipped ${skipped.length}: ${total} total`);
 for (const s of skipped) console.log(`  skip  ${s}`);

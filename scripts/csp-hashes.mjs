@@ -4,7 +4,7 @@
  * The CSP in public/_headers says `script-src 'self'`, which is the right
  * policy and which silently broke the site: Astro emits a small script inline
  * rather than as a file, the browser refused to run it, and the home page's
- * live cost counter — the first thing anyone sees — sat at zero. Nothing in the
+ * live cost counter (the first thing anyone sees) sat at zero. Nothing in the
  * build noticed, because the HTML was perfectly valid.
  *
  * The fix is not to allow 'unsafe-inline', which would defeat the directive

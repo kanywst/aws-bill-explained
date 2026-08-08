@@ -16,7 +16,7 @@ Two of the three have been renamed, both times because the name was narrower tha
 
 **Bytes** was Egress until the dataset contradicted it: CloudWatch ingestion, Firehose intake and NAT Gateway processing all meter gigabytes with no regard for direction. "Inbound is free" is a rule about data _transfer_, not a property of the meter.
 
-**Units** was Calls, defined as "the number of API operations; payload size and direction are irrelevant". That described one implementation rather than a billing shape, and most of its own members refuted it — SQS bills a 1 MiB call as sixteen requests, Bedrock counts tokens, Textract counts pages, SES counts recipients. What they share is that something discrete gets counted. A request is the commonest instance of that, not the definition of it.
+**Units** was Calls, defined as "the number of API operations; payload size and direction are irrelevant". That described one implementation rather than a billing shape, and most of its own members refuted it: SQS bills a 1 MiB call as sixteen requests, Bedrock counts tokens, Textract counts pages, SES counts recipients. What they share is that something discrete gets counted. A request is the commonest instance of that, not the definition of it.
 
 This site classifies AWS services against those three, explains the one thing people get wrong about each, and names the usage type to search for on your own bill.
 
@@ -24,7 +24,7 @@ This site classifies AWS services against those three, explains the one thing pe
 
 - **No dollar rates in the dataset.** Rates move and vary by region; which meter turns does not. The `Service` constructor rejects a record whose prose quotes one.
 - **Every claim carries an AWS source** and a date it was checked. The `Service` constructor rejects a record with no source, or one citing a page outside AWS's own domains.
-- **Colour means billed, grey means free** in every diagram — and never colour alone, since it also has to work in greyscale and for a screen reader.
+- **Colour means billed, grey means free** in every diagram, and never colour alone, since it also has to work in greyscale and for a screen reader.
 - **Model before detail.** Each page opens with a single sentence, then earns it.
 
 Unofficial. Not affiliated with Amazon Web Services.
@@ -48,9 +48,9 @@ npm run build       # static build into dist/
 src/
   domain/          pure TypeScript, knows nothing about Astro or locales
     meter.ts       MeterSet value object
-    service-slug.ts  ServiceSlug value object — identity that validates itself
+    service-slug.ts  ServiceSlug value object. Identity that validates itself
     service.ts     Service entity; the constructor enforces editorial rules
-    catalogue.ts   Catalogue aggregate — every cross-service query lives here
+    catalogue.ts   Catalogue aggregate. Every cross-service query lives here
   infrastructure/
     service-repository.ts   anti-corruption layer over the researched JSON
   lib/
@@ -69,15 +69,15 @@ Service pages are generated from the catalogue, so adding a service is a data ch
 
 ### Why a domain layer
 
-The dataset is assembled from independent research passes that disagree about naming (`amazon-s3` vs `s3`) and occasionally emit a meter string nobody has seen before. `ServiceSlug` makes identity impossible to get wrong — the only way to hold one is to have gone through its constructor — and the repository drops unknown meters rather than throwing, so a new AWS billing shape degrades to "we don't know" instead of breaking the build.
+The dataset is assembled from independent research passes that disagree about naming (`amazon-s3` vs `s3`), and occasionally emit a meter string nobody has seen before. `ServiceSlug` makes identity impossible to get wrong (the only way to hold one is to have gone through its constructor), and the repository drops unknown meters rather than throwing, so a new AWS billing shape degrades to "we don't know" instead of breaking the build.
 
 The editorial limits live in the `Service` constructor rather than in a test over the committed data. A test can only catch a bad record that has already been written; a constructor makes it unbuildable.
 
-Cross-service questions — what's free, what bills the same way, how much of the catalogue is still unverified — belong to `Catalogue`, not to page templates. That keeps the meaning of "free" in one place.
+Cross-service questions (what's free, what bills the same way, how much of the catalogue is still unverified) belong to `Catalogue`, not to page templates. That keeps the meaning of "free" in one place.
 
 ### Why the geometry is a separate module
 
-`src/lib/diagram-layout.ts` holds the arithmetic behind the SVG diagrams. It was extracted after the boundary map shipped a ring with `height="-40"`, which type-checked perfectly, threw a console error in the browser, and silently dropped the innermost ring — the one the diagram exists to show. Writing the tests then surfaced the same defect still latent on the horizontal axis.
+`src/lib/diagram-layout.ts` holds the arithmetic behind the SVG diagrams. It was extracted after the boundary map shipped a ring with `height="-40"`, which type-checked perfectly, threw a console error in the browser, and silently dropped the innermost ring, the one the diagram exists to show. Writing the tests then surfaced the same defect still latent on the horizontal axis.
 
 ### Why the build guards
 
@@ -85,17 +85,17 @@ Cross-service questions — what's free, what bills the same way, how much of th
 
 `scripts/csp-hashes.mjs` hashes every inline script in the build and writes those hashes into the `script-src` directive in `dist/_headers`. Astro emits small scripts inline rather than as files, and the policy is `script-src 'self'`, so without this the browser refuses to run them: the home page's cost counter stops and the services filter does nothing, with valid HTML and a green build. The hashes change whenever the code does, which is why they are generated rather than pasted, and why the answer is not `'unsafe-inline'`.
 
-`scripts/check-build.mjs` then scans the built HTML for negative SVG dimensions and `NaN` coordinates, checks translation parity, requires a checked date and at least one source on every topic, and fails if any inline script is missing from the policy above. It is a second net under the unit tests, catching what a component composes wrongly at render time — and `npm run test:smoke` is the third, catching what only a browser can see.
+`scripts/check-build.mjs` then scans the built HTML for negative SVG dimensions and `NaN` coordinates, checks translation parity, requires a checked date and at least one source on every topic, and fails if any inline script is missing from the policy above. It is a second net under the unit tests, catching what a component composes wrongly at render time, and `npm run test:smoke` is the third, catching what only a browser can see.
 
 ## Keeping it current
 
-Nothing here decays because the code changed. It decays because AWS did — a page is retired, a rate moves, a whole product line is renamed while every URL describing it still returns 200. Two checks look for that, and they ask different questions.
+Nothing here decays because the code changed. It decays because AWS did: a page is retired, a rate moves, a whole product line is renamed while every URL describing it still returns 200. Two checks look for that, and they ask different questions.
 
 `scripts/check-sources.mjs` asks whether a cited page is still there. It follows redirects and treats a page that lands on its guide index as gone, because that is how AWS retires documentation: not with a 404, but with a 200 somewhere less specific.
 
 `scripts/check-freshness.mjs` asks whether anyone has looked lately. Every service record and every article carries a `checked` date; the script warns past 90 days and, with `--strict`, fails past 180.
 
-Both run on every push. Both also run weekly in `.github/workflows/claims.yml`, which is the one that matters — a scheduled failure has no pull request to turn red, so it files an issue under the `claims` label instead, or comments on the open one if there already is one.
+Both run on every push. Both also run weekly in `.github/workflows/claims.yml`, which is the one that matters: a scheduled failure has no pull request to turn red, so it files an issue under the `claims` label instead, or comments on the open one if there already is one.
 
 When a claim comes up stale, re-verify it against a primary AWS source and move the date. Moving the date without re-reading the source is the one thing that turns this from a check into a ritual.
 

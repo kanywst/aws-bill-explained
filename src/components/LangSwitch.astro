@@ -9,7 +9,7 @@ interface Props {
 
 const { lang, available = [...LANGS] } = Astro.props;
 // Point each option at the same page in the other language, not at the home
-// page — losing your place is the most annoying thing a language switcher does.
+// page. Losing your place is the most annoying thing a language switcher does.
 const here = stripLocale(Astro.url.pathname);
 ---
 
@@ -27,7 +27,7 @@ const here = stripLocale(Astro.url.pathname);
           {LANG_NAME[l]}
         </a>
       ) : (
-        /* Not translated yet — show it greyed rather than linking to a 404. */
+        /* Not translated yet. Show it greyed rather than linking to a 404. */
         <span class="ls-opt is-missing" lang={l} title={`Not available in ${LANG_NAME[l]}`}>
           {LANG_NAME[l]}
         </span>

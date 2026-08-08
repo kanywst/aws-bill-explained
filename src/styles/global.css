@@ -5,8 +5,8 @@
  *
  * The palette and type are deliberately close to Cloudscape, the design system
  * behind the AWS console, so the site feels like it belongs next to the thing
- * it explains. Amazon Ember is proprietary, so we use Open Sans — Cloudscape's
- * own fallback — rather than inventing a look.
+ * it explains. Amazon Ember is proprietary, so we use Open Sans. Cloudscape's
+ * own fallback. Rather than inventing a look.
  *
  * The one idea layered on top of Cloudscape is the site's teaching device:
  *   SATURATED = you are being charged.  GREY = it's free.
@@ -36,8 +36,8 @@
    * The three meters, taken from AWS's own accent colours: the orange from the
    * logo, Cloudscape's link blue, and its error red.
    *
-   * Split into fill and ink deliberately. AWS orange is 2.14:1 on white — less
-   * than half of WCAG AA — and Time is the meter on 130 of 185 services, so
+   * Split into fill and ink deliberately. AWS orange is 2.14:1 on white. Less
+   * than half of WCAG AA, and Time is the meter on 130 of 185 services, so
    * the site's most-used colour was also its least legible. The fill keeps the
    * brand; the ink is what any text or meaningful stroke uses.
    */
@@ -49,7 +49,7 @@
    * Text-safe equivalents, measured on the tints below rather than on #ffffff.
    * That distinction is the bug this pair of lines used to carry: the blue was
    * recorded as 4.82 against white and left identical to its fill, but these
-   * inks are used on tinted panels, and on --m-time-tint it fell to 4.48 —
+   * inks are used on tinted panels, and on --m-time-tint it fell to 4.48:
    * under AA, on the cross-link at the foot of every service page.
    * On their own tint: 5.95, 5.75, 4.61.
    */
@@ -64,7 +64,7 @@
 
   /*
    * Unlit. Anything free renders in this and never takes a hue.
-   * Was #9ba7b6 at 2.44:1 — which put the entire "grey means free" half of the
+   * Was #9ba7b6 at 2.44:1, which put the entire "grey means free" half of the
    * teaching device below the legibility floor. Now 4.83:1.
    */
   --unlit: #6b7280;

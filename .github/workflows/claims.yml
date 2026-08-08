@@ -61,7 +61,7 @@ jobs:
           echo "simulated failure: exercising the issue-filing path" | tee -a freshness.log
           exit 1
 
-      # A failing scheduled run notifies nobody by default — there is no pull
+      # A failing scheduled run notifies nobody by default. There is no pull
       # request to turn red. An issue is the only thing anyone will see.
       - name: Open an issue when a claim has decayed
         if: failure()

@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   // Cloudflare Pages project configuration.
   //
-  // The site is static output, so there is no adapter and no Worker — Pages
+  // The site is static output, so there is no adapter and no Worker. Pages
   // just serves the built directory. Keeping this in the repo means
   // `wrangler pages deploy` needs no flags, and the project name cannot drift
   // from the URL baked into astro.config.mjs.

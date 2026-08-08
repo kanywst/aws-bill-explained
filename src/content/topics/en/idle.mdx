@@ -28,7 +28,7 @@ The Time meter has exactly one test, and it is not the one people apply. The tes
 _does the thing exist_. It is never _is the thing doing anything_.
 
 This is the most repeated surprise in AWS billing and AWS has never written it down as a
-rule. It gets restated one service at a time, in each service's own vocabulary — an
+rule. It gets restated one service at a time, in each service's own vocabulary: an
 _endpoint_, an _index_, a _subnet association_, a _provisioned model unit_, a _minimum
 ACU_. Read the pricing pages one by one and you collect forty footnotes. They are all the
 same footnote.
@@ -43,7 +43,7 @@ The giveaway is a service that publishes an hourly or monthly rate _alongside_ a
 per-request rate. DynamoDB shows both halves inside one product: in provisioned capacity
 mode the RCU and WCU you configured bill every hour at zero traffic, and the meter is Time;
 flip the same table to on-demand and the identical queries bill per request, and the meter
-is Units. Same data, same access pattern, different meter — because you changed what you
+is Units. Same data, same access pattern, different meter, because you changed what you
 bought, not what you did.
 
 That leaves three verbs that people treat as synonyms and AWS does not:
@@ -52,7 +52,7 @@ That leaves three verbs that people treat as synonyms and AWS does not:
   the three and the one everybody reaches for first.
 - **Pause** is real, but only where a service explicitly implements it, and only for some
   of its charges.
-- **Delete** is the only verb that works everywhere — except for the case at the end of
+- **Delete** is the only verb that works everywhere: except for the case at the end of
   this page, where nothing exists to delete.
 
 <PathDiagram
@@ -89,7 +89,7 @@ The monthly numbers assume a 730-hour month.
   are not billed on the same trigger. "When your application is deployed, you pay for the
   memory provisioned in each container instance"; vCPU only joins in when the service is
   actually processing requests. A 2 GB service that serves nobody for a month is about
-  **$10** — small, but it never reaches zero, because App Runner has no scale-to-zero.
+  **$10**. Small, but it never reaches zero, because App Runner has no scale-to-zero.
   Its `PauseService` API is the lever: it "reduces compute capacity for the service to zero."
 - **Aurora Serverless v2.** $0.12 per ACU-hour, billed per second against your _minimum_
   ACU setting whether or not a query ever arrives. A floor of 0.5 ACU is about **$44 a
@@ -103,7 +103,7 @@ The monthly numbers assume a 730-hour month.
   nothing to do with users. AWS's own worked example prices two subnets around the clock at
   **$144 a month** before a single person connects. The endpoint's elastic network
   interfaces also draw in-use public IPv4 charges.
-- **Public IPv4.** $0.005 per address-hour, in use or idle, since 1 February 2024 — the VPC
+- **Public IPv4.** $0.005 per address-hour, in use or idle, since 1 February 2024, the VPC
   pricing page lists the identical rate under both names. The distinction that matters is
   what happens on stop: EC2 "release[s] the public IP address when the instance is stopped,
   hibernated, or terminated," so an auto-assigned address stops billing. An Elastic IP is
@@ -123,7 +123,7 @@ The monthly numbers assume a 730-hour month.
 - **SageMaker real-time endpoints.** Billed by time deployed, from creation to deletion.
   The SageMaker developer guide warns in a box: "Your endpoint continues to incur charges
   even when not processing requests. To stop all charges, you must delete your endpoint."
-  There is no stop button — asynchronous and serverless inference are the variants that
+  There is no stop button. Asynchronous and serverless inference are the variants that
   scale to zero.
 - **EMR and OpenSearch clusters.** EMR's documentation says long-running clusters "continue
   to run, accept work, and accrue charges until you take action to shut them down," and that
@@ -131,7 +131,7 @@ The monthly numbers assume a 730-hour month.
   to your account." OpenSearch bills "for each hour your instance is running in an available
   state," with partial hours billed as full hours. Neither meter reads query volume.
 - **ALB and NAT Gateway.** $0.0225 per load balancer hour and $0.045 per NAT Gateway hour,
-  before a byte moves — about **$16** and **$33** a month respectively. Both then add
+  before a byte moves. About **$16** and **$33** a month respectively. Both then add
   capacity or per-GB charges on top. A copy of a dev environment nobody deploys to any more
   is usually these two.
 - **CodeBuild reserved fleets.** Instance time is "calculated in minutes, from the time you
@@ -145,7 +145,7 @@ The monthly numbers assume a 730-hour month.
 off the instance meter and leaves EBS and any Elastic IP running. Transfer Family says it in
 the API reference: "Stopping the server does not reduce or impact your file transfer protocol
 endpoint billing; you must delete the server to stop being billed." MediaLive goes further
-and gives idleness its own price — the user guide describes an explicit "idle channel charge
+and gives idleness its own price, the user guide describes an explicit "idle channel charge
 for each channel that isn't running" and an idle charge for push inputs, with only pull
 inputs free while idle. Three services, three different meanings of the same button.
 
@@ -165,7 +165,7 @@ _endpoint_, _cluster_, _subscription_. In usage types, look for anything ending 
 > If I sent no traffic for a week, what would still bill?
 
 Anything you cannot immediately answer "nothing" for is on the Time meter, and the follow-up
-is always the same — what exactly do I have to delete, and does anything short of deleting
+is always the same: what exactly do I have to delete, and does anything short of deleting
 work?
 
 **Sometimes the answer is that deleting does not work.** This is the honest edge of the
@@ -173,7 +173,7 @@ principle. Shield Advanced is a $3,000 monthly fee that "requires a 1-year subsc
 commitment," billed per payer account across an organization; EKS Anywhere Enterprise
 Subscription is $24,000 per cluster on a 1-year term, cancellable at no charge only "within
 the first 7 days of purchase." Terminating every protected resource or every cluster changes
-neither bill. The Time meter is still measuring existence — it is just that what exists is a
+neither bill. The Time meter is still measuring existence: it is just that what exists is a
 contract, and contracts do not have a delete button. When you buy one of these, you are
 buying months of the Time meter up front, and the only lever that ever existed was the
 decision to sign.

@@ -30,8 +30,8 @@ them cost money to cross.
 The rings are nested, and crossing one costs something. Direction matters at the outer
 rings and stops mattering at the inner ones, which is the part that catches people:
 arriving from the internet is free, but crossing an Availability Zone is charged at the
-same rate each way. Anything you put in the middle of the path — a NAT Gateway, an
-interface endpoint — charges for handling the bytes regardless of which way they were
+same rate each way. Anything you put in the middle of the path: a NAT Gateway, an
+interface endpoint. Charges for handling the bytes regardless of which way they were
 going.
 
 <BoundaryMap
@@ -55,7 +55,7 @@ going.
 
 The innermost ring is the one worth designing for. Traffic between resources in the same
 Availability Zone, addressed over private IPs, is free. Step one ring out and you are
-paying a cent per gigabyte — in both directions, which is the detail that turns a
+paying a cent per gigabyte: in both directions, which is the detail that turns a
 chatty multi-AZ service mesh into a real line item.
 
 ## What it costs
@@ -65,17 +65,17 @@ inter-region rate: AWS prices it per source/destination pair, so the only correc
 is to look up your two regions. The rate card matters less than the usage type anyway,
 because the usage type is what you can actually search for in Cost Explorer:
 
-- `<Region>-DataTransfer-Out-Bytes` — leaving for the internet. `USE2-DataTransfer-Out-Bytes`
+- `<Region>-DataTransfer-Out-Bytes`. Leaving for the internet. `USE2-DataTransfer-Out-Bytes`
   is Ohio to the internet. A usage type with no region prefix means us-east-1.
-- `<Region>-DataTransfer-Regional-Bytes` — between AZs inside one region. Expect two of
+- `<Region>-DataTransfer-Regional-Bytes`. Between AZs inside one region. Expect two of
   these per transfer, one for the sender and one for the receiver.
-- `<Region>-VpcPeering-In-Bytes` and `-Out-Bytes` — cross-AZ traffic over a peering
+- `<Region>-VpcPeering-In-Bytes` and `-Out-Bytes`: cross-AZ traffic over a peering
   connection, split out under their own names since April 2025. Before that it landed on
   `DataTransfer-Regional-Bytes`, which matters if you are reconciling an older bill.
 
 `DataTransfer-In-Bytes` exists too, and it is rated at $0.00 per GB. Inbound from the
 internet is metered and then charged nothing, so you will find the line and it will be
-zero — worth knowing before you go looking for a usage type that "should not be there".
+zero. Worth knowing before you go looking for a usage type that "should not be there".
 
 ## Traps
 
@@ -89,7 +89,7 @@ direction, so inbound through a NAT Gateway is _not_ free even though inbound fr
 internet is. Transit Gateway also bills per gigabyte, but only against whoever sent the
 traffic in, and not at all for traffic arriving from a peering attachment. Load balancers
 are different again: an ALB or NLB has no per-GB fee, only an hourly rate plus capacity
-units, and processed bytes is just one dimension of those — you are billed on whichever
+units, and processed bytes is just one dimension of those: you are billed on whichever
 dimension ran highest, so a chatty low-byte API never touches the byte one.
 
 <PathDiagram

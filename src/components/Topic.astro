@@ -27,7 +27,7 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
 ---
 
 <Base
-  title={`${entry.data.title} — ${s.siteTitle}`}
+  title={`${entry.data.title}: ${s.siteTitle}`}
   lang={lang}
   description={entry.data.oneLiner}
   available={available}
@@ -129,7 +129,7 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
   }
 
   /* The sources section sits outside .tp-body, so it has to opt in to the
-     heading treatment explicitly or it renders at browser-default h2 — the one
+     heading treatment explicitly or it renders at browser-default h2, the one
      shouting heading on an otherwise quiet page. */
   .tp-body :global(h2),
   .tp-src h2 {
@@ -194,7 +194,7 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
     color: var(--unlit);
   }
 
-  /* Diagrams are the exception to the measure — they get the full column. */
+  /* Diagrams are the exception to the measure. They get the full column. */
   .tp-body :global(figure) {
     width: min(64rem, calc(100vw - var(--gutter) * 2));
   }

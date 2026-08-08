@@ -3,14 +3,14 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Smoke tests run against the built site served the way Cloudflare Pages serves
  * it, headers included. Serving dist/ without _headers would miss the whole
- * class of bug these tests exist for — the CSP that blocked the site's own
+ * class of bug these tests exist for, the CSP that blocked the site's own
  * scripts was invisible to every check that did not apply it.
  */
 /**
  * SMOKE_BASE_URL points the same tests at a deployed site. Without it they run
  * against a local server; with it they run against production and no local
  * server starts. The local pass proves the build is sound, the deployed pass
- * proves the host serves it that way — the bug these tests exist for lived in
+ * proves the host serves it that way: the bug these tests exist for lived in
  * the headers, which only the host actually sends.
  */
 const deployed = process.env.SMOKE_BASE_URL;

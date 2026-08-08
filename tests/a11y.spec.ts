@@ -8,8 +8,8 @@
  * a human reading the code. None was caught by a tool, because there was no
  * tool. This is the tool.
  *
- * It cannot see the third kind — axe has no opinion about whether a correct
- * sentence says the right thing — but it does catch contrast, missing names
+ * It cannot see the third kind, axe has no opinion about whether a correct
+ * sentence says the right thing, but it does catch contrast, missing names
  * and broken structure, which is the class that is cheapest to introduce.
  */
 import AxeBuilder from '@axe-core/playwright';

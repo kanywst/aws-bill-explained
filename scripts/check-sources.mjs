@@ -3,7 +3,7 @@
  *
  * The site's whole claim is that each classification is backed by a primary
  * AWS page. A citation that has died is not a broken-link nit, it is a claim
- * with nothing behind it — and AWS retires pages often enough that this has
+ * with nothing behind it, and AWS retires pages often enough that this has
  * already happened once in this dataset.
  *
  * The subtlety this script exists for: AWS documentation mostly does NOT 404.
@@ -142,9 +142,9 @@ await Promise.all(
 );
 
 /**
- * Ignore the cosmetic differences — trailing slash, tracking query, and the
+ * Ignore the cosmetic differences: trailing slash, tracking query, and the
  * locale segment AWS injects from Accept-Language (`/jp/`, `/de/`, `/en_us/`)
- * — so this reports real relocations rather than every redirect. Anchored to
+ *, so this reports real relocations rather than every redirect. Anchored to
  * the host so a path segment that merely looks like a locale survives.
  */
 const TRACKING = /^(icmpid|trk|sc_channel|sc_campaign|sc_geo|sc_country|sc_outcome|ref_|did)$/i;
@@ -169,7 +169,7 @@ const moved = results.filter(
 
 /**
  * The soft-404: the page redirected UP to an ancestor, which is how AWS says
- * "this no longer exists". A sideways move — a page that genuinely relocated —
+ * "this no longer exists". A sideways move, a page that genuinely relocated:
  * still resolves to real content, so it only warns.
  */
 const softGone = moved.filter((r) => canonical(r.url).startsWith(canonical(r.finalUrl) + '/'));
@@ -212,6 +212,6 @@ console.log(
     `${other.length} other 4xx/5xx, ${unreachable.length} unreachable`,
 );
 
-// A dead citation fails. Timeouts, 403s and sideways redirects only warn —
+// A dead citation fails. Timeouts, 403s and sideways redirects only warn.
 // failing on those would train people to ignore this job.
 process.exit(gone.length + softGone.length + unreadable.length > 0 ? 1 : 0);

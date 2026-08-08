@@ -2,7 +2,7 @@
  * Infrastructure: turns the researched JSON files into domain objects.
  *
  * This is the anti-corruption layer. The JSON is written by several independent
- * research passes and is inconsistent by nature — different slug conventions,
+ * research passes and is inconsistent by nature: different slug conventions,
  * occasional unknown meters, missing optional fields. Everything downstream of
  * here gets clean domain objects or a loud failure; nothing downstream ever
  * sees a raw record.
@@ -35,7 +35,7 @@ const asStrings = (value: unknown): string[] =>
  * Confidence is our own editorial field, not something AWS hands us, so an
  * unrecognised value is an authoring mistake rather than a new billing shape to
  * tolerate. It used to fold anything that was not "high" into "medium", which
- * quietly PROMOTED a record marked "low" — on a site whose whole claim is that
+ * quietly PROMOTED a record marked "low". On a site whose whole claim is that
  * you can tell how sure it is. There are two levels; say one of them.
  */
 const asConfidence = (value: unknown, slug: string): Confidence => {
@@ -48,7 +48,7 @@ const asConfidence = (value: unknown, slug: string): Confidence => {
 /**
  * Both renamed meters keep their old spelling as an inbound alias. The dataset
  * itself has been migrated, so these exist for research written against the
- * older names rather than as a permanent shim — which is what an
+ * older names rather than as a permanent shim, which is what an
  * anti-corruption layer is for.
  */
 const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes', calls: 'units' };
@@ -58,7 +58,7 @@ const METER_ALIASES: Record<string, MeterId> = { egress: 'bytes', calls: 'units'
  * is a property of the untrusted source, not of the model.
  *
  * Dropping an unrecognised meter used to leave an empty set, which the domain
- * reads as "free" — so a new AWS billing shape degraded not to "we don't know"
+ * reads as "free", so a new AWS billing shape degraded not to "we don't know"
  * but to a confident claim that the service costs nothing. The drop is now
  * reported alongside the set so the model can tell those two apart.
  */

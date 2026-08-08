@@ -27,20 +27,20 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 There is no such thing as the price of an `m7i.large`. There is a price per region. Same instance type, Linux, on-demand, shared tenancy, all pulled from the Price List API on the same day:
 
-- us-east-1 (N. Virginia) and us-west-2 (Oregon) — $0.1008/hour
-- ap-south-1 (Mumbai) — $0.10605
-- eu-west-1 (Ireland) — $0.11235
-- eu-central-1 (Frankfurt) — $0.12075
-- ap-southeast-1 (Singapore) — $0.126
-- ap-northeast-1 (Tokyo) — $0.1302
-- af-south-1 (Cape Town) — $0.13335
-- sa-east-1 (São Paulo) — $0.16065
+- us-east-1 (N. Virginia), and us-west-2 (Oregon): $0.1008/hour
+- ap-south-1 (Mumbai): $0.10605
+- eu-west-1 (Ireland): $0.11235
+- eu-central-1 (Frankfurt): $0.12075
+- ap-southeast-1 (Singapore): $0.126
+- ap-northeast-1 (Tokyo): $0.1302
+- af-south-1 (Cape Town): $0.13335
+- sa-east-1 (São Paulo): $0.16065
 
-Run one for a month, 730 hours, and that is $73.58 in N. Virginia against $117.27 in São Paulo. Nothing about the machine changed. A region is a physical place with its own power, land, transit and tax, and AWS prices each one against its own costs rather than against a global list. That is why the ordering is not a tidy map — Mumbai undercuts Frankfurt, and Ireland undercuts Singapore.
+Run one for a month, 730 hours, and that is $73.58 in N. Virginia against $117.27 in São Paulo. Nothing about the machine changed. A region is a physical place with its own power, land, transit and tax, and AWS prices each one against its own costs rather than against a global list. That is why the ordering is not a tidy map: Mumbai undercuts Frankfurt, and Ireland undercuts Singapore.
 
 **The bill names the region in the usage type prefix.** `USE2-BoxUsage:m7i.large` is that instance in Ohio. The prefix is a short code from a table AWS publishes: `USE1` us-east-1, `USE2` us-east-2, `USW2` us-west-2, `CAN1` ca-central-1, `EUC1` eu-central-1, `APN1` ap-northeast-1, `SAE1` sa-east-1, and so on. Four things about that prefix cause trouble:
 
-- **No prefix means us-east-1.** `BoxUsage:m7i.large`, `TimedStorage-ByteHrs` and `DataTransfer-Out-Bytes` are all N. Virginia. us-east-1 predates the convention, so its older usage types never got a prefix. Newer ones do — CloudWatch bills `USE1-DataScanned-Bytes` there — so both forms coexist and mean the same region.
+- **No prefix means us-east-1.** `BoxUsage:m7i.large`, `TimedStorage-ByteHrs` and `DataTransfer-Out-Bytes` are all N. Virginia. us-east-1 predates the convention, so its older usage types never got a prefix. Newer ones do (CloudWatch bills `USE1-DataScanned-Bytes` there), so both forms coexist and mean the same region.
 - **`EU` is eu-west-1, not `EUW1`.** Every other European region got a proper code (`EUC1` Frankfurt, `EUW2` London, `EUN1` Stockholm). Ireland kept the original.
 - **The digits in the code are not the digits in the region name.** `APS1` is ap-southeast-1 (Singapore), `APS3` is ap-south-1 (Mumbai), `APS5` is ap-south-2 (Hyderabad). Read them as opaque labels and look them up.
 - **A few services print the full region code instead.** KMS bills `ap-northeast-1-KMS-Requests`, not `APN1-`.
@@ -53,13 +53,13 @@ All three meters move with the region, not just the hourly one.
 
 **Time.** EBS gp3 provisioned storage, per GB-month: $0.08 in us-east-1, $0.096 in ap-northeast-1, $0.152 in sa-east-1. Nearly double for a volume nobody has touched.
 
-**Bytes.** S3 Standard, first 50 TB per month: $0.023/GB-month in us-east-1, $0.0245 in eu-central-1, $0.025 in ap-northeast-1, $0.0274 in af-south-1, $0.0405 in sa-east-1 — 76% over N. Virginia. Internet egress, first 10 TB per month: $0.09/GB in us-east-1, $0.114 in ap-northeast-1, $0.15 in sa-east-1, $0.154 in af-south-1.
+**Bytes.** S3 Standard, first 50 TB per month: $0.023/GB-month in us-east-1, $0.0245 in eu-central-1, $0.025 in ap-northeast-1, $0.0274 in af-south-1, $0.0405 in sa-east-1. That is 76% over N. Virginia. Internet egress, first 10 TB per month: $0.09/GB in us-east-1, $0.114 in ap-northeast-1, $0.15 in sa-east-1, $0.154 in af-south-1.
 
 **Units.** S3 PUT/COPY/POST/LIST per 1,000 requests: $0.005 in us-east-1, $0.0047 in ap-northeast-1, $0.0054 in eu-central-1, $0.006 in af-south-1, $0.007 in sa-east-1. GET per 1,000: $0.0004 in us-east-1, $0.00037 in ap-northeast-1, $0.00056 in sa-east-1.
 
 Look at Tokyo twice. Storage there costs 8.7% more than N. Virginia and requests cost about 7% less. **The ranking is per meter, not per region.** The cheaper region for a storage-heavy workload can be the dearer one for a request-heavy workload on the same service.
 
-**Global services have no region at all.** Route 53 charges $0.50 per hosted zone per month for the first 25 and $0.40 per million standard queries for the first billion, and those rates apply wherever you are. The Price List records the location as "Any", and the usage types — `HostedZone`, `DNS-Queries` — carry no prefix because there is nothing to name. CloudFront does vary, but not by AWS region: its usage types are edge geographies. Data transfer out to the internet, first 10 TB per month, is $0.085/GB under `US-` and `EU-`, $0.114 under `JP-`, $0.12 under `AP-`. The CloudFront bill groups these under **Global**, and Cost Explorer files them in a region-less bucket.
+**Global services have no region at all.** Route 53 charges $0.50 per hosted zone per month for the first 25 and $0.40 per million standard queries for the first billion, and those rates apply wherever you are. The Price List records the location as "Any", and the usage types (`HostedZone`, `DNS-Queries`) carry no prefix because there is nothing to name. CloudFront does vary, but not by AWS region: its usage types are edge geographies. Data transfer out to the internet, first 10 TB per month, is $0.085/GB under `US-` and `EU-`, $0.114 under `JP-`, $0.12 under `AP-`. The CloudFront bill groups these under **Global**, and Cost Explorer files them in a region-less bucket.
 
 <SequenceDiagram
   lang="en"
@@ -89,15 +89,15 @@ Look at Tokyo twice. Storage there costs 8.7% more than N. Virginia and requests
   ]}
 />
 
-So why does a bill show us-east-1 usage for an account with nothing in N. Virginia? Because the side-effects of global services land there. Turn on additional CloudFront metrics and CloudFront sends up to eight metrics to CloudWatch **in the US East (N. Virginia) Region** — a distribution serving only Japan produces `USE1-` CloudWatch line items. A custom domain on that distribution needs an ACM certificate requested in us-east-1, because CloudFront accepts certificates from nowhere else. Billing and IAM console actions are logged in us-east-1. Virginia shows up because Virginia is where the global control plane lives.
+So why does a bill show us-east-1 usage for an account with nothing in N. Virginia? Because the side-effects of global services land there. Turn on additional CloudFront metrics and CloudFront sends up to eight metrics to CloudWatch **in the US East (N. Virginia) Region**. A distribution serving only Japan produces `USE1-` CloudWatch line items. A custom domain on that distribution needs an ACM certificate requested in us-east-1, because CloudFront accepts certificates from nowhere else. Billing and IAM console actions are logged in us-east-1. Virginia shows up because Virginia is where the global control plane lives.
 
-**Availability is a cost, not just a constraint.** `m8i.large` is offered in 24 regions, including us-east-1, eu-west-2 and sa-east-1. It is not offered in eu-north-1 (Stockholm), ap-northeast-3 (Osaka), il-central-1 (Tel Aviv) or me-central-1 (UAE). When the thing you need is missing from your region, the design that follows — reach across to a region that has it, or replicate the data there — turns an availability gap into a recurring bytes charge.
+**Availability is a cost, not just a constraint.** `m8i.large` is offered in 24 regions, including us-east-1, eu-west-2 and sa-east-1. It is not offered in eu-north-1 (Stockholm), ap-northeast-3 (Osaka), il-central-1 (Tel Aviv) or me-central-1 (UAE). When the thing you need is missing from your region, the design that follows (reach across to a region that has it, or replicate the data there) turns an availability gap into a recurring bytes charge.
 
 ## Traps
 
 **A us-east-1 estimate is not a quote for anywhere else.** Every AWS pricing page has a region selector with a default, and the default is rarely the region you are reading for. Read a number, set the selector, read it again. The Price List API is the cheaper habit: pull the same product with `regionCode` set to each candidate and compare the two rates directly.
 
-**Cheap compute, paid back in transfer.** The inter-region egress rate belongs to the _source_ region, and it is not symmetric. Out of us-east-1 it is $0.02/GB to essentially every other commercial region. Out of ap-northeast-1 it is $0.09/GB. Out of sa-east-1 to us-east-1 it is $0.138/GB — 6.9× the same wire in the other direction.
+**Cheap compute, paid back in transfer.** The inter-region egress rate belongs to the _source_ region, and it is not symmetric. Out of us-east-1 it is $0.02/GB to essentially every other commercial region. Out of ap-northeast-1 it is $0.09/GB. Out of sa-east-1 to us-east-1 it is $0.138/GB: 6.9× the same wire in the other direction.
 
 <PathDiagram
   lang="en"
@@ -122,6 +122,6 @@ Moving an `m7i.large` from Tokyo to N. Virginia saves $21.46 a month. One 1 TB r
 
 **`EU-` means two different things.** For EC2 and data transfer, `EU-` is eu-west-1 in Ireland. For CloudFront, `EU-` is European edge locations and has nothing to do with Ireland. Same three characters, two namespaces; only the service column separates them.
 
-**Local Zones and Wavelength Zones are priced separately from their parent region.** A `c5.2xlarge` is $0.34/hour in us-west-2. In the Los Angeles Local Zone it is `LAX1-BoxUsage:c5.2xlarge` at $0.408, a 20% premium. Others go further: Hamburg `HAM1-` $0.524, Perth `PER1-` $0.599, Lima `LIM1-` $0.655. Wavelength Zones get a compound code naming the parent — `EUW3WL1DSS1-BoxUsage:c5.2xlarge` is the Dakar Wavelength Zone under eu-west-3, at $0.461. On the bill these look like a region prefix you have never seen, which is exactly what they are.
+**Local Zones and Wavelength Zones are priced separately from their parent region.** A `c5.2xlarge` is $0.34/hour in us-west-2. In the Los Angeles Local Zone it is `LAX1-BoxUsage:c5.2xlarge` at $0.408, a 20% premium. Others go further: Hamburg `HAM1-` $0.524, Perth `PER1-` $0.599, Lima `LIM1-` $0.655. Wavelength Zones get a compound code naming the parent: `EUW3WL1DSS1-BoxUsage:c5.2xlarge` is the Dakar Wavelength Zone under eu-west-3, at $0.461. On the bill these look like a region prefix you have never seen, which is exactly what they are.
 
 **Two regions' prices move independently.** us-east-1 and us-west-2 happen to charge the same for an `m7i.large` today. That is a fact about the current rate card, not a rule, and it says nothing about S3 or egress in either place. A multiplier you measured once is not a multiplier you can reuse. Re-pull both.

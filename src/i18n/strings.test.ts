@@ -109,7 +109,7 @@ describe('string bundles', () => {
 
   /**
    * The diagrams are aria-hidden and these strings ARE the accessible version of
-   * them. A dropped placeholder does not throw — it silently ships a sentence
+   * them. A dropped placeholder does not throw. It silently ships a sentence
    * with a hole where the meter or the cost should be, in the one rendering a
    * screen reader user gets.
    */

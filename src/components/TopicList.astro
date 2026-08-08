@@ -18,7 +18,7 @@ const topics = (await getCollection('topics'))
 const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
 ---
 
-<Base title={`${s.nav.topics} — ${s.siteTitle}`} lang={lang}>
+<Base title={`${s.nav.topics}: ${s.siteTitle}`} lang={lang}>
   <section class="tl">
     <p class="eyebrow">{s.sections.topics}</p>
     <h1 class="display tl-h">{s.topicsLede}</h1>

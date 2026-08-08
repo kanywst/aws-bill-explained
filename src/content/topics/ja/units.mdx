@@ -30,13 +30,13 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 チャンクサイズはサービスごとにバラバラで、推測できるような規則性はない。
 
-- **Amazon SQS** — 1 リクエストあたり 64 KB。
-- **Amazon SNS** — publish 側で 64 KB、さらに配信側でも 64 KB。
-- **Amazon EventBridge** — カスタムイベント 1 件あたり 64 KB。「256 KB のペイロードのイベントは 4 イベントとして課金される」。Schema Discovery だけは同じペイロードを 8 KB で刻む。
-- **Amazon API Gateway** — HTTP API は 512 KB 単位、WebSocket メッセージは 32 KB 単位で「33 KB のメッセージは 2 メッセージとして計測される」。REST API だけは例外で、サイズに関係なく 1 回は 1 回。
-- **AWS AppSync** — リアルタイムメッセージは「配信データのペイロード 5 KB ごと」に課金。送受信の両方向。
-- **AWS IoT Core** — 1 メッセージ 5 KB。8 KB の publish は 2 メッセージ。
-- **Amazon Kinesis Data Streams** のプロビジョンドモード — PUT ペイロードユニットは 25 KB。45 KB のレコードは 2 ユニット、1 MB のレコードは 40 ユニット。
+- **Amazon SQS**: 1 リクエストあたり 64 KB。
+- **Amazon SNS**。publish 側で 64 KB、さらに配信側でも 64 KB。
+- **Amazon EventBridge**。カスタムイベント 1 件あたり 64 KB。「256 KB のペイロードのイベントは 4 イベントとして課金される」。Schema Discovery だけは同じペイロードを 8 KB で刻む。
+- **Amazon API Gateway**。HTTP API は 512 KB 単位、WebSocket メッセージは 32 KB 単位で「33 KB のメッセージは 2 メッセージとして計測される」。REST API だけは例外で、サイズに関係なく 1 回は 1 回。
+- **AWS AppSync**。リアルタイムメッセージは「配信データのペイロード 5 KB ごと」に課金。送受信の両方向。
+- **AWS IoT Core**: 1 メッセージ 5 KB。8 KB の publish は 2 メッセージ。
+- **Amazon Kinesis Data Streams** のプロビジョンドモード。PUT ペイロードユニットは 25 KB。45 KB のレコードは 2 ユニット、1 MB のレコードは 40 ユニット。
 
 ここから実用的なルールが1本出る。**チャンク境界までの余白は無料、1 バイトはみ出した瞬間に有料。** IoT の 4 KB publish と 5 KB publish は同じ値段で、5.1 KB になると倍になる。メッセージフォーマットを自分で握っているなら設計で効く非対称性だし、握っていないなら思い込む前に測るべき非対称性だ。
 
@@ -51,21 +51,21 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
     {
       from: 'client',
       to: 'q',
-      label: 'SendMessage — 1 MiB',
+      label: 'SendMessage:1 MiB',
       meter: 'units',
       charge: '16 リクエスト',
     },
     {
       from: 'client',
       to: 'q',
-      label: 'SendMessage — 4 KiB',
+      label: 'SendMessage:4 KiB',
       meter: 'units',
       charge: '1 リクエスト',
     },
     {
       from: 'client',
       to: 'q',
-      label: 'ReceiveMessage — 0 件',
+      label: 'ReceiveMessage:0 件',
       meter: 'units',
       charge: '1 リクエスト',
     },
@@ -82,10 +82,10 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 **ファンアウトは1回の呼び出しを N 個に変える。** SES の送信メーターはメッセージ単位ではなく**宛先単位**で、50 アドレスへの `SendEmail` 1 回は 50 件の課金になる。us-east-1 で 1,000 件 $0.10。SNS は二重取りで、publish で 1 回、配信ごとにもう 1 回。しかも課金される宛先とされない宛先がある。publish は 100 万件 $0.50。配信は us-east-1 で以下のとおり。
 
-- **SQS** と **Lambda** — $0.00。AWS の price list 上でも本当にゼロ。
-- **モバイルプッシュ** — 100 万件 $0.50。
-- **HTTP/S** — 100 万件 $0.60。最初の 10 万件は無料。
-- **メール / email-JSON** — 10 万件 $2.00、つまり 100 万件 $20。最初の 1,000 件は無料。
+- **SQS** と **Lambda**: $0.00。AWS の price list 上でも本当にゼロ。
+- **モバイルプッシュ**: 100 万件 $0.50。
+- **HTTP/S**: 100 万件 $0.60。最初の 10 万件は無料。
+- **メール / email-JSON**: 10 万件 $2.00、つまり 100 万件 $20。最初の 1,000 件は無料。
 
 メール配信は HTTPS POST の 33 倍。publish の呼び出し側にはその情報は一切ない。値段を決めているのはサブスクリプションのプロトコルで、そのサブスクリプションは全然別の場所で設定されている。
 
@@ -99,7 +99,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
     { id: 'hook', label: 'HTTPS 宛先' },
   ]}
   steps={[
-    { from: 'app', to: 'sns', label: 'Publish — 8 KB', meter: 'units', charge: '1 × $0.50/M' },
+    { from: 'app', to: 'sns', label: 'Publish:8 KB', meter: 'units', charge: '1 × $0.50/M' },
     { from: 'sns', to: 'q', label: 'SQS へ配信' },
     { from: 'sns', to: 'hook', label: 'HTTPS へ配信', meter: 'units', charge: '1 × $0.60/M' },
   ]}
@@ -119,9 +119,9 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## 例外と罠
 
-**AWS のおよそ半分にはそもそも個数メーターがない。そして境界線は思っている場所にない。** このサイトが索引している 253 サービスのうち、個数メーターを持つのは 124、持たないのが 129。分かれ目は「安いサービス」対「高いサービス」ではなく、**コントロールプレーン対データプレーン**だ。`RunInstances`、`DescribeInstances`、IAM の全 API、STS の全 API — どれだけ叩いても無料。EC2・ECS・EKS・RDS・ALB・Fargate・CloudFormation のスタック操作、どこにも呼び出し課金はない。**AWS に構成を変えてくれと頼むのは無料。データを動かせ・データを見ろと頼むと個数で取られる。**
+**AWS のおよそ半分にはそもそも個数メーターがない。そして境界線は思っている場所にない。** このサイトが索引している 253 サービスのうち、個数メーターを持つのは 124、持たないのが 129。分かれ目は「安いサービス」対「高いサービス」ではなく、**コントロールプレーン対データプレーン**だ。`RunInstances`、`DescribeInstances`、IAM の全 API、STS の全 API。どれだけ叩いても無料。EC2・ECS・EKS・RDS・ALB・Fargate・CloudFormation のスタック操作、どこにも呼び出し課金はない。**AWS に構成を変えてくれと頼むのは無料。データを動かせ・データを見ろと頼むと個数で取られる。**
 
-役に立つのは後半のほうだ。探す場所を教えてくれるから。EBS は片方の半分ともう片方の半分が1サービスに同居している一番きれいな例で、ボリュームの作成・アタッチ・記述は無料なのに、EBS direct API — スナップショットのブロックを読み書きするやつ — は**リクエスト単位とブロック単位の両方**で課金される。`ListSnapshotBlocks` と `ListChangedBlocks` が 1,000 リクエスト $0.0006、`GetSnapshotBlock` が 1,000 SnapshotAPIUnit あたり $0.003、`PutSnapshotBlock` が $0.006。1 ユニットは 512 KiB ブロック 1 個。同じサービス、同じコンソール、データに触った瞬間にメーターが入る。
+役に立つのは後半のほうだ。探す場所を教えてくれるから。EBS は片方の半分ともう片方の半分が1サービスに同居している一番きれいな例で、ボリュームの作成・アタッチ・記述は無料なのに、EBS direct API (スナップショットのブロックを読み書きするやつ) は**リクエスト単位とブロック単位の両方**で課金される。`ListSnapshotBlocks` と `ListChangedBlocks` が 1,000 リクエスト $0.0006、`GetSnapshotBlock` が 1,000 SnapshotAPIUnit あたり $0.003、`PutSnapshotBlock` が $0.006。1 ユニットは 512 KiB ブロック 1 個。同じサービス、同じコンソール、データに触った瞬間にメーターが入る。
 
 **最低課金は脚注ではなく一族だ。** どの最低値も同じ発想を別の角度から実装したもので、まとめて見ると「小さく・バーストする仕事が 数量 × 単価 の予想を超える」理由そのものになっている。
 

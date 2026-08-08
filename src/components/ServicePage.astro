@@ -27,7 +27,7 @@ const sameShape =
 const topic = (await getCollection('topics')).find((e) => e.id === `${lang}/${service.slug.value}`);
 ---
 
-<Base title={`${service.name} — ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
+<Base title={`${service.name}: ${s.siteTitle}`} lang={lang} description={service.oneLiner}>
   <article class="sp">
     <header>
       <a class="sp-back" href={localePath(lang, '/services/')}>&larr; {s.nav.services}</a>

@@ -24,7 +24,7 @@ export class Catalogue {
     this.bySlug = bySlug;
   }
 
-  /** Throws on duplicate slugs — silently losing a service would be worse. */
+  /** Throws on duplicate slugs. Silently losing a service would be worse. */
   static from(services: readonly Service[]): Catalogue {
     const bySlug = new Map<string, Service>();
     for (const service of services) {
@@ -43,7 +43,7 @@ export class Catalogue {
     return this.bySlug.get(slug);
   }
 
-  /** Alphabetical by display name — the only order a reader can predict. */
+  /** Alphabetical by display name, the only order a reader can predict. */
   all(): Service[] {
     return [...this.bySlug.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -61,7 +61,7 @@ export class Catalogue {
     return this.all().filter((s) => s.isFree);
   }
 
-  /** Every meter at once — the services that are hardest to reason about. */
+  /** Every meter at once, the services that are hardest to reason about. */
   turningAll(): Service[] {
     return this.all().filter((s) => s.meters.size === METER_ORDER.length);
   }

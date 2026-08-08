@@ -29,12 +29,12 @@ There is no per-call charge on the EC2 API. `RunInstances`, `DescribeInstances`,
 rest of the control plane cost nothing per invocation, no matter how often you poll them.
 So the number of times you _ask EC2 to do something_ never appears on your bill.
 
-What does appear is time — every second an instance exists — and bytes that leave.
+What does appear is time (every second an instance exists), and bytes that leave.
 
 AWS publishes the rates but never explains the asymmetry, so what follows is the standard
 industry account rather than anything AWS has stated. Transit and peering links are full
 duplex and are conventionally billed on the busier direction, and a cloud provider is
-overwhelmingly egress-heavy — requests arriving are small, responses leaving are large.
+overwhelmingly egress-heavy: requests arriving are small, responses leaving are large.
 On that reading the inbound direction is capacity already paid for and not being used, so
 giving it away costs close to nothing. The commercial motive needs no speculation: cheap
 ingress removes the barrier to moving data in, and data that has moved in earns storage
@@ -53,7 +53,7 @@ second half as the part you can rely on.
     {
       from: 'ec2',
       to: 'client',
-      label: '200 OK — 1 GB body',
+      label: '200 OK: 1 GB body',
       reply: true,
       meter: 'bytes',
       charge: '1 GB × $0.09',
@@ -66,7 +66,7 @@ second half as the part you can rely on.
 Four lines show up for a plain instance, and only one of them is the instance:
 
 - **Instance time.** Per second with a 60-second minimum on Amazon Linux, Windows, RHEL,
-  Ubuntu and Ubuntu Pro. Other operating systems — SUSE among them — still bill each
+  Ubuntu and Ubuntu Pro. Other operating systems (SUSE among them) still bill each
   partial hour as a full hour, so the granularity depends on the AMI you chose.
 - **EBS.** Provisioned GB-month, plus IOPS and throughput on the volume types that
   charge for them. This bills on the size you asked for, not the size you used.
@@ -85,7 +85,7 @@ egress can easily exceed the compute.
 **A NAT Gateway makes one gigabyte bill twice.** Send traffic out through NAT and you pay
 the NAT hourly charge, the NAT per-GB processing charge (about $0.045/GB in most regions),
 _and_ the ordinary data transfer out. AWS's own VPC pricing page is explicit that the transfer portion is "the standard EC2
-Data Transfer charge" — so the same gigabyte appears under two different services with two
+Data Transfer charge", so the same gigabyte appears under two different services with two
 different names.
 
 <PathDiagram
@@ -104,7 +104,7 @@ different names.
 
 **Cross-AZ traffic bills in both directions.** Data moving between Availability Zones in
 one region carries the usage type `<Region>-DataTransfer-Regional-Bytes`, and the AWS
-billing documentation states that you are charged for both the inbound and outbound side —
+billing documentation states that you are charged for both the inbound and outbound side,
 you will see _two_ line items for a single transfer. A multi-AZ deployment buys
 availability, and this is its recurring price.
 
