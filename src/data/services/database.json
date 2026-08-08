@@ -206,7 +206,7 @@
     "category": "database",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Instance-hours or NCU-seconds on Serverless, plus storage and per-million I/O.",
-    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. You can switch between them only once per 30 days, in either direction — unlike Aurora.",
+    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. You can switch between them only once per 30 days, in either direction: unlike Aurora.",
     "billOn": [
       "InstanceUsage",
       "InstanceUsageIOOptimized",
@@ -316,7 +316,7 @@
     "category": "database",
     "meters": ["time", "bytes"],
     "oneLiner": "Compute-hours that queries actually consume, plus GB-month of stored data. Both have a free allowance.",
-    "trap": "Legacy — no console, and DynamoDB superseded it — but an existing domain keeps billing. Compute meters the time a query consumes, not the request count, so one unindexed scan costs more than thousands of key reads.",
+    "trap": "Legacy (no console, and DynamoDB superseded it) but an existing domain keeps billing. Compute meters the time a query consumes, not the request count, so one unindexed scan costs more than thousands of key reads.",
     "billOn": ["BoxUsage", "TimedStorage-ByteHrs"],
     "confidence": "high",
     "sources": [

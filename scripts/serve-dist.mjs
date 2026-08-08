@@ -1,5 +1,5 @@
 /**
- * Serve dist/ the way Cloudflare Pages does — including the rules in _headers.
+ * Serve dist/ the way Cloudflare Pages does. Including the rules in _headers.
  *
  * This exists so the smoke tests hit the real Content-Security-Policy. A plain
  * static server, or `astro preview`, ignores _headers entirely, and would have

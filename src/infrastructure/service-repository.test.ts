@@ -100,7 +100,7 @@ describe('toService', () => {
   /**
    * There are two legacy spellings and only egress was covered, so when the
    * Calls-to-Units rename swept the codebase it rewrote the alias entry itself
-   * from `calls: 'units'` to `units: 'units'` — a no-op — and no test noticed.
+   * from `calls: 'units'` to `units: 'units'` (a no-op), and no test noticed.
    * A batch of research written before the rename would have had its third
    * meter dropped and the service marked unclassified.
    */
@@ -130,7 +130,7 @@ describe('toService', () => {
 
 /**
  * These run against the real researched dataset. They are the guard that the
- * catalogue stays publishable as it grows service by service — every rule here
+ * catalogue stays publishable as it grows service by service. Every rule here
  * is an editorial promise the site makes to a reader looking at their bill.
  */
 describe('the real catalogue', () => {

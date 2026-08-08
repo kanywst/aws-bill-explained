@@ -3,7 +3,7 @@
  *
  * A deploy is not atomic from the outside. For a short window after wrangler
  * returns, Cloudflare can still answer with the previous build's fingerprinted
- * CSS — which is how the post-deploy accessibility check failed once and passed
+ * CSS, which is how the post-deploy accessibility check failed once and passed
  * on retry: it measured a colour from the stylesheet before the fix.
  *
  * Sleeping for a guessed number of seconds trades one wrong answer for another.
@@ -23,7 +23,7 @@ if (!target) {
 const local = await readFile(new URL('../dist/index.html', import.meta.url).pathname, 'utf8');
 const expected = local.match(/\/_astro\/[\w.-]+\.css/)?.[0];
 if (!expected) {
-  console.error('  no fingerprinted stylesheet in the local build — nothing to wait for');
+  console.error('  no fingerprinted stylesheet in the local build. Nothing to wait for');
   process.exit(1);
 }
 

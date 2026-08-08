@@ -52,14 +52,14 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
     {
       from: 'inst',
       to: 'aws',
-      label: 'インフラ — bill/BillingEntity = AWS',
+      label: 'インフラ。bill/BillingEntity = AWS',
       meter: 'time',
       cost: '$0.085/時',
     },
     {
       from: 'aws',
       to: 'seller',
-      label: 'ソフトウェア — bill/BillingEntity = AWS Marketplace',
+      label: 'ソフトウェア。bill/BillingEntity = AWS Marketplace',
       meter: 'time',
       cost: '$0.12/時',
     },
@@ -98,7 +98,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
     {
       from: 'sw',
       to: 'meter',
-      label: 'MeterUsage — ディメンション + 数量、毎時',
+      label: 'MeterUsage。ディメンション + 数量、毎時',
       meter: 'units',
       charge: '単位は売り手が定義',
     },
@@ -126,6 +126,6 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 **ワークロードが消えたあとも生き残るコミット契約。** 前払い契約と支払スケジュール付きプライベートオファーは**売り手が決めた日付で請求**され、`agreementValue` は使用量の予測ではなく契約期間全体で支払うことが確定した額だ。その製品に関係するリソースを全部消しても、この請求書は1円も動かない。更新はこれを静かに膨らませる。更新やアップグレードのオファーを承諾すると新条件が即座に発効し、「それ以前の条件や残っている支払スケジュールはキャンセルされ、この新しい契約の条件に置き換えられる」。承諾しているのは**延長ではなく新しい総額**だ。
 
-**コスト最適化がこの行に触れられると思い込む。** 右サイジング、スケジューリング、Savings Plans、Reserved Instances、リージョン移動 — 全部 AWS 側の半分に効くレバーだ。Marketplace 側で引けるレバーは、**サブスクリプションを解約する / 契約を満了させる / プライベートオファーを再交渉する**。以上。しかも標準的な最適化のひとつは逆効果になる。年額 AMI サブスクリプションで覆われているインスタンスを右サイジングすると、**年額が覆っているのは購入時に指定したインスタンスタイプだけ**なのでライセンスは時間課金に戻る。
+**コスト最適化がこの行に触れられると思い込む。** 右サイジング、スケジューリング、Savings Plans、Reserved Instances、リージョン移動。全部 AWS 側の半分に効くレバーだ。Marketplace 側で引けるレバーは、**サブスクリプションを解約する / 契約を満了させる / プライベートオファーを再交渉する**。以上。しかも標準的な最適化のひとつは逆効果になる。年額 AMI サブスクリプションで覆われているインスタンスを右サイジングすると、**年額が覆っているのは購入時に指定したインスタンスタイプだけ**なのでライセンスは時間課金に戻る。
 
 **逆に、見た目より何とかなるものが1つある。配賦だ。** Marketplace はコスト配分タグに対応している。AMI のソフトウェアコストは紐づく EC2 インスタンスのタグをそのまま継承するし、売り手は AMI・コンテナ・SaaS 製品に vendor-metered タグを付けられる。ユーザー数で課金する SaaS 製品が部署別に使用量をタグ付けする、といった使い方だ。落とし穴もいつもと同じで、**タグが追跡するのは有効化した時点以降のコストだけ**。今目の前にある請求書ではなく、来月の請求書に効く手当だ。

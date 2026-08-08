@@ -1,7 +1,7 @@
 /**
  * The topics quote catalogue counts in prose. Prose does not recompile when a
  * service is added, so those numbers drift silently and the site starts
- * asserting a total it no longer has — which is exactly the failure the dated
+ * asserting a total it no longer has, which is exactly the failure the dated
  * `checked` field exists to prevent everywhere else.
  *
  * This pins every count that appears in a topic to the catalogue that produced

@@ -5,7 +5,7 @@ import { AWS_SOURCE } from './domain/service';
 
 /**
  * The whole site is built on one promise: you get the model before the detail.
- * The schema enforces it — a topic cannot exist without `oneLiner`, and
+ * The schema enforces it: a topic cannot exist without `oneLiner`, and
  * `oneLiner` is capped so it stays a sentence you can hold in your head.
  */
 const topics = defineCollection({
@@ -28,7 +28,7 @@ const topics = defineCollection({
      * AWS pages the article's claims rest on. Every service record carries
      * these and gets its links checked in CI; the articles make just as many
      * verifiable claims and carried nothing but a date. Restricted to
-     * AWS-controlled hosts by the Service entity's own rule — imported rather
+     * AWS-controlled hosts by the Service entity's own rule: imported rather
      * than restated, because two copies of it drift and then the catalogue and
      * the articles disagree about what counts as a citation.
      */

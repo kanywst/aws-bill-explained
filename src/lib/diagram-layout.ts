@@ -4,7 +4,7 @@
  * This lives outside the .astro components so it can be tested. That is not an
  * abstract preference: the boundary map once shipped a ring with
  * height="-40", which type-checked perfectly, threw a console error in the
- * browser, and silently dropped the innermost ring — the one the whole diagram
+ * browser, and silently dropped the innermost ring, the one the whole diagram
  * exists to show. A post-build scan catches it now, but only after a full
  * build. These functions let the arithmetic fail in milliseconds instead.
  */
@@ -34,8 +34,8 @@ export interface RingLayout {
 /**
  * Concentric boxes, outermost first.
  *
- * Derived from the innermost ring outward. Deriving it the other way — fixing
- * the canvas and subtracting per ring — is what produced the negative height,
+ * Derived from the innermost ring outward. Deriving it the other way. Fixing
+ * the canvas and subtracting per ring: is what produced the negative height,
  * because the subtraction outran the total once the ring count grew.
  */
 export function layoutRings(count: number, minWidth = 700): RingLayout {
@@ -44,7 +44,7 @@ export function layoutRings(count: number, minWidth = 700): RingLayout {
   }
 
   // BOTH axes are derived from the innermost ring outward. Fixing the canvas
-  // and subtracting per ring collapses the centre once the count grows — that
+  // and subtracting per ring collapses the centre once the count grows: that
   // is the bug that shipped on the vertical axis, and it was still latent on
   // the horizontal one until a test walked the ring count up to six.
   const ringsHeight = count === 0 ? 0 : RING_INNER_HEIGHT + 2 * RING_STEP_Y * (count - 1);
@@ -124,7 +124,7 @@ export function layoutHop(fromIndex: number, toIndex: number): HopLayout {
 
 /**
  * Where a cost or "free" chip sits relative to its hop line. On the forward
- * lane it must go above, because below is where the node boxes start — a
+ * lane it must go above, because below is where the node boxes start, a
  * collision that shipped once already.
  */
 export function chipY(hop: Pick<HopLayout, 'y' | 'forward'>): number {
@@ -144,7 +144,7 @@ export const SEQ_FIRST_STEP_OFFSET = 34;
 /**
  * Centre of an actor's lifeline. Throws on an unknown actor for the same reason
  * layoutHop does: a -1 index puts the lane at a negative x, and the arrow draws
- * off the left of the canvas without erroring — visible only if you happen to
+ * off the left of the canvas without erroring. Visible only if you happen to
  * look at that one step.
  */
 export function seqLaneX(index: number): number {

@@ -78,7 +78,7 @@ Price List は `pricing.us-east-1.amazonaws.com` 配下に置かれた静的フ�
   ]}
 />
 
-最後のファイルの中で、`products` は SKU をキーにしたマップで、各エントリが `productFamily` と属性の袋を持つ。`terms` はそれと並行するマップで、まず term type — `OnDemand` / `Reserved` / `FlatRate` — でキーが切られ、その下に同じ SKU、さらに offer term code が来る。term の下にあるのが `priceDimensions` で、`unit`、`startingRange` と `endingRange`、`pricePerUnit` を持つ。このレンジが階段そのものだ。1つの SKU が複数の price dimension を抱えるのは、量が増えるとレートが変わるからで、SKU だけを見てもどの段に落ちるかは分からない。
+最後のファイルの中で、`products` は SKU をキーにしたマップで、各エントリが `productFamily` と属性の袋を持つ。`terms` はそれと並行するマップで、まず term type (`OnDemand` / `Reserved` / `FlatRate`) でキーが切られ、その下に同じ SKU、さらに offer term code が来る。term の下にあるのが `priceDimensions` で、`unit`、`startingRange` と `endingRange`、`pricePerUnit` を持つ。このレンジが階段そのものだ。1つの SKU が複数の price dimension を抱えるのは、量が増えるとレートが変わるからで、SKU だけを見てもどの段に落ちるかは分からない。
 
 レート表と請求書を橋渡しする属性が `usagetype` だ。これは Cost and Usage Report の `line_item_usage_type` 列に出てくるのとまったく同じ文字列なので、**見積もり時に見つけた usage type は、後から実際の請求書で検索して答え合わせできる**。実例として、us-east-1 の AmazonVPC のレート表には `USE1-PublicIPv4:InUseAddress` という product があり、その OnDemand の price dimension は unit が `Hrs`、価格が $0.005、説明は "$0.005 per In-use public IPv4 address per hour"。その隣に同じレートで `USE1-PublicIPv4:IdleAddress` が並んでいる。あるサービスの usage type 一覧を読むのは、そのサービスが回しうるメーターのチェックリストを読むのに一番近い行為だ。
 

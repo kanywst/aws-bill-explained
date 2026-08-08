@@ -67,7 +67,7 @@ jobs:
 
       # Passing locally is not the same as being served correctly. The defect
       # that prompted these tests was in the response headers, which only the
-      # host sends — a local pass could not have seen it. This runs the same
+      # host sends, a local pass could not have seen it. This runs the same
       # tests against what readers actually get.
       - name: Smoke tests against the deployed site
         env:

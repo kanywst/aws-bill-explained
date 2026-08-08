@@ -422,7 +422,7 @@
     "category": "management",
     "meters": ["time"],
     "oneLiner": "Per second of agent working time on investigations, evaluations and on-demand SRE tasks.",
-    "trap": "Idle and waiting time is free, but every tool the agent reaches for bills through its own service — CloudWatch Logs Insights queries and trace retrievals land separately. Paid Support plans earn monthly credits.",
+    "trap": "Idle and waiting time is free, but every tool the agent reaches for bills through its own service. CloudWatch Logs Insights queries and trace retrievals land separately. Paid Support plans earn monthly credits.",
     "billOn": ["USE1-investigation", "USE1-evaluation", "USE1-on-demand"],
     "confidence": "high",
     "sources": [
@@ -467,7 +467,7 @@
     "category": "management",
     "meters": [],
     "oneLiner": "Free to read, both the public status page and your own account events.",
-    "trap": "The API is the gated part. Calling it without Business Support+, Enterprise Support or Unified Operations — or the legacy Business and Enterprise On-Ramp, retired January 1, 2027 — returns SubscriptionRequiredException.",
+    "trap": "The API is the gated part. Calling it without Business Support+, Enterprise Support or Unified Operations (or the legacy Business and Enterprise On-Ramp, retired January 1, 2027) returns SubscriptionRequiredException.",
     "billOn": [],
     "confidence": "high",
     "sources": [
@@ -610,7 +610,7 @@
     "category": "management",
     "meters": ["time"],
     "oneLiner": "A flat monthly charge per application, starting the first time you assess it.",
-    "trap": "Billing starts at the first assessment and then never stops on its own — an app assessed once and forgotten bills every month until you remove it. The free trial covers only your first three apps for six months.",
+    "trap": "Billing starts at the first assessment and then never stops on its own, an app assessed once and forgotten bills every month until you remove it. The free trial covers only your first three apps for six months.",
     "billOn": ["PaidTierApplication", "FreeTierApplication"],
     "confidence": "high",
     "sources": [

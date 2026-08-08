@@ -245,7 +245,7 @@
     "category": "security",
     "meters": ["time", "units"],
     "oneLiner": "Audit bills per device per month. Detect bills per metric datapoint reported, not per device.",
-    "trap": "ML Detect costs up to eighty times Rules Detect per datapoint at low volume, narrowing to about five times at scale, and it bills from the moment datapoints arrive — including the two-week training window.",
+    "trap": "ML Detect costs up to eighty times Rules Detect per datapoint at low volume, narrowing to about five times at scale, and it bills from the moment datapoints arrive: including the two-week training window.",
     "billOn": ["USE1-Audit", "USE1-Detect", "USE1-ML-Detect"],
     "confidence": "high",
     "sources": [
@@ -502,7 +502,7 @@
     "category": "security",
     "meters": ["units"],
     "oneLiner": "Every authorization decision is a billed API request, and policy reads and writes bill too.",
-    "trap": "A BatchIsAuthorized call meters as one request however many decisions it carries, but costs thirty times a lone IsAuthorized — so batching only pays off once you pack it full. ListPolicies bills as well.",
+    "trap": "A BatchIsAuthorized call meters as one request however many decisions it carries, but costs thirty times a lone IsAuthorized, so batching only pays off once you pack it full. ListPolicies bills as well.",
     "billOn": [
       "USE1-SingleAuthorizationRequest-API-Requests",
       "USE1-AuthorizationRequest-API-Requests",

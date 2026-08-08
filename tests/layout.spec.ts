@@ -6,7 +6,7 @@
  * failed request and no horizontal overflow. The smoke tests would pass.
  *
  * These assert geometry rather than pixels. Screenshot baselines are the usual
- * answer, but they are captured on one platform and compared on another — the
+ * answer, but they are captured on one platform and compared on another, the
  * fonts on a macOS laptop and an Ubuntu runner do not rasterise identically, so
  * the baseline is either wrong locally or wrong in CI. A suite that fails for
  * reasons unrelated to the change teaches people to stop reading it, which is
@@ -18,7 +18,7 @@ import { expect, test, type Page } from '@playwright/test';
 /** The rectangle a browser actually laid the element out in. */
 async function box(page: Page, selector: string, index = 0) {
   const rect = await page.locator(selector).nth(index).boundingBox();
-  expect(rect, `${selector}[${index}] has no box — it is not laid out at all`).not.toBeNull();
+  expect(rect, `${selector}[${index}] has no box. It is not laid out at all`).not.toBeNull();
   return rect!;
 }
 
@@ -90,7 +90,7 @@ test.describe('narrow', () => {
     // The diagram is wider than the phone; that is expected. What matters is
     // that the overflow belongs to the diagram and the container stays within
     // the screen, so the prose around it is unaffected.
-    expect(scrolls, 'the diagram is not actually overflowing — check the fixture').toBe(true);
+    expect(scrolls, 'the diagram is not actually overflowing: check the fixture').toBe(true);
     expect(wider, 'the scroll region itself is wider than the screen').toBe(true);
   });
 });

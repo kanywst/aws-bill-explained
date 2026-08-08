@@ -23,20 +23,20 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## Why it works that way
 
-A pricing page that says "First 10 TB / month — $0.090 per GB" is not quoting you a price. It is quoting the first rung of a ladder, and that rung applies only to the GB that fall inside it. Cross the boundary and the next GB is cheaper; the GB you already paid for stay where they were. It is the arithmetic of an income tax bracket, and it fails the same way when someone reads it as a flat rate.
+A pricing page that says "First 10 TB / month: $0.090 per GB" is not quoting you a price. It is quoting the first rung of a ladder, and that rung applies only to the GB that fall inside it. Cross the boundary and the next GB is cheaper; the GB you already paid for stay where they were. It is the arithmetic of an income tax bracket, and it fails the same way when someone reads it as a flat rate.
 
 The Price List API makes the structure literal. Every price dimension carries a `beginRange` and an `endRange`, and a tiered meter is just a usage type that has more than one of them. `DataTransfer-Out-Bytes` in us-east-1 has four:
 
-- 0 – 10,240 GB — $0.090 per GB
-- 10,240 – 51,200 GB — $0.085 per GB
-- 51,200 – 153,600 GB — $0.070 per GB
-- 153,600 GB and up — $0.050 per GB
+- 0 – 10,240 GB: $0.090 per GB
+- 10,240 – 51,200 GB: $0.085 per GB
+- 51,200 – 153,600 GB: $0.070 per GB
+- 153,600 GB and up: $0.050 per GB
 
-Two things there are worth reading twice. The boundaries are binary: "first 10 TB" is 10,240 GB, not 10,000. And the ranges are cumulative month-to-date usage of that one usage type — not per request, not per resource, not per bucket.
+Two things there are worth reading twice. The boundaries are binary: "first 10 TB" is 10,240 GB, not 10,000. And the ranges are cumulative month-to-date usage of that one usage type: not per request, not per resource, not per bucket.
 
 <SequenceDiagram
   lang="en"
-  caption="60 TB out of us-east-1 in one month — 61,440 GB, $5,120.00. The average is $0.0833/GB, the headline is $0.090/GB, and the next GB costs $0.070."
+  caption="60 TB out of us-east-1 in one month: 61,440 GB, $5,120.00. The average is $0.0833/GB, the headline is $0.090/GB, and the next GB costs $0.070."
   actors={[
     { id: 'app', label: 'Workload' },
     { id: 'net', label: 'Internet' },
@@ -60,9 +60,9 @@ Two things there are worth reading twice. The boundaries are binary: "first 10 T
   ]}
 />
 
-Hold three numbers at once. The headline rate is $0.090. The marginal rate — what the next GB costs — is $0.070. The average rate, which is the only one anyone downstream of you will ever quote, is $0.0833. None of the three is wrong. They answer different questions, and estimates go bad when somebody answers the average question with the headline number.
+Hold three numbers at once. The headline rate is $0.090. The marginal rate (what the next GB costs) is $0.070. The average rate, which is the only one anyone downstream of you will ever quote, is $0.0833. None of the three is wrong. They answer different questions, and estimates go bad when somebody answers the average question with the headline number.
 
-How much any of this matters depends entirely on which meter you are on, because the spread between top and bottom rung is wildly inconsistent. S3 Standard storage in us-east-1 is $0.023 per GB-month for the first 50 TB, $0.022 for the next 450 TB, and $0.021 above 500 TB — a spread of 8.7 percent across three rungs, which is flat enough that estimating 600 TB at the headline rate lands within five percent of the real $13,465.60. Data transfer out drops 44 percent from top rung to bottom. CloudWatch custom metrics drop from $0.30 per metric-month for the first 10,000 to $0.02 above 1,000,000 — 93 percent. Same mechanism, completely different answer to "can I ignore the ladder".
+How much any of this matters depends entirely on which meter you are on, because the spread between top and bottom rung is wildly inconsistent. S3 Standard storage in us-east-1 is $0.023 per GB-month for the first 50 TB, $0.022 for the next 450 TB, and $0.021 above 500 TB: a spread of 8.7 percent across three rungs, which is flat enough that estimating 600 TB at the headline rate lands within five percent of the real $13,465.60. Data transfer out drops 44 percent from top rung to bottom. CloudWatch custom metrics drop from $0.30 per metric-month for the first 10,000 to $0.02 above 1,000,000: 93 percent. Same mechanism, completely different answer to "can I ignore the ladder".
 
 ## What it costs
 
@@ -70,7 +70,7 @@ How much any of this matters depends entirely on which meter you are on, because
 
 **Tiers aggregate across the whole consolidated billing family.** This is the least-known part and AWS is unambiguous about it. "For billing purposes, AWS treats all of the accounts in the organization as if they were one account." And: "Member accounts don't reach tier thresholds individually. Instead, all usage in the organization is aggregated for each service."
 
-Three accounts each pushing 20 TB out of us-east-1, each under its own payer, walk three separate ladders — 10,240 GB at $0.090 plus 10,240 GB at $0.085 is $1,792.00 apiece, $5,376.00 in total. Put those same three accounts under one payer and the organisation walks one ladder to 61,440 GB and pays $5,120.00. Nothing about the workloads changed. Run it the other way and it gets sharper.
+Three accounts each pushing 20 TB out of us-east-1, each under its own payer, walk three separate ladders: 10,240 GB at $0.090 plus 10,240 GB at $0.085 is $1,792.00 apiece, $5,376.00 in total. Put those same three accounts under one payer and the organisation walks one ladder to 61,440 GB and pays $5,120.00. Nothing about the workloads changed. Run it the other way and it gets sharper.
 
 <SequenceDiagram
   lang="en"
@@ -83,30 +83,30 @@ Three accounts each pushing 20 TB out of us-east-1, each under its own payer, wa
     {
       from: 'acct',
       to: 'net',
-      label: '20 TB out — standalone payer',
+      label: '20 TB out: standalone payer',
       meter: 'bytes',
       charge: '$1,792.00',
     },
     {
       from: 'acct',
       to: 'net',
-      label: '20 TB out — org past 150 TB',
+      label: '20 TB out: org past 150 TB',
       meter: 'bytes',
       charge: '$1,024.00',
     },
   ]}
 />
 
-**For data transfer out the ladder aggregates across services as well.** The EC2 pricing page names them: "Rate tiers take into account your aggregate usage for Data Transfer Out to the Internet across Amazon EC2, Amazon S3, Amazon Glacier, Amazon RDS, Amazon Redshift, Amazon SageMaker, Amazon SES, Amazon SimpleDB, Amazon SQS, Amazon SNS, Amazon DynamoDB, AWS Storage Gateway, AWS CloudShell, and Amazon CloudWatch Logs." S3 egress pushes EC2 egress down a rung. The ladder is still bound to a usage type, and data transfer out usage types carry a Region prefix — `USE2-DataTransfer-Out-Bytes` is Ohio's — so each Region publishes and walks its own ladder.
+**For data transfer out the ladder aggregates across services as well.** The EC2 pricing page names them: "Rate tiers take into account your aggregate usage for Data Transfer Out to the Internet across Amazon EC2, Amazon S3, Amazon Glacier, Amazon RDS, Amazon Redshift, Amazon SageMaker, Amazon SES, Amazon SimpleDB, Amazon SQS, Amazon SNS, Amazon DynamoDB, AWS Storage Gateway, AWS CloudShell, and Amazon CloudWatch Logs." S3 egress pushes EC2 egress down a rung. The ladder is still bound to a usage type, and data transfer out usage types carry a Region prefix (`USE2-DataTransfer-Out-Bytes` is Ohio's), so each Region publishes and walks its own ladder.
 
 **The free allowance aggregates too, and there is one of it per organisation.** 100 GB per month of data transfer out to the internet is free, "aggregated across all AWS Services and Regions (except China and GovCloud)". More generally: "AWS applies the free tier to the total usage across all accounts in an AWS organization. AWS doesn't apply the free tier to each account individually." A fresh member account does not come with a fresh allowance.
 
 ## Traps
 
-**"Tier" means two unrelated things on an S3 bill, and only one of them is a volume tier.** `Requests-Tier1` is PUT, COPY, POST and LIST at $0.005 per 1,000 in us-east-1. `Requests-Tier2` is GET and all other requests, at $0.004 per 10,000. Those are request _classes_, not volume brackets — each has exactly one price dimension running from 0 to infinity, so no amount of traffic ever moves you off the rate. The numbering runs all the way to `Requests-Tier8`: Tier3 and Tier4 are lifecycle transitions and Glacier restores, Tier5 and Tier6 are bulk and expedited restores, Tier8 is S3 Access Grants. Meanwhile `TimedStorage-ByteHrs` on the same invoice does have a real three-rung ladder and no "tier" in its name at all. The word tells you nothing; the `beginRange` does.
+**"Tier" means two unrelated things on an S3 bill, and only one of them is a volume tier.** `Requests-Tier1` is PUT, COPY, POST and LIST at $0.005 per 1,000 in us-east-1. `Requests-Tier2` is GET and all other requests, at $0.004 per 10,000. Those are request _classes_, not volume brackets. Each has exactly one price dimension running from 0 to infinity, so no amount of traffic ever moves you off the rate. The numbering runs all the way to `Requests-Tier8`: Tier3 and Tier4 are lifecycle transitions and Glacier restores, Tier5 and Tier6 are bulk and expedited restores, Tier8 is S3 Access Grants. Meanwhile `TimedStorage-ByteHrs` on the same invoice does have a real three-rung ladder and no "tier" in its name at all. The word tells you nothing; the `beginRange` does.
 
-**Estimating with the first rung is wrong in the cheap direction, and estimating with the last is wrong in the expensive one.** 60 TB of egress at the headline $0.090 predicts $5,529.60 against an actual $5,120.00 — eight percent high. The same 60 TB at the bottom rung of $0.050 predicts $3,072.00 — forty percent low. Both errors compound when you extrapolate them across a growth curve, and they compound in opposite directions, so two teams modelling the same workload can disagree by 80 percent while both quoting the same pricing page.
+**Estimating with the first rung is wrong in the cheap direction, and estimating with the last is wrong in the expensive one.** 60 TB of egress at the headline $0.090 predicts $5,529.60 against an actual $5,120.00. Eight percent high. The same 60 TB at the bottom rung of $0.050 predicts $3,072.00. Forty percent low. Both errors compound when you extrapolate them across a growth curve, and they compound in opposite directions, so two teams modelling the same workload can disagree by 80 percent while both quoting the same pricing page.
 
 **Cost per unit is a broken efficiency metric under a ladder.** Your average $/GB falls as you grow whether or not anything got more efficient, and rises when you shrink whether or not anything got worse. A team that doubles its egress and reports a five percent drop in cost per GB has demonstrated nothing. If you need a per-unit number that means something, compare against a fixed reference rate, or track the marginal rate you are currently sitting on and treat the average as an accounting artefact.
 
-**Splitting a workload across accounts does not split the tier, and consolidating accounts changes unit economics silently.** Moving a service into its own account for blast radius or chargeback does nothing to the rate as long as the payer is unchanged — the ladder is walked at the organisation. The reverse is the one that catches people. An account that leaves an organisation starts its own ladder at zero, so a divestiture or a spin-off can raise a bill without a single byte moving. And any chargeback model that bills teams at their line-item rate will hand two teams different unit prices for identical usage, purely because of where in the organisation's ladder their GB happened to land. That is also why the Cost and Usage Report carries a blended rate column next to the unblended one: the blended rate is the organisation's total cost divided by its total usage, and it exists precisely because no single account's real rate is the rate anyone expected.
+**Splitting a workload across accounts does not split the tier, and consolidating accounts changes unit economics silently.** Moving a service into its own account for blast radius or chargeback does nothing to the rate as long as the payer is unchanged: the ladder is walked at the organisation. The reverse is the one that catches people. An account that leaves an organisation starts its own ladder at zero, so a divestiture or a spin-off can raise a bill without a single byte moving. And any chargeback model that bills teams at their line-item rate will hand two teams different unit prices for identical usage, purely because of where in the organisation's ladder their GB happened to land. That is also why the Cost and Usage Report carries a blended rate column next to the unblended one: the blended rate is the organisation's total cost divided by its total usage, and it exists precisely because no single account's real rate is the rate anyone expected.

@@ -32,8 +32,8 @@ instance-hour. `Resource-Invocation-Count-FreeTier` is a CloudFormation handler 
 AWS had to name the quantity before it could decline to charge for it.
 
 That is not pedantry. A meter running at a rate of zero goes back to a non-zero rate the
-moment a condition outside the resource changes — a date passes, a monthly allowance fills,
-an account joins an organization — and the resource itself does not change at all.
+moment a condition outside the resource changes: a date passes, a monthly allowance fills,
+an account joins an organization, and the resource itself does not change at all.
 
 ### The kinds of free
 
@@ -43,12 +43,12 @@ use, not on sign-up). On **July 15, 2025** AWS rebuilt the front door and added 
 mechanism: credits.
 
 A new account now picks a plan at sign-up and gets **USD $100 in credits either way**, plus up
-to $100 more earned in $20 increments for five console activities — EC2, RDS, Lambda, Bedrock
+to $100 more earned in $20 increments for five console activities. EC2, RDS, Lambda, Bedrock
 and Budgets. The credits expire twelve months from the account's open date, on either plan.
 
 - **Free plan.** You cannot incur a charge. It ends six months after account creation or when
   the credits are exhausted, whichever comes first, and then **the account closes
-  automatically** — you lose access to your resources and data. AWS holds the content for 90
+  automatically**, you lose access to your resources and data. AWS holds the content for 90
   days; upgrade to a Paid plan inside that window or it is deleted permanently. Only
   `Always Free` offers are active: no short-term trials, no Savings Plans, no Reserved
   Instances. Joining AWS Organizations or standing up a Control Tower landing zone converts
@@ -71,7 +71,7 @@ eligible" on EC2 meant `t2.micro` and `t3.micro`; on or after, it means `t3.micr
     {
       label: 'Your invoice',
       crossing: 'on-demand rate',
-      note: 'nothing left to absorb it — this is the rate card',
+      note: 'nothing left to absorb it: this is the rate card',
     },
     {
       label: 'Free Tier credits',
@@ -83,7 +83,7 @@ eligible" on EC2 meant `t2.micro` and `t3.micro`; on or after, it means `t3.micr
       label: 'Short-term trial',
       crossing: '$0.00 for a fixed window',
       free: true,
-      note: 'clock starts on first use, per service, often per Region — Paid plan only',
+      note: 'clock starts on first use, per service, often per Region: Paid plan only',
     },
     {
       label: 'Always free allowance',
@@ -104,7 +104,7 @@ consolidated billing family.
 Order of application matters too, and AWS is explicit: "AWS applies AWS Free Tier benefits
 before Savings Plans benefits. Savings Plans cover excess usage that Free Tier doesn't
 cover." Free-tier hours leave the pool _before_ a commitment gets a chance to match against
-them — a real reason a young organization's Compute Savings Plan can look under-used in its
+them, a real reason a young organization's Compute Savings Plan can look under-used in its
 first months.
 
 ## What it costs
@@ -112,14 +112,14 @@ first months.
 Free costs nothing. What costs something is the first hour on the other side of it. All rates
 below are **us-east-1**, on-demand, from the AWS Price List:
 
-- `t3.micro` Linux — **$0.0104 per hour**, so the 750 hours a legacy account used to get free
+- `t3.micro` Linux: **$0.0104 per hour**, so the 750 hours a legacy account used to get free
   is about **$7.80 a month**.
-- Public IPv4 address — **$0.005 per hour**, charged identically whether it is in use or idle.
-- EBS `gp3` — **$0.08 per GB-month**; `gp2` is **$0.10**; standard-tier snapshots are
+- Public IPv4 address: **$0.005 per hour**, charged identically whether it is in use or idle.
+- EBS `gp3`: **$0.08 per GB-month**; `gp2` is **$0.10**; standard-tier snapshots are
   **$0.05 per GB-month**.
-- Data transfer out to the internet — **$0.09 per GB**. The price list describes that tier, in
+- Data transfer out to the internet: **$0.09 per GB**. The price list describes that tier, in
   its own words, as "first 10 TB / month data transfer out beyond the global free tier".
-- NAT Gateway — **$0.045 per hour plus $0.045 per GB processed**, with no free tier at all.
+- NAT Gateway: **$0.045 per hour plus $0.045 per GB processed**, with no free tier at all.
 
 <PathDiagram
   lang="en"
@@ -147,7 +147,7 @@ custom metrics and alarms, 1 million API requests, and 5 GB each of log ingestio
 archive.
 
 Visibility is worse than the numbers suggest. AWS sends a Free Tier usage alert at **85
-percent** of a service's limit, to the root user's email address — on by default for
+percent** of a service's limit, to the root user's email address: on by default for
 standalone accounts, but **off by default for an organization's management account**, the
 exact account that owns the only free tier in the family. The Billing console has a Free Tier
 page broken down by service, Region and usage type, with a `GetFreeTierUsage` API behind it.
@@ -158,7 +158,7 @@ three times a day.
 
 **A free resource drags paid ones behind it.** A free-tier EC2 instance is not a free-tier
 system. It needs a public IPv4 address to be reachable, and that address bills at $0.005 an
-hour whether attached or not — AWS added 750 hours a month of _in-use_ public IPv4 to the EC2
+hour whether attached or not. AWS added 750 hours a month of _in-use_ public IPv4 to the EC2
 free tier on February 1, 2024, but an idle Elastic IP was never covered, and only addresses
 you bring yourself under BYOIP are free outright. The root volume draws on a separate 30 GB
 allowance, snapshots on a separate 1 GB one, and a snapshot outlives the instance that made
@@ -183,7 +183,7 @@ shared 100 GB that every other service in your organization is drawing down.
 **One service can mean two different things by "free".** CloudFront's pay-as-you-go model
 still carries the always-free 1 TB of monthly data transfer and 10 million requests. Its
 flat-rate plans, offered alongside it, have a **Free tier at $0/month covering 1 million
-requests and 100 GB per distribution** — and there the overage behaviour inverts: exceed a
+requests and 100 GB per distribution**, and there the overage behaviour inverts: exceed a
 plan's allowance and "you may experience reduced performance… but you won't incur overage
 charges." Same word, same service, allowances an order of magnitude apart, two different
 failure modes.

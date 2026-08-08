@@ -3,13 +3,13 @@
  *
  * A Meter is the unit of the ubiquitous language on this site. AWS bills in
  * hundreds of usage types, but every one of them turns exactly one of three
- * meters. The domain layer knows nothing about rendering, locales, or Astro —
+ * meters. The domain layer knows nothing about rendering, locales, or Astro:
  * it only knows what a meter is and how to reason about a set of them.
  *
  * Two of the three have been renamed, both times for the same reason: the name
  * was narrower than the shape and quietly excluded valid members.
  *
- * "bytes" was "egress" until the dataset contradicted it — CloudWatch
+ * "bytes" was "egress" until the dataset contradicted it: CloudWatch
  * ingestion, Firehose intake and NAT Gateway processing all meter gigabytes
  * with no regard for direction. "Inbound is free" is a rule about data
  * *transfer*, not a property of the meter.
@@ -19,7 +19,7 @@
  * rather than of a billing shape, and most of its own members refuted it: SQS
  * bills a 1 MiB call as sixteen requests, EventBridge chunks at 64 KB, Bedrock
  * counts tokens, Polly counts characters, Textract counts pages, SES counts
- * recipients. What they share is that something discrete gets counted — and a
+ * recipients. What they share is that something discrete gets counted, and a
  * request is the most common instance of that, not the definition of it.
  */
 

@@ -80,7 +80,7 @@ jobs:
 
       # The build runs csp-hashes.mjs and check-build.mjs afterwards, which
       # catch SVG geometry, translation gaps and inline scripts the CSP would
-      # block — none of which a type checker can see.
+      # block. None of which a type checker can see.
       - name: Build and post-build guards
         run: npm run build
 
@@ -135,7 +135,7 @@ jobs:
     # correctness problem here rather than a broken-link nit.
     #
     # This used to carry continue-on-error, which made it green whatever it
-    # found — a check nobody reads. The script itself already draws the line:
+    # found, a check nobody reads. The script itself already draws the line:
     # it exits non-zero only on a definite 404/410 and treats timeouts, 403s
     # and redirects as warnings, so the flakiness that flag was guarding
     # against cannot fail the job anyway.
@@ -155,7 +155,7 @@ jobs:
         run: node scripts/check-sources.mjs
 
       # A link check asks whether the page is still there. This asks whether
-      # anyone has looked at it lately — AWS replaced the entire Support plan
+      # anyone has looked at it lately. AWS replaced the entire Support plan
       # lineup without moving a single URL.
       - name: Check how stale the claims are
         run: node scripts/check-freshness.mjs

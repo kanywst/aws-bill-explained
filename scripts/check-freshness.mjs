@@ -9,7 +9,7 @@
  *
  * Ages are measured against today, and --strict turns the oldest of them into
  * a failure. The first version measured against the newest date in the dataset
- * instead, for reproducibility — which quietly defeated the whole point: when
+ * instead, for reproducibility, which quietly defeated the whole point: when
  * every claim ages together, nothing is ever behind anything, and a repository
  * untouched for two years reported "0 days behind". A staleness check whose
  * answer does not change as time passes is not a staleness check.
@@ -83,7 +83,7 @@ if (process.argv.includes('--json')) {
 const failing = expired.length + undated.length;
 if (failing > 0 && !strict) {
   console.warn(
-    `  ${failing} claim(s) past ${EXPIRED_DAYS} days — run with --strict to fail on this`,
+    `  ${failing} claim(s) past ${EXPIRED_DAYS} days: run with --strict to fail on this`,
   );
 }
 process.exit(strict && failing > 0 ? 1 : 0);

@@ -3,7 +3,7 @@
     Three dials on a dark housing: the same device as the wordmark rule and the
     lamps on every service card. Orange is Time, blue is Bytes, red is Calls.
     At 16px the hues are all that survive, which is the right trade for a
-    favicon — this is recognition, not information.
+    favicon. This is recognition, not information.
   -->
   <rect width="32" height="32" rx="7" fill="#232f3e" />
 

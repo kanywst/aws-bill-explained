@@ -74,7 +74,7 @@ const lanes = hops.map((hop, i) => ({
 
 /**
  * role="img" prunes everything inside the SVG from the accessibility tree, so a
- * screen reader used to get the caption and nothing else — no nodes, no meters,
+ * screen reader used to get the caption and nothing else: no nodes, no meters,
  * no costs. On a site whose argument lives in the diagrams that is the argument
  * going missing. The SVG is now aria-hidden and this list carries it instead.
  */
@@ -95,7 +95,7 @@ const hopAlt = (hop: PathHop) =>
 /**
  * A node's lamps are a separate claim from the hops: they say the box bills for
  * existing, whether or not anything flows. Listing only the hops made an idle
- * path read as entirely free — on the very articles whose thesis is that it is
+ * path read as entirely free. On the very articles whose thesis is that it is
  * not. `sub` goes in too, because it is where the rate or the region lives.
  */
 const billedNodes = nodes.filter((n) => n.charges?.length || n.sub);
@@ -269,7 +269,7 @@ const nodeAlt = (n: PathNode) => {
 
   .pd-scroll {
     overflow-x: auto;
-    /* Bleed past the prose measure — diagrams get more room than text. */
+    /* Bleed past the prose measure. Diagrams get more room than text. */
     margin-inline: calc(var(--gutter) * -0.5);
     padding-inline: calc(var(--gutter) * 0.5);
     padding-block: 0.5rem;

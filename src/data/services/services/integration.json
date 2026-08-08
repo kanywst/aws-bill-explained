@@ -373,7 +373,7 @@
     "category": "integration",
     "meters": ["time", "bytes"],
     "oneLiner": "Hourly per environment by size, plus hourly per extra worker, scheduler and web server, plus DB storage.",
-    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button — you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
+    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button, you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
     "billOn": [
       "Airflow-SmallEnvironment",
       "Airflow-LargeWorker",
@@ -475,7 +475,7 @@
     "category": "integration",
     "meters": ["units", "time"],
     "oneLiner": "Standard bills per state transition. Express swaps that for a per-start charge plus memory-seconds.",
-    "trap": "Standard counts every transition, retries included. Distributed Map bills one per iteration, an Inline Map none — so not every loop costs. Express bills duration times memory instead.",
+    "trap": "Standard counts every transition, retries included. Distributed Map bills one per iteration, an Inline Map none, so not every loop costs. Express bills duration times memory instead.",
     "billOn": ["StateTransition", "StepFunctions-Request", "StepFunctions-GB-Second"],
     "confidence": "high",
     "sources": [

@@ -45,7 +45,7 @@ for (const file of html) {
 
   if (/(?:x|y|width|height|cx|cy)="NaN"/.test(body)) {
     failures.push(
-      `${where}: NaN in an SVG coordinate — a layout formula divided by something empty`,
+      `${where}: NaN in an SVG coordinate: a layout formula divided by something empty`,
     );
   }
 }
@@ -79,7 +79,7 @@ for (const [slug, langs] of bySlug) {
 //    Both are read from the frontmatter alone. Matching against the whole file
 //    would let a `checked:` line in prose satisfy the rule, and the sources
 //    check exists because CI probes the URLs an article lists but has no way to
-//    notice an article that lists none — the citations would simply never be
+//    notice an article that lists none: the citations would simply never be
 //    checked, silently, which is the failure this whole pair guards against.
 for (const lang of LANGS) {
   let files = [];

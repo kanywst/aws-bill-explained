@@ -461,7 +461,7 @@
     "category": "analytics",
     "meters": ["bytes"],
     "oneLiner": "Two per-GB meters: what goes in, and what gets packaged back out.",
-    "trap": "Live ingest is metered per GB, so a high-bitrate contribution feed costs money before a viewer connects. VOD has no ingest charge at all — only packaging on the way out.",
+    "trap": "Live ingest is metered per GB, so a high-bitrate contribution feed costs money before a viewer connects. VOD has no ingest charge at all: only packaging on the way out.",
     "billOn": ["EMP-ingest-bytes", "EMP-origin-packaging-bytes"],
     "confidence": "high",
     "sources": [

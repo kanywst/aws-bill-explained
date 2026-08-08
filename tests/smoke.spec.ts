@@ -24,7 +24,7 @@ import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
  * not need; Playwright reports a cancellation as a failed request, so counting
  * those made the suite fail at random on a font that was present and served.
  * A font that is actually missing returns 404, which is a response rather than
- * a failure — so the response check below is what would catch it, and catches
+ * a failure, so the response check below is what would catch it, and catches
  * a broken stylesheet or script too.
  */
 function watch(page: Page) {
@@ -89,7 +89,7 @@ for (const { lang, path, free } of INDEXES) {
       .poll(async () => await cards.locator(':visible').count(), { timeout: 5_000 })
       .toBeLessThan(total);
 
-    // The filter is announced, not just applied — the count is the only feedback
+    // The filter is announced, not just applied: the count is the only feedback
     // a screen reader gets that anything happened.
     await expect(page.locator('[role="status"]')).not.toBeEmpty();
 
@@ -116,7 +116,7 @@ test('a topic page renders its diagrams and loads clean', async ({ page }) => {
  * boxes have to be drawn in. The sentence above the list says "from the inside
  * out" and the diagram's argument is that the centre is free and every ring you
  * cross outward is a toll. Announcing them in prop order told a screen reader
- * the innermost boundary was the internet at nine cents a gigabyte — the thesis
+ * the innermost boundary was the internet at nine cents a gigabyte: the thesis
  * inverted, for exactly the readers who cannot see the picture that contradicts
  * it. Every sentence was correct; only the order was wrong, which is why no
  * automated audit flagged it and why this test exists.
@@ -134,13 +134,13 @@ test('the boundary diagram is announced from the free centre outwards', async ({
   expect(free, 'no ring is described as free').toBeGreaterThanOrEqual(0);
   expect(free, 'the free ring must be announced first, as the centre').toBe(0);
 
-  // And the internet — the most expensive crossing — must be announced last.
+  // And the internet (the most expensive crossing) must be announced last.
   expect(items.at(-1), 'the outermost ring should be the internet').toMatch(/internet/i);
 });
 
 /**
  * Read from disk rather than listed by hand. The hand-written version claimed
- * to cover "every topic" while four newer ones were missing from it — the list
+ * to cover "every topic" while four newer ones were missing from it, the list
  * drifted the first time articles were added after it was written.
  */
 const TOPICS = readdirSync(new URL('../src/content/topics/en/', import.meta.url))
@@ -169,8 +169,8 @@ test.describe('reduced motion', () => {
     await page.goto('/');
 
     // A number flickering ten times a second in peripheral vision is what this
-    // preference asks us not to do. The argument survives as one reading — a
-    // whole day of an instance nobody is using — so the value must be present
+    // preference asks us not to do. The argument survives as one reading, a
+    // whole day of an instance nobody is using, so the value must be present
     // and must be still.
     const dial = page.locator('#dial-time');
     await expect(dial).toHaveAttribute('data-value', '24:00:00');

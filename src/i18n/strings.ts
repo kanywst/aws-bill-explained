@@ -152,7 +152,7 @@ export const STRINGS: Record<Lang, Strings> = {
     skip: 'Skip to content',
     nav: { home: 'The three meters', topics: 'Topics', services: 'Services' },
     footerPrices:
-      "Prices are us-east-1, on-demand, checked against AWS's own documentation on the date shown on each page. Rates move and vary by region, so take the meters home rather than the numbers — which meter turns is the part that stays true.",
+      "Prices are us-east-1, on-demand, checked against AWS's own documentation on the date shown on each page. Rates move and vary by region, so take the meters home rather than the numbers: which meter turns is the part that stays true.",
     footerDisclaimer: 'An unofficial explainer. Not affiliated with Amazon Web Services.',
 
     meters: {
@@ -176,7 +176,7 @@ export const STRINGS: Record<Lang, Strings> = {
         name: 'Units',
         test: 'How many countable things did you ask for?',
         counts:
-          'Countable units of work. Requests are just the commonest kind — tokens, pages, characters, destinations and every 64 KB slice of a payload all count the same way.',
+          'Countable units of work. Requests are just the commonest kind: tokens, pages, characters, destinations and every 64 KB slice of a payload all count the same way.',
         trap: 'One call is often not one unit. A 1 MiB queue message is 16 of them, a 200 KB event is 4. And about half of all services never turn this meter: EC2, IAM and STS charge nothing per call.',
         onTheBill: 'Requests',
       },
@@ -187,7 +187,7 @@ export const STRINGS: Record<Lang, Strings> = {
       eyebrow: 'How an AWS bill is built',
       headA: 'Every bill is',
       headB: 'three meters',
-      lede: "AWS documents pricing one service at a time, so every new service looks like a new billing model to learn. It isn't. There are three meters — Time, Bytes, Units — and a service either turns one or it doesn't. Once you can say which, a pricing page stops being a lesson and becomes a lookup.",
+      lede: "AWS documents pricing one service at a time, so every new service looks like a new billing model to learn. It isn't. There are three meters (Time, Bytes, Units), and a service either turns one or it doesn't. Once you can say which, a pricing page stops being a lesson and becomes a lookup.",
       rigHead:
         'Since you opened this page, one t3.micro somebody forgot to terminate has been turning its meter.',
       capElapsed: 'Elapsed',
@@ -201,7 +201,7 @@ export const STRINGS: Record<Lang, Strings> = {
     sections: { meters: 'The three meters', reading: 'Reading a diagram here', topics: 'Topics' },
 
     reading: {
-      lede: 'One rule holds across every picture on this site: colour means billed, grey means free. You can find the money before you read a word. Here is the simplest case — a request arrives, a response leaves.',
+      lede: 'One rule holds across every picture on this site: colour means billed, grey means free. You can find the money before you read a word. Here is the simplest case: a request arrives, a response leaves.',
       diagramCaption:
         'One request, one response, and all three meters. Grey means the meter did not turn.',
       note: 'All three meters appear here. The lamp on the EC2 box is Time, turning before the request arrived and after the response is sent. The inbound request is free as bytes but still counts as one unit at the API. Only the response out turns the Bytes meter.',
@@ -237,7 +237,7 @@ export const STRINGS: Record<Lang, Strings> = {
     },
     services: {
       title: 'Every service, by meter',
-      lede: 'Which meters a service turns, and the one thing people get wrong about each. No rates — those move; the meters do not.',
+      lede: 'Which meters a service turns, and the one thing people get wrong about each. No rates: those move; the meters do not.',
       freeNote:
         'This service turns no meters of its own. Read the trap below for what it makes you pay for elsewhere.',
       trapHead: 'What gets missed',
@@ -249,7 +249,7 @@ export const STRINGS: Record<Lang, Strings> = {
         'These services turn exactly the same meters, so what you learn here transfers.',
       sourcesHead: 'Checked against',
       mediumConfidence:
-        "We are not certain about this one — AWS's own documentation does not pin the meter set down. Check the sources below before you build anything on it.",
+        "We are not certain about this one. AWS's own documentation does not pin the meter set down. Check the sources below before you build anything on it.",
       filterAll: 'All',
       filterFree: 'Free',
       count: 'services',
@@ -263,7 +263,7 @@ export const STRINGS: Record<Lang, Strings> = {
       filterLabel: 'Filter by meter',
       billedOn: 'Billed on: {billed}.',
       notBilledOn: 'Not billed on: {unbilled}.',
-      freeService: 'Free — turns no meters of its own.',
+      freeService: 'Free: turns no meters of its own.',
       showing: 'Showing {shown} of {total} services.',
       pathAlt: 'Path through {nodes}, hop by hop:',
       seqAlt: 'Exchange between {actors}, step by step:',
@@ -338,7 +338,7 @@ export const STRINGS: Record<Lang, Strings> = {
     sections: { meters: '3つのメーター', reading: '図の読み方', topics: 'トピック' },
 
     reading: {
-      lede: 'このサイトの図は全部ひとつのルールで描いてある。色が付いていれば課金、グレーなら無料。文章を読む前に、どこで金が出ているか分かる。まずは一番単純な形 — リクエストが来て、レスポンスが出ていく。',
+      lede: 'このサイトの図は全部ひとつのルールで描いてある。色が付いていれば課金、グレーなら無料。文章を読む前に、どこで金が出ているか分かる。まずは一番単純な形。リクエストが来て、レスポンスが出ていく。',
       diagramCaption: 'リクエスト1往復に、3本のメーターが全部出てくる。グレーは回らなかったもの。',
       note: 'ここに3本とも出ている。EC2 の箱のランプが Time で、リクエストが来る前から回っていて、返した後も回り続ける。行きのリクエストは GB としては無料だが、API では1個として数えられる。GB メーターが回るのは帰りだけ。',
       nodeClient: 'クライアント',
@@ -373,7 +373,7 @@ export const STRINGS: Record<Lang, Strings> = {
     },
     services: {
       title: '全サービスをメーターで引く',
-      lede: 'どのメーターが回るか、そしてそのサービスで一番よく間違えられる点。金額は載せない — レートは変わるから。回るメーターのほうは変わらない。',
+      lede: 'どのメーターが回るか、そしてそのサービスで一番よく間違えられる点。金額は載せない。レートは変わるから。回るメーターのほうは変わらない。',
       freeNote:
         'このサービス自体はメーターを回さない。下の「見落とすところ」に、どこに金が移るかを書いてある。',
       trapHead: '見落とすところ',
@@ -398,11 +398,11 @@ export const STRINGS: Record<Lang, Strings> = {
       filterLabel: 'メーターで絞り込む',
       billedOn: '課金されるメーター: {billed}。',
       notBilledOn: '課金されないメーター: {unbilled}。',
-      freeService: '無料 — 自前のメーターを回さない。',
+      freeService: '無料: 自前のメーターを回さない。',
       showing: '{total} 件中 {shown} 件を表示。',
-      pathAlt: '{nodes} を通る経路。1ホップずつ:',
-      seqAlt: '{actors} のやりとり。1ステップずつ:',
-      boundaryAlt: '内側から外側への境界:',
+      pathAlt: '{nodes} を通る経路。1ホップずつ: ',
+      seqAlt: '{actors} のやりとり。1ステップずつ: ',
+      boundaryAlt: '内側から外側への境界: ',
       hopBilled: '{from} から {to}: {label}。{meter}メーターで課金、{cost}。',
       hopFree: '{from} から {to}: {label}。課金されない。',
       stepReply: '応答',

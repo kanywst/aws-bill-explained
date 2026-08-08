@@ -381,7 +381,7 @@
     "category": "compute",
     "meters": ["time", "units"],
     "oneLiner": "Shut down. WorkDocs reached end of support on 25 April 2025 and the service is gone.",
-    "trap": "The user guide has been withdrawn and the pricing offer is frozen at 2022. While it ran it billed per user-month, per GB stored and per API call — though deletes were rated at zero. Nothing to migrate to inside AWS.",
+    "trap": "The user guide has been withdrawn and the pricing offer is frozen at 2022. While it ran it billed per user-month, per GB stored and per API call, though deletes were rated at zero. Nothing to migrate to inside AWS.",
     "billOn": ["WorkDocs-UserHrs", "WorkDocs-StorageByteHrs", "WorkDocs-ReadAPICalls"],
     "confidence": "high",
     "sources": [
@@ -411,7 +411,7 @@
     "category": "compute",
     "meters": ["time"],
     "oneLiner": "Managed instances bill per second with a one-minute minimum, or at a flat monthly rate per instance.",
-    "trap": "The instance rate covers compute only — EBS volumes, snapshots, dedicated-instance Region fees and Windows RDS user CALs are all yours. The monthly option carries built-in discounts, so Savings Plans do not apply.",
+    "trap": "The instance rate covers compute only: EBS volumes, snapshots, dedicated-instance Region fees and Windows RDS user CALs are all yours. The monthly option carries built-in discounts, so Savings Plans do not apply.",
     "billOn": [
       "BoxUsage:m5.xlarge:WH-ManagedInstances:Hourly",
       "BoxUsage:m5.xlarge:WH-ManagedInstances:Monthly",

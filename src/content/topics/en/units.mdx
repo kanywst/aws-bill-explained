@@ -25,7 +25,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 ## Why it works that way
 
 Time and Bytes both measure something continuous, and you can feel them running. Units
-looks like the easy meter by comparison — count the calls, multiply by the rate — and it
+looks like the easy meter by comparison (count the calls, multiply by the rate), and it
 is the one that misleads people, because the number in your code and the number on the
 invoice are usually different.
 
@@ -37,17 +37,17 @@ language on the SQS pricing page: "Each 64 KB chunk of a payload is billed as 1 
 
 The chunk size is different for every service, and it is not guessable:
 
-- **Amazon SQS** — 64 KB per request.
-- **Amazon SNS** — 64 KB on the publish, and 64 KB again on each delivery.
-- **Amazon EventBridge** — 64 KB per custom event, so "an event with a 256 KB payload is
+- **Amazon SQS**: 64 KB per request.
+- **Amazon SNS**: 64 KB on the publish, and 64 KB again on each delivery.
+- **Amazon EventBridge**: 64 KB per custom event, so "an event with a 256 KB payload is
   billed as 4 events". Schema Discovery slices the same payload at 8 KB instead.
-- **Amazon API Gateway** — HTTP APIs are metered in 512 KB increments. WebSocket messages
+- **Amazon API Gateway**: hTTP APIs are metered in 512 KB increments. WebSocket messages
   are metered in 32 KB increments, "so a 33KB message is metered as two messages". REST
   APIs are the exception: one call is one call, whatever it weighs.
-- **AWS AppSync** — real-time messages are "charged per 5 KB payload of data delivered",
+- **AWS AppSync**: real-time messages are "charged per 5 KB payload of data delivered",
   inbound and outbound.
-- **AWS IoT Core** — 5 KB per message. An 8 KB publish is two messages.
-- **Amazon Kinesis Data Streams**, provisioned mode — a PUT payload unit is 25 KB, so a
+- **AWS IoT Core**: 5 KB per message. An 8 KB publish is two messages.
+- **Amazon Kinesis Data Streams**, provisioned mode: a PUT payload unit is 25 KB, so a
   45 KB record is two units and a 1 MB record is 40.
 
 One practical rule falls out of all of them. **Padding up to a chunk boundary is free;
@@ -66,15 +66,15 @@ control the message format, and worth measuring before you assume anything when 
     {
       from: 'client',
       to: 'q',
-      label: 'SendMessage — 1 MiB',
+      label: 'SendMessage: 1 MiB',
       meter: 'units',
       charge: '16 requests',
     },
-    { from: 'client', to: 'q', label: 'SendMessage — 4 KiB', meter: 'units', charge: '1 request' },
+    { from: 'client', to: 'q', label: 'SendMessage: 4 KiB', meter: 'units', charge: '1 request' },
     {
       from: 'client',
       to: 'q',
-      label: 'ReceiveMessage — 0 returned',
+      label: 'ReceiveMessage: 0 returned',
       meter: 'units',
       charge: '1 request',
     },
@@ -82,7 +82,7 @@ control the message format, and worth measuring before you assume anything when 
 />
 
 The third line is the one people argue with. An empty poll is a real API action, so it
-bills like any other — at $0.40 per million standard requests in us-east-1, after the
+bills like any other: at $0.40 per million standard requests in us-east-1, after the
 first million free each month.
 
 ## What it costs
@@ -91,21 +91,21 @@ Chunking is only one of the three ways a call stops being a unit. The other two 
 class of the request and the number of things it fans out to.
 
 **Request classes are priced an order of magnitude apart.** S3 splits its requests into
-tiers and the gap is not subtle. In us-east-1, `Requests-Tier1` — PUT, COPY, POST and
-LIST — is $0.005 per 1,000, while `Requests-Tier2` — GET and everything else — is $0.0004
+tiers and the gap is not subtle. In us-east-1, `Requests-Tier1`. PUT, COPY, POST and
+LIST (is $0.005 per 1,000, while `Requests-Tier2`) GET and everything else: is $0.0004
 per 1,000. That is 12.5× for the privilege of writing instead of reading. DELETE and
 CANCEL are free outright. A crawler that LISTs a bucket per object is therefore paying
 write-tier prices to do nothing but read, which is the usual way this bites.
 
 **Fan-out turns one call into N units.** SES meters outbound mail per recipient, not per
 message: one `SendEmail` to fifty addresses is fifty charges, at $0.10 per 1,000 in
-us-east-1. SNS charges twice over — once for the publish and once per delivery — and only
+us-east-1. SNS charges twice over (once for the publish and once per delivery), and only
 some destinations are rated. Publishing is $0.50 per million. Delivery in us-east-1 runs:
 
-- **SQS** and **Lambda** — $0.00. Free, per AWS's own price list.
-- **Mobile push** — $0.50 per million.
-- **HTTP/S** — $0.60 per million, first 100,000 free.
-- **Email and email-JSON** — $2.00 per 100,000, which is $20 per million, first 1,000 free.
+- **SQS** and **Lambda**: $0.00. Free, per AWS's own price list.
+- **Mobile push**: $0.50 per million.
+- **HTTP/S**: $0.60 per million, first 100,000 free.
+- **Email and email-JSON**: $2.00 per 100,000, which is $20 per million, first 1,000 free.
 
 Email delivery is thirty-three times an HTTPS POST. Nothing about the publish call tells
 you that; the subscription protocol decides it, and the subscription was configured
@@ -121,7 +121,7 @@ somewhere else entirely.
     { id: 'hook', label: 'HTTPS endpoint' },
   ]}
   steps={[
-    { from: 'app', to: 'sns', label: 'Publish — 8 KB', meter: 'units', charge: '1 × $0.50/M' },
+    { from: 'app', to: 'sns', label: 'Publish: 8 KB', meter: 'units', charge: '1 × $0.50/M' },
     { from: 'sns', to: 'q', label: 'Deliver to SQS' },
     { from: 'sns', to: 'hook', label: 'Deliver to HTTPS', meter: 'units', charge: '1 × $0.60/M' },
   ]}
@@ -133,7 +133,7 @@ for, and "request" is just the most common shape. In us-east-1:
 - **Bedrock** counts input and output tokens, with cache-read and cache-write tokens
   metered on their own usage types.
 - **Textract** counts pages. A 200-page PDF is 200 pages, and reprocessing it is 200 more.
-- **Polly** counts characters — of speech _and_ of Speech Marks, at the same rate, so
+- **Polly** counts characters: of speech _and_ of Speech Marks, at the same rate, so
   asking for both doubles the text you pay for. $4.00 per million characters for standard
   voices, $16.00 for neural. SSML tags are not counted as billed characters.
 - **Translate** counts source characters "including white space characters", at $15.00 per
@@ -144,7 +144,7 @@ for, and "request" is just the most common shape. In us-east-1:
   per request", at $0.0001 per unit.
 - **Step Functions** Standard counts state transitions, one each time a step executes, at
   $0.025 per 1,000 with 4,000 free every month forever.
-- **Config** counts configuration items — one per recorded change to a resource — at
+- **Config** counts configuration items (one per recorded change to a resource) at
   $0.003 each on continuous recording.
 - **Route 53** counts DNS queries, at $0.40 per million for standard records.
 
@@ -152,16 +152,15 @@ for, and "request" is just the most common shape. In us-east-1:
 
 **Roughly half of AWS has no Units meter, and the dividing line is not the one you'd
 guess.** Of the 253 services indexed on this site, 124 turn a Units meter and 129 never do.
-The split is not "cheap services" versus "expensive" — it is control plane versus data
+The split is not "cheap services" versus "expensive". It is control plane versus data
 plane. `RunInstances`, `DescribeInstances`, every IAM call, every STS call: free, at any
 rate you can generate. EC2, ECS, EKS, RDS, ALB, Fargate, CloudFormation's own stack
-operations — no per-call charge anywhere. Asking AWS to change your infrastructure costs
+operations. No per-call charge anywhere. Asking AWS to change your infrastructure costs
 nothing. Asking it to move or inspect your data costs per unit.
 
 The useful half of the lesson is the second one, because it tells you where to look. EBS
 is the cleanest example of both halves in one service: creating, attaching and describing
-volumes is free, but the EBS direct APIs — the ones that read and write snapshot blocks —
-bill per request _and_ per block. `ListSnapshotBlocks` and `ListChangedBlocks` are $0.0006
+volumes is free, but the EBS direct APIs (the ones that read and write snapshot blocks) bill per request _and_ per block. `ListSnapshotBlocks` and `ListChangedBlocks` are $0.0006
 per 1,000 requests; `GetSnapshotBlock` is $0.003 per 1,000 SnapshotAPIUnits and
 `PutSnapshotBlock` is $0.006 per 1,000, where a unit is one 512 KiB block. Same service,
 same console, and the meter switches on the moment you touch data.
@@ -170,9 +169,9 @@ same console, and the meter switches on the moment you touch data.
 angle, and together they are why small and bursty workloads cost more than quantity × rate
 predicts:
 
-- Transcribe's 15-second minimum per request — slice a stream into three-second clips and
+- Transcribe's 15-second minimum per request. Slice a stream into three-second clips and
   you pay five times over.
-- Comprehend's 3-unit minimum — a 20-character string costs the same as a 300-character
+- Comprehend's 3-unit minimum, a 20-character string costs the same as a 300-character
   one.
 - Redshift Spectrum rounds each query up to the next megabyte with a 10 MB floor per query.
 - S3 Standard-IA and One Zone-IA have "a minimum billable object size of 128 KB" and a
@@ -184,7 +183,7 @@ predicts:
   evaluates and fires nothing still costs a rule plus an action.
 
 **The chunk rule leaks into the Bytes meter.** Amazon Data Firehose has no per-request
-charge at all — Direct PUT ingestion is billed per GB, $0.029 in the first tier — but it
+charge at all (Direct PUT ingestion is billed per GB, $0.029 in the first tier), but it
 rounds every record up to the next 5 KB multiple before it weighs them: "a 3KB record is
 billed as 5KB, a 12KB record is billed as 15KB". A firehose of 1 KB records is therefore
 billed at five times the volume you actually sent, on a meter with no request dimension

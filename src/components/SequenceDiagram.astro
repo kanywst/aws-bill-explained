@@ -50,7 +50,7 @@ const HEAD_H = SEQ_HEAD_HEIGHT;
 const GUTTER_W = SEQ_GUTTER_WIDTH;
 
 // findIndex returns -1 for an id that is not an actor, which would put the lane
-// at a negative x and draw the arrow off the left of the canvas — silently, and
+// at a negative x and draw the arrow off the left of the canvas. Silently, and
 // only for the one step with the typo. Fail the build instead, the way
 // PathDiagram does for hops.
 const actorIndex = (id: string) => seqActorIndex(actors, id);
@@ -113,7 +113,7 @@ const stepAlt = (step: SeqStep) => {
         </marker>
       </defs>
 
-      {/* Billing gutter — the column AWS's own diagrams are missing. */}
+      {/* Billing gutter, the column AWS's own diagrams are missing. */}
       <rect x={LANES_W} y="0" width={GUTTER_W} height={H} fill="var(--surface)"></rect>
       <line x1={LANES_W} y1="0" x2={LANES_W} y2={H} stroke="var(--border)" stroke-width="1"></line>
       <text x={LANES_W + 14} y="24" class="sq-gutter-head">{s.meter}</text>

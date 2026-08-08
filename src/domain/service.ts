@@ -1,14 +1,14 @@
 /**
  * Domain: the Service entity.
  *
- * Identity is the slug — two records with the same slug are the same service
+ * Identity is the slug. Two records with the same slug are the same service
  * even if every other field differs.
  *
  * The constructor enforces the editorial rules rather than leaving them to a
  * test over the real dataset. That distinction matters: a test can only catch
  * a bad record that is already committed, while a constructor makes the bad
  * record impossible to build in the first place. These limits are not styling
- * preferences — a one-liner that runs long stops being something a reader can
+ * preferences, a one-liner that runs long stops being something a reader can
  * hold in their head, which is the entire premise of the site.
  */
 import { MeterSet, type MeterId } from './meter';
@@ -41,7 +41,7 @@ export const MAX_TRAP = 220;
 /**
  * Sources must be AWS's own words. The site's entire claim is that each
  * classification is backed by a primary page, so this belongs in the model
- * rather than in a test over the committed data — a test only catches a bad
+ * rather than in a test over the committed data, a test only catches a bad
  * record after somebody has written it down.
  */
 export const AWS_SOURCE =
@@ -151,7 +151,7 @@ export class Service {
    * Free means "turns no meters", which is a claim. An empty meter set can
    * also mean the parser threw away meter names it did not recognise, and
    * announcing that as free is the most expensive thing this site could get
-   * wrong — so an unclassified service is never free.
+   * wrong, so an unclassified service is never free.
    */
   get isFree(): boolean {
     return !this.unclassified && this.meters.isFree;
@@ -168,7 +168,7 @@ export class Service {
 
   /**
    * A claim is only as good as the page it came from. A service asserting
-   * meters with no source is not publishable — see Catalogue.unsourced().
+   * meters with no source is not publishable. See Catalogue.unsourced().
    */
   get isSourced(): boolean {
     return this.sources.length > 0;
