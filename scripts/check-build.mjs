@@ -9,6 +9,7 @@
  *
  * Run automatically after `npm run build`.
  */
+import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
@@ -108,6 +109,36 @@ for (const lang of LANGS) {
     const sources = at < 0 ? '' : frontmatter.slice(at);
     if (!/https:\/\//.test(sources)) {
       failures.push(`${lang}/${f}: cites no AWS sources`);
+    }
+  }
+}
+
+// 4. Every inline script must be allowed by the shipped CSP.
+//
+//    `script-src 'self'` blocks inline scripts, and Astro emits small ones
+//    inline rather than as files. That combination shipped a home page whose
+//    live cost counter never started and a services page whose filter did
+//    nothing, with valid HTML and a green build. scripts/csp-hashes.mjs adds
+//    the hashes after the build; this checks it actually did.
+{
+  const headers = await readFile(join(DIST, '_headers'), 'utf8').catch(() => '');
+  const policy = headers.match(/script-src [^;\n]*/)?.[0] ?? '';
+  const seen = new Map();
+
+  for (const file of html) {
+    const body = await readFile(file, 'utf8');
+    for (const [, script] of body.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) {
+      const hash = `sha256-${createHash('sha256').update(script, 'utf8').digest('base64')}`;
+      if (!seen.has(hash)) seen.set(hash, relative(DIST, file));
+    }
+  }
+
+  if (seen.size > 0 && !policy) {
+    failures.push(`${seen.size} inline script(s) but no script-src in dist/_headers`);
+  }
+  for (const [hash, where] of seen) {
+    if (!policy.includes(hash)) {
+      failures.push(`inline script in ${where} is blocked by the CSP (missing '${hash}')`);
     }
   }
 }
