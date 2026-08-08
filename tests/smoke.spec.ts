@@ -91,3 +91,78 @@ test('a topic page renders its diagrams and loads clean', async ({ page }) => {
 
   expect(problems).toEqual([]);
 });
+
+const TOPICS = [
+  'reading-a-bill',
+  'free-tier',
+  'ec2',
+  'idle',
+  'storage-classes',
+  'boundaries',
+  'rounding',
+  'units',
+  'tiers',
+  'regions',
+  'commitments',
+  'account-charges',
+];
+
+test('every topic loads in both languages without an error', async ({ page }) => {
+  const problems = watch(page);
+  for (const slug of TOPICS) {
+    for (const prefix of ['', '/ja']) {
+      const response = await page.goto(`${prefix}/topics/${slug}/`);
+      expect(response?.status(), `${prefix}/topics/${slug}/`).toBe(200);
+      await expect(page.locator('h1')).not.toBeEmpty();
+    }
+  }
+  expect(problems).toEqual([]);
+});
+
+test.describe('reduced motion', () => {
+  test('the counter states the total instead of animating', async ({ page }) => {
+    const problems = watch(page);
+    // Set at runtime rather than through test.use: the fixture form did not
+    // reach matchMedia here, and a preference test that silently tests the
+    // default is worse than none.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+
+    // A number flickering ten times a second in peripheral vision is what this
+    // preference asks us not to do. The argument survives as one reading — a
+    // whole day of an instance nobody is using — so the value must be present
+    // and must be still.
+    const dial = page.locator('#dial-time');
+    await expect(dial).toHaveAttribute('data-value', '24:00:00');
+
+    const cost = await page.locator('#dial-cost').getAttribute('data-value');
+    expect(cost).not.toBe('0.000000');
+
+    await page.waitForTimeout(1500);
+    await expect(dial).toHaveAttribute('data-value', '24:00:00');
+    expect(await page.locator('#dial-cost').getAttribute('data-value')).toBe(cost);
+
+    expect(problems).toEqual([]);
+  });
+});
+
+test.describe('narrow screens', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  for (const path of ['/', '/services/', '/topics/boundaries/']) {
+    test(`${path} does not overflow sideways`, async ({ page }) => {
+      const problems = watch(page);
+      await page.goto(path);
+
+      // Diagrams are wider than a phone and live in their own scroll regions.
+      // If one escapes, the whole document scrolls sideways and every line of
+      // prose goes off-screen with it.
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow, `${path} overflows by ${overflow}px`).toBeLessThanOrEqual(1);
+
+      expect(problems).toEqual([]);
+    });
+  }
+});

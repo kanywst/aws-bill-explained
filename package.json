@@ -10,7 +10,7 @@
     "build": "astro build && node scripts/csp-hashes.mjs && node scripts/check-build.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "npm run lint && astro check && vitest run && npm run build && npm run test:smoke",
+    "check": "npm run lint && astro check && vitest run && npm run build && npm run test:smoke && node scripts/check-freshness.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
