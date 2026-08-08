@@ -26,7 +26,15 @@ export default defineConfig({
     baseURL: deployed ?? 'http://localhost:4321',
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // Three engines because the CSS this site leans on is not uniformly old:
+  // clip-path for the visually-hidden text, context-stroke on the diagram
+  // arrowheads, and prefers-reduced-motion. A Chromium-only run would not
+  // notice an arrowhead that renders nowhere else.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
   ...(deployed
     ? {}
     : {

@@ -15,14 +15,30 @@
  */
 import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
 
-/** Collects console errors and failed requests for the life of a page. */
+/**
+ * Collects console errors, uncaught exceptions and genuinely broken requests.
+ *
+ * Fonts are excluded from the request check on purpose. The webfont is split by
+ * unicode-range, and WebKit starts then cancels the subsets it decides it does
+ * not need; Playwright reports a cancellation as a failed request, so counting
+ * those made the suite fail at random on a font that was present and served.
+ * A font that is actually missing returns 404, which is a response rather than
+ * a failure — so the response check below is what would catch it, and catches
+ * a broken stylesheet or script too.
+ */
 function watch(page: Page) {
   const problems: string[] = [];
   page.on('console', (m: ConsoleMessage) => {
     if (m.type() === 'error') problems.push(`console: ${m.text()}`);
   });
   page.on('pageerror', (e) => problems.push(`uncaught: ${e.message}`));
-  page.on('requestfailed', (r) => problems.push(`request failed: ${r.url()}`));
+  page.on('requestfailed', (r) => {
+    if (r.resourceType() === 'font') return;
+    problems.push(`request failed (${r.failure()?.errorText}): ${r.url()}`);
+  });
+  page.on('response', (r) => {
+    if (r.status() >= 400) problems.push(`HTTP ${r.status()}: ${r.url()}`);
+  });
   return problems;
 }
 

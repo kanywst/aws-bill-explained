@@ -45,9 +45,16 @@
   --m-bytes: #0972d3;
   --m-units: #d13212;
 
-  /* Text-safe equivalents. Measured on #ffffff: 6.39, 4.82, 5.03. */
+  /*
+   * Text-safe equivalents, measured on the tints below rather than on #ffffff.
+   * That distinction is the bug this pair of lines used to carry: the blue was
+   * recorded as 4.82 against white and left identical to its fill, but these
+   * inks are used on tinted panels, and on --m-time-tint it fell to 4.48 —
+   * under AA, on the cross-link at the foot of every service page.
+   * On their own tint: 5.95, 5.75, 4.61.
+   */
   --m-time-ink: #8a5200;
-  --m-bytes-ink: #0972d3;
+  --m-bytes-ink: #0b63ad;
   --m-units-ink: #d13212;
 
   /* Tints for filled backgrounds behind each meter. */
@@ -120,7 +127,11 @@ body {
 }
 
 a {
-  color: var(--m-bytes);
+  /* The ink, not the fill. --m-bytes is the diagram stroke colour, tuned to be
+     seen next to the other two meters rather than to be read as small text; it
+     clears AA on white by 0.32 and fails on any tinted panel. Every link on the
+     site was using it. */
+  color: var(--m-bytes-ink);
   text-underline-offset: 0.15em;
 }
 

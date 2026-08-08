@@ -1,0 +1,71 @@
+name: Claims
+
+# Everything else here runs when we change something. This runs when AWS does.
+#
+# The site's claims decay without a commit: a cited page is retired, a price
+# page is rewritten, an entire Support plan lineup is replaced while every URL
+# describing it keeps returning 200. On a push-only pipeline none of that is
+# noticed until somebody happens to push, which could be weeks.
+on:
+  schedule:
+    # Mondays, 07:00 UTC. Cron on GitHub is best-effort under load, which is
+    # fine for a weekly freshness sweep.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: claims
+  cancel-in-progress: false
+
+jobs:
+  claims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # To file the issue below. Nothing else here writes anything.
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Check cited sources resolve
+        id: sources
+        run: node scripts/check-sources.mjs 2>&1 | tee sources.log
+
+      - name: Check how stale the claims are
+        id: freshness
+        if: always()
+        run: node scripts/check-freshness.mjs 2>&1 | tee freshness.log
+
+      # A failing scheduled run notifies nobody by default — there is no pull
+      # request to turn red. An issue is the only thing anyone will see.
+      - name: Open an issue when a claim has decayed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          existing=$(gh issue list --label claims --state open --limit 1 --json number --jq '.[0].number')
+          fence='```'
+          {
+            echo "The weekly sweep found a citation that no longer resolves, or a claim nobody has revisited."
+            echo
+            echo "${fence}text"
+            tail -n 25 sources.log 2>/dev/null || true
+            tail -n 25 freshness.log 2>/dev/null || true
+            echo "${fence}"
+            echo
+            echo "Run: ${RUN_URL}"
+          } > issue-body.md
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue-body.md
+          else
+            gh issue create --label claims --title "Claims sweep failed" --body-file issue-body.md
+          fi
