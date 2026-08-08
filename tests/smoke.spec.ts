@@ -123,7 +123,10 @@ test('a topic page renders its diagrams and loads clean', async ({ page }) => {
 test('the boundary diagram is announced from the free centre outwards', async ({ page }) => {
   await page.goto('/topics/boundaries/');
 
-  const items = await page.locator('ol.sr').first().locator('li').allInnerTexts();
+  // textContent, not innerText: .sr is clipped to a pixel, and WebKit returns
+  // nothing from innerText for text it does not render. The whole point of
+  // this markup is that it is read while not being drawn.
+  const items = await page.locator('ol.sr').first().locator('li').allTextContents();
   expect(items.length).toBeGreaterThan(2);
 
   const free = items.findIndex((t) => /free/i.test(t));
