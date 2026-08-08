@@ -84,8 +84,8 @@ jobs:
       - name: Build and post-build guards
         run: npm run build
 
-      - name: Install the browser
-        run: npx playwright install --with-deps chromium
+      - name: Install the browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       # The only step here that opens a page. Everything else in this workflow
       # answers a question about the source; this asks whether the site works.

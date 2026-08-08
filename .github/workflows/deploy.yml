@@ -40,8 +40,8 @@ jobs:
       # Deploying past a failing guard would publish a diagram that renders
       # nothing or a claim with no source, so the gates run here too rather
       # than being trusted from the CI workflow.
-      - name: Install the browser
-        run: npx playwright install --with-deps chromium
+      - name: Install the browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Types
         run: npx astro check
