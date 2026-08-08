@@ -311,6 +311,22 @@
     "checked": "2026-08-04"
   },
   {
+    "slug": "simpledb",
+    "name": "Amazon SimpleDB",
+    "category": "database",
+    "meters": ["time", "bytes"],
+    "oneLiner": "Compute-hours that queries actually consume, plus GB-month of stored data. Both have a free allowance.",
+    "trap": "Legacy — no console, and DynamoDB superseded it — but an existing domain keeps billing. Compute meters the time a query consumes, not the request count, so one unindexed scan costs more than thousands of key reads.",
+    "billOn": ["BoxUsage", "TimedStorage-ByteHrs"],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/simpledb/pricing/",
+      "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/Welcome.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSimpleDB/current/us-east-1/index.json"
+    ],
+    "checked": "2026-08-08"
+  },
+  {
     "slug": "timestream",
     "name": "Amazon Timestream",
     "category": "database",

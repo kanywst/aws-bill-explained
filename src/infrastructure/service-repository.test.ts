@@ -2,6 +2,27 @@ import { describe, expect, it } from 'vitest';
 import { InvalidServiceRecordError, loadCatalogue, toService } from './service-repository';
 import { CATEGORY_IDS } from '../domain/service';
 
+import compute from '../data/services/compute.json';
+import storage from '../data/services/storage.json';
+import database from '../data/services/database.json';
+import networking from '../data/services/networking.json';
+import security from '../data/services/security.json';
+import integration from '../data/services/integration.json';
+import management from '../data/services/management.json';
+import analytics from '../data/services/analytics.json';
+
+/** The committed records as they sit on disk, before the boundary cleans them. */
+const RAW: unknown[] = [
+  compute,
+  storage,
+  database,
+  networking,
+  security,
+  integration,
+  management,
+  analytics,
+].flat();
+
 describe('toService', () => {
   const valid = {
     slug: 'amazon-s3',
@@ -117,6 +138,29 @@ describe('the real catalogue', () => {
 
   it('loads and is non-trivial', () => {
     expect(catalogue.size).toBeGreaterThan(100);
+  });
+
+  /**
+   * asStrings drops a non-string quietly, which is right for an untrusted
+   * source but wrong for our own committed data: a source or usage type
+   * mistyped as a number or nested array would simply disappear, and a record
+   * would ship citing fewer pages than its author thought it did. The domain
+   * only notices when every source is dropped. This checks the raw files, so
+   * the drop cannot happen unseen.
+   */
+  it('has no malformed entry that the boundary would silently drop', () => {
+    for (const raw of RAW) {
+      const r = raw as Record<string, unknown>;
+      for (const field of ['sources', 'billOn', 'meters'] as const) {
+        const value = r[field];
+        expect(Array.isArray(value), `${String(r.slug)}.${field} is not an array`).toBe(true);
+        for (const entry of value as unknown[]) {
+          expect(typeof entry, `${String(r.slug)}.${field} contains ${JSON.stringify(entry)}`).toBe(
+            'string',
+          );
+        }
+      }
+    }
   });
 
   it('has no duplicate slugs across the eight research passes', () => {
