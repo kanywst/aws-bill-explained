@@ -87,6 +87,18 @@ Cross-service questions — what's free, what bills the same way, how much of th
 
 `scripts/check-build.mjs` then scans the built HTML for negative SVG dimensions and `NaN` coordinates, checks translation parity, requires a checked date and at least one source on every topic, and fails if any inline script is missing from the policy above. It is a second net under the unit tests, catching what a component composes wrongly at render time — and `npm run test:smoke` is the third, catching what only a browser can see.
 
+## Keeping it current
+
+Nothing here decays because the code changed. It decays because AWS did — a page is retired, a rate moves, a whole product line is renamed while every URL describing it still returns 200. Two checks look for that, and they ask different questions.
+
+`scripts/check-sources.mjs` asks whether a cited page is still there. It follows redirects and treats a page that lands on its guide index as gone, because that is how AWS retires documentation: not with a 404, but with a 200 somewhere less specific.
+
+`scripts/check-freshness.mjs` asks whether anyone has looked lately. Every service record and every article carries a `checked` date; the script warns past 90 days and, with `--strict`, fails past 180.
+
+Both run on every push. Both also run weekly in `.github/workflows/claims.yml`, which is the one that matters — a scheduled failure has no pull request to turn red, so it files an issue under the `claims` label instead, or comments on the open one if there already is one.
+
+When a claim comes up stale, re-verify it against a primary AWS source and move the date. Moving the date without re-reading the source is the one thing that turns this from a check into a ritual.
+
 ## Adding a service
 
 Add an object to the matching file in `src/data/services/`:
