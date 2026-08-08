@@ -25,7 +25,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## Why it works that way
 
-No AWS meter reads the true quantity. Each one reads a quantised version of it — your usage snapped to the next multiple of some unit — and the snap is always upward. Of the 185 services indexed on this site, 26 have a minimum, a floor, or a rounding rule written into their billing, and every one of them is documented locally, as small print on its own pricing page. It is not small print. It is one rule applied everywhere, and it is why small workloads never cost what quantity × rate predicts.
+No AWS meter reads the true quantity. Each one reads a quantised version of it — your usage snapped to the next multiple of some unit — and the snap is always upward. Services with a minimum, a floor, or a rounding rule written into their billing are scattered right across this catalogue, and every one of them is documented locally, as small print on its own pricing page. It is not small print. It is one rule applied everywhere, and it is why small workloads never cost what quantity × rate predicts.
 
 EC2 is the cleanest statement of it. Usage is "billed in one-second increments, with a minimum of 60 seconds" — and that applies to Amazon Linux, Windows, RHEL, Ubuntu and Ubuntu Pro, not to everything you can boot. SUSE Linux Enterprise Server is still billed by the whole hour: each partial instance-hour is charged as a full hour. Same instance type, same region, same workload; the AMI you picked decides whether your quantum is one second or 3,600 of them. EBS follows EC2 — provisioned storage, provisioned IOPS and provisioned throughput are all "billed in per-second increments, with a 60-second minimum".
 
