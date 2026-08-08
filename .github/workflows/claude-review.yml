@@ -2,15 +2,15 @@ name: Claude review
 
 # CI answers "does it build and do the tests pass". This asks the question no
 # script here can: is the claim true, and does the Japanese still say what the
-# English says. Those are the two ways this site actually breaks — a count that
-# drifted away from the catalogue, a rename one locale missed — and both ship
-# green today.
+# English says. Those are the two ways this site actually breaks: a count that
+# drifted away from the catalogue, a rename one locale missed. Both ship green
+# today.
 #
 # It reviews, it does not gate. Nothing here is a required check.
 #
 # The action refuses to run when this file differs from the copy on the default
 # branch, so a pull request cannot rewrite its own reviewer. The cost is that
-# any change to this file — including the one that added it — goes unreviewed
+# any change to this file, including the one that added it, goes unreviewed
 # by Claude until it is merged.
 
 on:
@@ -101,7 +101,7 @@ jobs:
 
             4. **Sources and dates.** Every service record and topic carries a
                `checked` date and an AWS source. A `checked` date moved without
-               a corresponding change to the claim is worth a question — the
+               a corresponding change to the claim is worth a question. The
                date is supposed to mean someone re-read the page.
 
             5. **Rates in the dataset.** `src/data/services/` must not quote
@@ -110,13 +110,13 @@ jobs:
                other and needs a source.
 
             6. **Colour alone.** Diagrams encode billed vs free. Colour is
-               never allowed to be the only signal — it has to work in
+               never allowed to be the only signal. It has to work in
                greyscale and for a screen reader.
 
             Post findings as inline comments on the lines they concern. Use one
             top-level comment for the summary. Be specific and cite
             `file:line`. If the diff is clean against all of the above, say so
-            in one line rather than manufacturing nits — this repo already has
+            in one line rather than manufacturing nits. This repo already has
             another reviewer generating those.
 
             Write the review in Japanese.
