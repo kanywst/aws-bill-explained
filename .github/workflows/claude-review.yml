@@ -120,6 +120,10 @@ jobs:
             another reviewer generating those.
 
             Write the review in Japanese.
+          # 30 turns died on `error_max_turns` before posting anything, having
+          # spent two minutes reading a 250-service catalogue against six
+          # review criteria. The job timeout above is the real backstop; this
+          # only needs to be high enough that the review finishes.
           claude_args: |
-            --max-turns 30
+            --max-turns 80
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*)"
