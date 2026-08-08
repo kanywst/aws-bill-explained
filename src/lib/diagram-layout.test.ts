@@ -24,8 +24,8 @@ import {
 describe('layoutRings', () => {
   /**
    * The regression this file exists for. The boundary map shipped with
-   * height="-40" on its innermost ring, so the free centre, the point of the
-   * whole diagram. Was never drawn.
+   * height="-40" on its innermost ring, so the free centre (the point of the
+   * whole diagram) was never drawn.
    */
   it('never produces a ring that SVG refuses to render', () => {
     for (let count = 1; count <= 12; count += 1) {

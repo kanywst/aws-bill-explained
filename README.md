@@ -69,7 +69,7 @@ Service pages are generated from the catalogue, so adding a service is a data ch
 
 ### Why a domain layer
 
-The dataset is assembled from independent research passes that disagree about naming (`amazon-s3` vs `s3`), and occasionally emit a meter string nobody has seen before. `ServiceSlug` makes identity impossible to get wrong (the only way to hold one is to have gone through its constructor), and the repository drops unknown meters rather than throwing, so a new AWS billing shape degrades to "we don't know" instead of breaking the build.
+The dataset is assembled from independent research passes that disagree about naming (`amazon-s3` vs `s3`) and occasionally emit a meter string nobody has seen before. `ServiceSlug` makes identity impossible to get wrong (the only way to hold one is to have gone through its constructor), and the repository drops unknown meters rather than throwing, so a new AWS billing shape degrades to "we don't know" instead of breaking the build.
 
 The editorial limits live in the `Service` constructor rather than in a test over the committed data. A test can only catch a bad record that has already been written; a constructor makes it unbuildable.
 

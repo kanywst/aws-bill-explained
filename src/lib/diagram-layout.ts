@@ -34,8 +34,8 @@ export interface RingLayout {
 /**
  * Concentric boxes, outermost first.
  *
- * Derived from the innermost ring outward. Deriving it the other way. Fixing
- * the canvas and subtracting per ring: is what produced the negative height,
+ * Derived from the innermost ring outward. Deriving it the other way (fixing
+ * the canvas and subtracting per ring) is what produced the negative height,
  * because the subtraction outran the total once the ring count grew.
  */
 export function layoutRings(count: number, minWidth = 700): RingLayout {
