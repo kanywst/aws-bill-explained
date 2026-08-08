@@ -73,5 +73,5 @@ jobs:
         env:
           SMOKE_BASE_URL: https://aws-bill-explained.pages.dev
         run: |
-          sleep 20
+          node scripts/await-deploy.mjs https://aws-bill-explained.pages.dev/ 120
           npm run test:smoke
