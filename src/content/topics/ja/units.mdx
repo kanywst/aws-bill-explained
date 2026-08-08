@@ -31,10 +31,10 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 チャンクサイズはサービスごとにバラバラで、推測できるような規則性はない。
 
 - **Amazon SQS**: 1 リクエストあたり 64 KB。
-- **Amazon SNS**。publish 側で 64 KB、さらに配信側でも 64 KB。
-- **Amazon EventBridge**。カスタムイベント 1 件あたり 64 KB。「256 KB のペイロードのイベントは 4 イベントとして課金される」。Schema Discovery だけは同じペイロードを 8 KB で刻む。
-- **Amazon API Gateway**。HTTP API は 512 KB 単位、WebSocket メッセージは 32 KB 単位で「33 KB のメッセージは 2 メッセージとして計測される」。REST API だけは例外で、サイズに関係なく 1 回は 1 回。
-- **AWS AppSync**。リアルタイムメッセージは「配信データのペイロード 5 KB ごと」に課金。送受信の両方向。
+- **Amazon SNS**: publish 側で 64 KB、さらに配信側でも 64 KB。
+- **Amazon EventBridge**: カスタムイベント 1 件あたり 64 KB。「256 KB のペイロードのイベントは 4 イベントとして課金される」。Schema Discovery だけは同じペイロードを 8 KB で刻む。
+- **Amazon API Gateway**: HTTP API は 512 KB 単位、WebSocket メッセージは 32 KB 単位で「33 KB のメッセージは 2 メッセージとして計測される」。REST API だけは例外で、サイズに関係なく 1 回は 1 回。
+- **AWS AppSync**: リアルタイムメッセージは「配信データのペイロード 5 KB ごと」に課金。送受信の両方向。
 - **AWS IoT Core**: 1 メッセージ 5 KB。8 KB の publish は 2 メッセージ。
 - **Amazon Kinesis Data Streams** のプロビジョンドモード。PUT ペイロードユニットは 25 KB。45 KB のレコードは 2 ユニット、1 MB のレコードは 40 ユニット。
 
