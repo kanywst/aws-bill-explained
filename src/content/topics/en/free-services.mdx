@@ -1,0 +1,130 @@
+---
+title: The services that cost nothing
+short: Free services
+oneLiner: A service that turns no meter is not the end of the question. What it creates turns three.
+meters: []
+order: 9
+checked: 2026-08-08
+sources:
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.json'
+  - 'https://aws.amazon.com/iam/faqs/'
+  - 'https://aws.amazon.com/cloudformation/pricing/'
+  - 'https://aws.amazon.com/cloudtrail/pricing/'
+  - 'https://aws.amazon.com/iam/access-analyzer/pricing/'
+  - 'https://aws.amazon.com/controltower/pricing/'
+  - 'https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html'
+  - 'https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html'
+  - 'https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html'
+  - 'https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html'
+---
+
+import BoundaryMap from '../../../components/BoundaryMap.astro';
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+This site classifies 253 AWS services by which of the three meters they turn. Thirty of them turn none. That is a real category with a mechanical definition, not a gap in the research.
+
+The definition is checkable. The AWS Price List publishes an index of every offer code AWS bills against — 268 of them at the time of writing. There is no offer code for IAM. None for STS, none for Organizations, none for EC2 Auto Scaling, Control Tower, Elastic Beanstalk, AWS Batch, Resource Explorer or Resource Access Manager. A service with no offer has no usage types, and a usage type is the only material a line item can be made of. There is nothing for the bill to say about it.
+
+The docs say the same thing in prose, and they all say it the same way. IAM "is offered at no additional charge." EC2 Auto Scaling has "no additional fees… You only pay for the AWS resources (for example, EC2 instances, EBS volumes, and CloudWatch alarms) that you use." Gateway VPC endpoints for S3 and DynamoDB: "There is no additional charge for using gateway endpoints." Control Tower: "There is no additional charge to use AWS Control Tower" — followed immediately by the list of services you will be billed for as a result of turning it on, which runs to Service Catalog, CloudTrail, Config, CloudWatch, SNS, S3 and VPC.
+
+Read the second sentence of each of those. It is the same sentence every time. The service is free; the thing it exists to operate is not. That is not hedging. It is the actual shape of the category, and it is the reason this article exists. The meter model answers "which meter does this service turn." For thirty services the answer is none, and on its own that answer is useless, because the question you actually have is what the service will cause.
+
+<BoundaryMap
+  lang="en"
+  caption="A free service sits at the centre of two rings that are not free. Crossing outward is where the bill starts."
+  rings={[
+    {
+      label: 'What it created',
+      crossing: 'full rate card — time, bytes and units',
+      note: 'instances, buckets, repositories, log volume. The stack, not the template',
+    },
+    {
+      label: 'Its paid features',
+      crossing: 'per-feature rate',
+      note: 'third-party resource types, unused-access analysis, data events, extra trails',
+    },
+    {
+      label: 'The service itself',
+      crossing: '$0.00',
+      free: true,
+      note: 'no offer code, no usage type, no line item — ever',
+    },
+  ]}
+/>
+
+There are two different kinds of free underneath this, and they behave differently. IAM's kind has no usage type at all; the word will never appear in a cost report. The other kind has a usage type that is priced at zero — CloudFormation's first 1,000 handler operations a month, CloudTrail's first copy of management events. That kind is a quantity AWS decided not to charge for, which means the quantity is being counted, and a counted quantity has a number after which it is no longer free.
+
+## What it costs
+
+All rates below are us-east-1.
+
+**A free control plane that creates billed resources.** CloudFormation charges nothing for resource providers in the `AWS::*` and `Alexa::*` namespaces — every resource type AWS itself ships. So a template is free to deploy and free to keep. The stack is a bill of materials priced at everyone else's rate card. Auto Scaling is the same pattern with the point made bluntly: the service is free and it exists in order to launch instances.
+
+**The CDK is that pattern with a permanent floor under it.** `cdk bootstrap` deploys a CloudFormation stack named `CDKToolkit` that provisions an S3 bucket for project files and assets, an ECR repository for Docker images, and a set of IAM roles. Environments are independent — each account and Region you deploy to must be bootstrapped separately, so three accounts across two Regions is six buckets and six repositories. The CLI is free, the bootstrap stack is free, the roles are free. The bucket and the repository bill on the bytes meter per GB-month from the moment they exist, and they only grow: assets from every deploy accumulate unless something removes them.
+
+<SequenceDiagram
+  lang="en"
+  caption="Every free step is a real step. The charges all land on the last actor, which is not a service you chose."
+  actors={[
+    { id: 'you', label: 'You' },
+    { id: 'cli', label: 'CDK CLI' },
+    { id: 'cfn', label: 'CloudFormation' },
+    { id: 'acct', label: 'Your account' },
+  ]}
+  steps={[
+    { from: 'you', to: 'cli', label: 'cdk bootstrap' },
+    { from: 'cli', to: 'cfn', label: 'deploy CDKToolkit' },
+    {
+      from: 'cfn',
+      to: 'acct',
+      label: 'S3 bucket + ECR repo + roles',
+      meter: 'bytes',
+      charge: 'per GB-month, forever',
+    },
+    { from: 'you', to: 'cli', label: 'cdk deploy' },
+    {
+      from: 'cli',
+      to: 'acct',
+      label: 'upload assets',
+      meter: 'bytes',
+      charge: 'stored, not swept',
+    },
+    { from: 'cli', to: 'cfn', label: 'create stack (AWS::* types)' },
+    { from: 'cfn', to: 'acct', label: 'provision resources', meter: 'time', charge: 'rate card' },
+  ]}
+/>
+
+**Free and not-free doing the same job.** A gateway endpoint for S3 or DynamoDB costs nothing — no hourly charge, no per-GB charge. An interface endpoint reaches the same services over PrivateLink and bills on two meters at once: `USE1-VpcEndpoint-Hours` at $0.01 per endpoint per hour, charged for each Availability Zone the endpoint is provisioned in, plus `USE1-VpcEndpoint-Bytes` at $0.01 per GB for the first petabyte a month. Three AZs is $0.03 an hour before a byte moves. There are real reasons to pay — a gateway endpoint cannot be reached from on-premises or across Regions — but the two options sit next to each other in the same console flow, and nothing marks the moment you left $0.00.
+
+<PathDiagram
+  lang="en"
+  caption="The same request to the same bucket. Swap the endpoint type and it is free; leave it and the endpoint bills on time and bytes."
+  nodes={[
+    { id: 'app', label: 'EC2 instance', sub: 'private subnet', charges: ['time'] },
+    { id: 'vpce', label: 'Interface endpoint', sub: 'one ENI per AZ', charges: ['time'] },
+    { id: 's3', label: 'Amazon S3', sub: 'same Region' },
+  ]}
+  hops={[
+    { from: 'app', to: 'vpce', label: 'GetObject', meter: 'bytes', cost: '$0.01/GB' },
+    { from: 'vpce', to: 's3', label: 'over PrivateLink' },
+    { from: 's3', to: 'vpce', label: 'object bytes back' },
+    { from: 'vpce', to: 'app', label: 'also processed', meter: 'bytes', cost: '$0.01/GB' },
+  ]}
+/>
+
+**Free until a specific feature.** IAM Access Analyzer holds both prices inside one service name. External access analyzers, policy validation and policy generation are "provided at no additional charge." Unused access analysis bills $0.20 per IAM role or user per month. Same console, same service on the bill, and the switch is a choice made at analyzer creation. CloudTrail draws its line somewhere else again: one copy of ongoing management events delivered to S3 is free, additional copies bill $2.00 per 100,000 events, data events bill $0.10 per 100,000, and Insights on management events runs $0.35 per 100,000 events analyzed per insight type. In both cases the boundary is a feature, not a service — which means it cannot be found by asking whether the service is free.
+
+## Traps
+
+**You deleted the free thing and kept what it made.** CloudFormation's `DeletionPolicy: Retain` is documented in exactly these words: when the stack is deleted, "resources that are retained continue to exist and continue to incur applicable charges until you delete those resources." `Snapshot` behaves identically — the snapshots outlive the stack and keep billing. The stack vanishes from the console, the delete reports success, and the volume is still there. A bootstrapped CDK environment nobody deploys to any more is the version nobody thinks to check, because there is no application attached to it to remind you.
+
+**A free service's logging is not free.** CloudTrail is where this bites hardest, because the free part is generous enough to hide the shape. The first trail's management events cost nothing to deliver, but the S3 bucket they land in is charged as ordinary S3 storage, and sending the same events to CloudWatch Logs is a separate charge on top: CloudTrail bills $0.25 per GB delivered to a log group, and CloudWatch Logs bills its own ingestion on top of that. Turn on S3 data events for a busy bucket and the units meter starts counting object-level operations at $0.10 per 100,000. Nothing about the trail changed. What changed is how much of your own activity you asked it to write down.
+
+**Free in one direction only.** The us-east-1 price list carries `DataTransfer-In-Bytes` at $0.000 per GB and `DataTransfer-Out-Bytes` at $0.090 per GB for the first 10 TB a month. Same wire, same bytes, one direction free. Region-to-region is the same asymmetry in miniature: `USE1-APN1-AWS-In-Bytes` is $0.00 and `USE1-APN1-AWS-Out-Bytes` is $0.02, so a copy between N. Virginia and Tokyo is billed once, on the sending side, while the receiving side's usage type exists and reads zero. "It was free last time" is a statement about direction, not about the operation.
+
+**"No charge for the service" is not "no charge."** It is a statement about one line of the price list, made by the team that owns that line. It says nothing about the resources, the storage, the log volume, the endpoints, or the cross-Region bytes that the service exists to produce. The useful question is never whether a service is free. It is what the free service is holding.

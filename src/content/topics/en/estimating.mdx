@@ -1,0 +1,99 @@
+---
+title: Costing it before you build it
+short: Estimating
+oneLiner: An estimate is a model of which meters will turn. It fails by omitting one, not by mispricing it.
+meters: []
+order: 35
+checked: 2026-08-08
+sources:
+  - 'https://docs.aws.amazon.com/pricing-calculator/latest/userguide/what-is-pricing-calculator.html'
+  - 'https://aws.amazon.com/calculator/calculator-assumptions/'
+  - 'https://docs.aws.amazon.com/cost-management/latest/userguide/pricing-calculator.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/price-changes.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/reading-service-price-list-file-for-services.html'
+  - 'https://docs.aws.amazon.com/cli/latest/reference/pricing/get-products.html'
+  - 'https://docs.aws.amazon.com/cur/latest/userguide/table-dictionary-cur2-line-item.html'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
+  - 'https://aws.amazon.com/vpc/pricing/'
+  - 'https://repost.aws/knowledge-center/estimating-aws-resource-costs'
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+An estimate looks like a lookup: find the rate, multiply by the quantity, add it up. It is not. Rates are published, machine-readable and free to fetch. What decides whether your number is right is the list of meters you thought to put on the page — how many hours a thing will exist, how many gigabytes will cross a boundary, how many discrete units will get counted. With the right list the arithmetic is trivial. With a list that is short by one entry the arithmetic is irrelevant.
+
+That asymmetry is why estimates fail in a predictable direction. Almost nobody types the wrong rate; the rate is right there. What happens is that the NAT Gateway the private subnet needed was never in the sketch, so the meter it turns is not in the total. An estimate is nearly always low, and it is low because it is missing meters, not because it mispriced the ones it has.
+
+AWS gives you two instruments here and they are not substitutes. AWS Pricing Calculator is a form: you describe a configuration and it prices it. The AWS Price List is the rate card underneath — the same numbers as files and as an API, without the form. The calculator's own documentation says its prices come from the Price List API, so reaching past the UI is not going around AWS. It is going to the same place with fewer assumptions in the way.
+
+There are also two calculators, which trips people up. The public one at calculator.aws needs no account and is free. The in-console one, inside Billing and Cost Management, can import your existing usage, model Savings Plans and Reserved Instances against it, and show rates before or after your discounts. Its workload estimates are free; its bill estimates give you five per calendar month and then cost $2 each. The estimating tool itself has a units meter.
+
+<SequenceDiagram
+  lang="en"
+  caption="The calculator is a form over the Price List. Only the last exchange is billed, and only in the in-console version, after five bill estimates in a calendar month."
+  actors={[
+    { id: 'you', label: 'You' },
+    { id: 'calc', label: 'Pricing Calculator' },
+    { id: 'pl', label: 'Price List API' },
+  ]}
+  steps={[
+    { from: 'you', to: 'calc', label: 'Configure a service, pick a region' },
+    { from: 'calc', to: 'pl', label: 'Fetch rates for that region' },
+    { from: 'pl', to: 'calc', label: 'SKU, terms, priceDimensions', reply: true },
+    { from: 'calc', to: 'you', label: 'Monthly total at 730 hours', reply: true },
+    {
+      from: 'you',
+      to: 'calc',
+      label: 'In-console bill estimate, sixth this month',
+      meter: 'units',
+      charge: '$2 per estimate',
+    },
+  ]}
+/>
+
+Both calculators price exactly what you enter and nothing else. The published assumptions are worth reading before you trust a total: a month is 730 hours, leap years are ignored, taxes are excluded, and free tier pricing, promotional credits and other discounts are not applied. Only the first twelve months are shown, so a three-year commitment renders as a twelve-month slice of itself.
+
+## What it costs
+
+The Price List is a small tree of static files under `pricing.us-east-1.amazonaws.com`, and any service's rate card is three hops from the root.
+
+<PathDiagram
+  lang="en"
+  caption="Four plain HTTPS files. The last one is the whole rate card for one service in one region, in JSON or CSV."
+  nodes={[
+    { id: 'services', label: 'index.json', sub: 'service index' },
+    { id: 'versions', label: '<service>/index.json', sub: 'version index' },
+    { id: 'regions', label: 'region_index.json', sub: 'regions for a version' },
+    { id: 'rates', label: '<region>/index.json', sub: 'products + terms' },
+  ]}
+  hops={[
+    { from: 'services', to: 'versions', label: 'pick an offerCode, e.g. AmazonVPC' },
+    { from: 'versions', to: 'regions', label: 'pick a version, or "current"' },
+    { from: 'regions', to: 'rates', label: 'pick us-east-1' },
+  ]}
+/>
+
+Inside the final file, `products` is a map keyed by SKU, each entry carrying a `productFamily` and a bag of attributes. `terms` is a parallel map keyed by term type — `OnDemand`, `Reserved` or `FlatRate` — then by the same SKU, then by an offer term code. Under a term sit `priceDimensions`, each with a `unit`, a `startingRange` and `endingRange`, and a `pricePerUnit`. Those ranges are the tiers: one SKU can carry several price dimensions because the rate changes as volume grows, and the SKU alone tells you nothing about which one you will land in.
+
+The attribute that bridges the rate card to your bill is `usagetype`. It is the same string that appears in the `line_item_usage_type` column of a Cost and Usage Report, so a usage type you found while estimating is a usage type you can search for afterwards to check whether you were right. In the us-east-1 AmazonVPC price list, `USE1-PublicIPv4:InUseAddress` is a product whose OnDemand price dimension has a unit of `Hrs` and a price of $0.005, described as "$0.005 per In-use public IPv4 address per hour". Sitting next to it is `USE1-PublicIPv4:IdleAddress` at the same rate. Reading a service's usage type list is the closest thing that exists to a checklist of meters that service can turn.
+
+The other route to the same data is the Price List Query API, which is a real AWS service with its own endpoints — `api.pricing.us-east-1.amazonaws.com`, `api.pricing.eu-central-1.amazonaws.com`, `api.pricing.ap-south-1.amazonaws.com` — and its own IAM permissions. `aws pricing describe-services` lists service codes and the attribute names you can filter each one on; `aws pricing get-products --service-code AmazonEC2 --filters ...` returns the matching products with their terms attached. The endpoint region is only where you call; it has nothing to do with which region you are pricing. Use the Query API when you want a handful of SKUs behind a filter, and the bulk files when you want a whole service at once, need the throughput, or need a historical version — every published version stays addressable, and `current` is an alias for the newest.
+
+Two gaps in the catalogue matter for estimating. The Query API does not return Savings Plans prices, which live in a separate `savingsPlan/v1.0/` tree of bulk files. And the catalogue includes the perpetual, usage-based free tier offers but not the time-limited ones that expire with the account's age, and it excludes EC2 Spot entirely.
+
+## Traps
+
+**The machine-readable copy is not the authority.** Both the calculator and the Price List documentation say the same thing in different words: where the file and the service pricing page disagree, you are charged what the pricing page says. Treat the API as the fast, complete, queryable copy of the rates — not as the contract.
+
+**You estimated the resource, not the assembly.** A compute instance drags things behind it and each one is a separate meter with its own usage type: an EBS volume billed on provisioned size whether or not the instance is running; a public IPv4 address at $0.005 per hour in us-east-1, charged identically whether it is in use or idle; and, if the thing sits in a private subnet that needs to reach the internet, a NAT Gateway at $0.045 per hour plus $0.045 per gigabyte processed. At the calculator's own 730-hour month that gateway is $32.85 before a single byte moves. Then there is shape: the moment a design has two Availability Zones, the traffic between them is a byte meter that a single-AZ sketch never had a box for.
+
+**Check the region before you read the total.** The calculator opens on a default region and will happily produce a confident number for the wrong one. Prices differ per region for essentially everything, so a total is meaningless until you know which region produced it. In the Price List the region is impossible to miss — it is a path segment in the URL and a prefix on every usage type — which is one good reason to sanity-check a calculator total against the file.
+
+**Term mismatch cuts both ways.** An estimate built from on-demand rates for a workload that will actually run under a Savings Plan or a Reserved Instance overstates it. An estimate built from committed rates for capacity nobody has committed to yet understates it, and understates it for the whole life of the thing. The bulk files make the distinction explicit — `OnDemand` and `Reserved` are separate term blocks under the same SKU — so if you are pricing from the file, choosing the wrong block is a deliberate act rather than an oversight.
+
+**Free tier assumptions outlive the free tier.** The public calculator does not apply free tier at all, so for a new account's first year it reads high and after that it reads correctly. A script reading the Price List has the inverse blind spot in one narrow way: the perpetual free tier offers are in the catalogue, the twelve-month ones are not. Either way, an estimate that quietly depends on a free tier has an expiry date on it, and nothing in the tooling will tell you when it passed.

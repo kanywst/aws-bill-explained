@@ -67,7 +67,7 @@ There are two families of cost allocation tag. **User-defined** tags are the one
 
 The timing is what catches people. After you apply a user-defined tag it can take up to 24 hours for the key to appear on the cost allocation tags page, and up to another 24 hours to activate after you select it. Then it starts from there. Activation is forward-only.
 
-There is one way back, and it is bounded. `StartCostAllocationTagBackfill` re-applies the current activation status to past months, but `BackfillFrom` must be the first day of a month and, in AWS's words, dates can't precede the previous twelve months. You can request one backfill every 24 hours. Read what it actually restores: the activation *status* of tag keys, not the tags. A resource that carried no tag in March is still untagged in March after the backfill.
+There is one way back, and it is bounded. `StartCostAllocationTagBackfill` re-applies the current activation status to past months, but `BackfillFrom` must be the first day of a month and, in AWS's words, dates can't precede the previous twelve months. You can request one backfill every 24 hours. Read what it actually restores: the activation _status_ of tag keys, not the tags. A resource that carried no tag in March is still untagged in March after the backfill.
 
 Some charges can never be tagged, and AWS enumerates them when explaining unallocated cost in a report. Subscription-based charges, such as AWS Support and AWS Marketplace monthly fees, can't be allocated. One-time fees, such as Amazon EC2 Reserved Instance upfront charges, can't be allocated. Add services that don't support tagging, and resources that were untagged for part or all of the period, and you have the gap between your tagged total and your invoice.
 

@@ -1,0 +1,130 @@
+---
+title: タダのサービスが取り立てるもの
+short: 無料サービス
+oneLiner: メーターを1つも回さないサービスは答えの終点じゃない。それが作ったものが3つ回す。
+meters: []
+order: 9
+checked: 2026-08-08
+sources:
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.json'
+  - 'https://aws.amazon.com/iam/faqs/'
+  - 'https://aws.amazon.com/cloudformation/pricing/'
+  - 'https://aws.amazon.com/cloudtrail/pricing/'
+  - 'https://aws.amazon.com/iam/access-analyzer/pricing/'
+  - 'https://aws.amazon.com/controltower/pricing/'
+  - 'https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html'
+  - 'https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html'
+  - 'https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html'
+  - 'https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html'
+---
+
+import BoundaryMap from '../../../components/BoundaryMap.astro';
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+このサイトは AWS の253サービスを「3つのメーターのどれを回すか」で分類している。うち30サービスは1つも回さない。調査の穴ではなく、機械的な定義を持った実在のカテゴリだ。
+
+定義は検証できる。AWS Price List は課金対象になるオファーコードの一覧を公開していて、執筆時点で268件ある。そこに IAM はない。STS もない。Organizations、EC2 Auto Scaling、Control Tower、Elastic Beanstalk、AWS Batch、Resource Explorer、Resource Access Manager — どれもない。オファーがないサービスには usage type がない。そして請求書の1行は usage type からしか作れない。書きようがないのだ。
+
+ドキュメントの言い回しも全部同じ形をしている。IAM は "offered at no additional charge"。EC2 Auto Scaling は "no additional fees… You only pay for the AWS resources (for example, EC2 instances, EBS volumes, and CloudWatch alarms) that you use"。S3 と DynamoDB のゲートウェイ VPC エンドポイントは "There is no additional charge for using gateway endpoints"。Control Tower は "There is no additional charge to use AWS Control Tower" と言った直後に、有効化した結果として課金されるサービスを並べる — Service Catalog、CloudTrail、Config、CloudWatch、SNS、S3、VPC。
+
+2文目を読み直してほしい。毎回まったく同じ構造になっている。**サービスは無料で、そのサービスが動かす対象は無料ではない**。言い逃れではなく、これがこのカテゴリの実際の形だ。メーターモデルは「このサービスはどのメーターを回すか」に答える。30サービスの答えは「回さない」で、その答えは単体では役に立たない。知りたいのは、そのサービスが何を生むかだからだ。
+
+<BoundaryMap
+  lang="ja"
+  caption="無料サービスは、無料じゃない2枚のリングの中心に座っている。外に越えた時点から請求が始まる。"
+  rings={[
+    {
+      label: '作られたもの',
+      crossing: '通常レート — time / bytes / units',
+      note: 'インスタンス、バケット、リポジトリ、ログ量。テンプレートではなくスタックのほう',
+    },
+    {
+      label: '有料機能',
+      crossing: '機能ごとのレート',
+      note: 'サードパーティのリソースタイプ、未使用アクセス分析、データイベント、2本目の証跡',
+    },
+    {
+      label: 'サービス本体',
+      crossing: '$0.00',
+      free: true,
+      note: 'オファーコードなし、usage type なし、請求行なし',
+    },
+  ]}
+/>
+
+この下には2種類の「無料」がある。IAM の側は usage type がそもそも存在しない。コストレポートにその単語が出ることは永遠にない。もう一方は、usage type はあって値段がゼロになっている側だ — CloudFormation の月1,000ハンドラ操作、CloudTrail の管理イベント1コピー目。こちらは AWS が「数えた上で請求しないと決めた量」であり、数えられている以上、無料でなくなる境目の数字が必ずある。
+
+## で、いくらなの
+
+以下すべて us-east-1。
+
+**無料のコントロールプレーンが、課金されるリソースを作る。** CloudFormation は `AWS::*` と `Alexa::*` ネームスペースのリソースプロバイダについて一切課金しない。AWS 自身が提供する全リソースタイプがここに入る。だからテンプレートはデプロイもタダ、置いておくのもタダ。一方スタックは、他人のレートカードで値付けされた部品表だ。Auto Scaling はもっと露骨に同じ形をしている — サービス自体は無料で、そのサービスはインスタンスを起動するために存在する。
+
+**CDK は、そこに恒久的な床を敷くバージョンだ。** `cdk bootstrap` は `CDKToolkit` という CloudFormation スタックをデプロイし、プロジェクトファイルとアセット用の S3 バケット、Docker イメージ用の ECR リポジトリ、IAM ロール一式をプロビジョニングする。環境は互いに独立していて、デプロイ先のアカウントとリージョンごとに個別のブートストラップが要る。3アカウント×2リージョンなら、バケット6個とリポジトリ6個。CLI も、ブートストラップスタックも、ロールも無料。バケットとリポジトリは存在した瞬間から GB 月あたりの bytes メーターを回し、しかも減らない。何かが消さない限り、全デプロイのアセットが積み上がっていく。
+
+<SequenceDiagram
+  lang="ja"
+  caption="無料のステップも実在するステップ。課金は全部、自分が選んだ覚えのない最後のアクターに落ちる。"
+  actors={[
+    { id: 'you', label: '自分' },
+    { id: 'cli', label: 'CDK CLI' },
+    { id: 'cfn', label: 'CloudFormation' },
+    { id: 'acct', label: '自分のアカウント' },
+  ]}
+  steps={[
+    { from: 'you', to: 'cli', label: 'cdk bootstrap' },
+    { from: 'cli', to: 'cfn', label: 'CDKToolkit をデプロイ' },
+    {
+      from: 'cfn',
+      to: 'acct',
+      label: 'S3 バケット + ECR リポジトリ + ロール',
+      meter: 'bytes',
+      charge: 'GB 月、以後ずっと',
+    },
+    { from: 'you', to: 'cli', label: 'cdk deploy' },
+    {
+      from: 'cli',
+      to: 'acct',
+      label: 'アセットをアップロード',
+      meter: 'bytes',
+      charge: '溜まる。掃除はされない',
+    },
+    { from: 'cli', to: 'cfn', label: 'スタック作成 (AWS::* 型)' },
+    { from: 'cfn', to: 'acct', label: 'リソースを構築', meter: 'time', charge: 'レートカード' },
+  ]}
+/>
+
+**同じ仕事をする無料版と有料版。** S3 / DynamoDB のゲートウェイエンドポイントは完全にタダ。時間課金もGB課金もない。インターフェースエンドポイントは PrivateLink 経由で同じサービスに届き、メーターを2つ同時に回す — `USE1-VpcEndpoint-Hours` がエンドポイント1つ1時間あたり $0.01、しかもプロビジョニングした AZ ごとに計上され、加えて `USE1-VpcEndpoint-Bytes` が月1PBまで1GBあたり $0.01。3 AZ なら1バイトも流れないうちから1時間 $0.03。有料側を選ぶ理由は実在する（ゲートウェイエンドポイントはオンプレやリージョン跨ぎからは届かない）。ただしこの2つは同じコンソールの流れの中で隣り合っていて、$0.00 側から出た瞬間を教えてくれるものは何もない。
+
+<PathDiagram
+  lang="ja"
+  caption="同じバケットへの同じリクエスト。エンドポイント種別を変えるだけで無料になり、変えなければ time と bytes を回し続ける。"
+  nodes={[
+    { id: 'app', label: 'EC2 インスタンス', sub: 'プライベートサブネット', charges: ['time'] },
+    { id: 'vpce', label: 'インターフェースEP', sub: 'AZ ごとに ENI 1つ', charges: ['time'] },
+    { id: 's3', label: 'Amazon S3', sub: '同一リージョン' },
+  ]}
+  hops={[
+    { from: 'app', to: 'vpce', label: 'GetObject', meter: 'bytes', cost: '$0.01/GB' },
+    { from: 'vpce', to: 's3', label: 'PrivateLink 経由' },
+    { from: 's3', to: 'vpce', label: 'オブジェクトが返る' },
+    { from: 'vpce', to: 'app', label: 'これも処理量', meter: 'bytes', cost: '$0.01/GB' },
+  ]}
+/>
+
+**特定の機能から有料になる。** IAM Access Analyzer は1つのサービス名の中に両方の値段を抱えている。外部アクセス分析、ポリシー検証、ポリシー生成は "provided at no additional charge"。未使用アクセス分析は IAM ロールまたはユーザー1つあたり月 $0.20。同じコンソール、請求書上も同じサービス名、切り替えはアナライザー作成時の選択ひとつ。CloudTrail は線の引き場所がまた別だ。管理イベントを S3 に配信する1コピー目は無料、追加コピーは10万イベントあたり $2.00、データイベントは10万あたり $0.10、管理イベントの Insights は insight type ごとに分析10万イベントあたり $0.35。どちらも境界はサービスではなく機能にある。つまり「このサービスは無料か」という問いでは絶対に見つからない場所にある。
+
+## 例外と罠
+
+**無料のほうを消して、作らせたほうを残した。** CloudFormation の `DeletionPolicy: Retain` はこう明記されている。スタックを削除しても、保持されたリソースは "continue to exist and continue to incur applicable charges until you delete those resources"。`Snapshot` も同じで、スナップショットはスタックより長生きして課金され続ける。スタックはコンソールから消え、削除は成功と報告され、ボリュームはそこに残っている。誰もデプロイしなくなったブートストラップ済み CDK 環境が、この罠の最も見つからない形だ。紐づくアプリケーションがないから、思い出すきっかけがない。
+
+**無料サービスのログは無料じゃない。** CloudTrail が一番刺さる。無料部分がそこそこ手厚いせいで、形が見えなくなるからだ。1本目の証跡の管理イベントは配信が無料。ただし着地先の S3 バケットは通常の S3 ストレージとして課金され、同じイベントを CloudWatch Logs にも送るなら別途課金される — CloudTrail 側がロググループへの配信で1GBあたり $0.25、その上に CloudWatch Logs 自身の取り込み料金が乗る。忙しいバケットで S3 データイベントを有効にすれば、units メーターがオブジェクト単位の操作を10万あたり $0.10 で数え始める。証跡そのものは何も変わっていない。変わったのは、自分の活動のどこまでを書き取らせたか、だ。
+
+**片方向だけ無料。** us-east-1 の price list には `DataTransfer-In-Bytes` が1GBあたり $0.000、`DataTransfer-Out-Bytes` が月10TBまで $0.090 と載っている。同じ線、同じバイト、片方向だけ無料。リージョン間も同じ非対称の縮小版で、`USE1-APN1-AWS-In-Bytes` が $0.00、`USE1-APN1-AWS-Out-Bytes` が $0.02。バージニア北部と東京の間のコピーは送信側で1回だけ課金され、受信側の usage type は存在した上でゼロを表示する。「前回はタダだった」は操作についての言明ではなく、向きについての言明でしかない。
+
+**「サービス自体は無料」は「無料」ではない。** それは price list の1行についての言明であり、その行を持っているチームが言っているだけだ。リソースについても、ストレージについても、ログ量についても、エンドポイントについても、リージョンを跨ぐバイトについても、何も言っていない。役に立つ問いは「このサービスは無料か」ではない。「この無料サービスは何を抱えているか」だ。

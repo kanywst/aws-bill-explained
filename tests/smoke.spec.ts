@@ -13,6 +13,7 @@
  * two things a reader would notice first and the one thing that hides: a
  * console error.
  */
+import { readdirSync } from 'node:fs';
 import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
 
 /**
@@ -137,20 +138,14 @@ test('the boundary diagram is announced from the free centre outwards', async ({
   expect(items.at(-1), 'the outermost ring should be the internet').toMatch(/internet/i);
 });
 
-const TOPICS = [
-  'reading-a-bill',
-  'free-tier',
-  'ec2',
-  'idle',
-  'storage-classes',
-  'boundaries',
-  'rounding',
-  'units',
-  'tiers',
-  'regions',
-  'commitments',
-  'account-charges',
-];
+/**
+ * Read from disk rather than listed by hand. The hand-written version claimed
+ * to cover "every topic" while four newer ones were missing from it — the list
+ * drifted the first time articles were added after it was written.
+ */
+const TOPICS = readdirSync(new URL('../src/content/topics/en/', import.meta.url))
+  .filter((f) => f.endsWith('.mdx'))
+  .map((f) => f.replace(/\.mdx$/, ''));
 
 test('every topic loads in both languages without an error', async ({ page }) => {
   const problems = watch(page);

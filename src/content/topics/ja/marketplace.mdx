@@ -1,0 +1,131 @@
+---
+title: AWS が値付けしていない請求
+short: Marketplace
+oneLiner: 請求書の一部は他社のソフトで、AWS は決済経路にすぎない。メーターを決めたのは売り手で、いつものレバーは届かない。
+meters: []
+order: 37
+checked: 2026-08-08
+sources:
+  - 'https://docs.aws.amazon.com/cur/latest/userguide/billing-columns.html'
+  - 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create-filters.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/pricing-ami-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/pricing-container-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/saas-subscriptions.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/developerguide/metering-apis.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-paying-for-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-ami-subscriptions.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-private-offers.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/APIReference/API_marketplace-agreements_EstimatedCharges.html'
+  - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/marketplace-manage-subscriptions.html'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-services.html'
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+このサイトの他のページは、暗黙のうちに3つを前提にしている。**メーターを回しているのは AWS**、**単価を公開しているのも AWS**、そして**使う前に単価を調べられる**。AWS Marketplace はこの3つを全部壊す。しかも同じ請求書の上で、他の行と見分けのつかない顔をして混ざっている。
+
+両者を分けているのは Cost and Usage Report の `bill/BillingEntity` という列だ。取りうる値は2つ。`AWS` は「AWS Marketplace 以外の AWS サービスの取引」を指し、`AWS Marketplace` は「AWS Marketplace での購入」を指す。**境界はこの1列がすべて**だ。片側は AWS が値付けした金額で、もう片側は AWS ではない会社が、AWS が書いていない出品ページで決めた金額。同じディメンションは AWS Budgets と Cost Explorer に **Billing entity** フィルタとして出ているので、SQL を書かなくても請求書をこの線で割れる。
+
+分業の内訳は、AWS 自身の AMI 製品向けセラードキュメントに書いてある。インフラの料金は「AWS が定義・管理し、AWS リージョンによって変動しうる」。ソフトウェアの料金は、有料製品なら「売り手が定義する」。**2つのカテゴリが出品ページに別々に表示され、事前に読めるレートカードを持っているのは片方だけ**だ。
+
+2つ目に変わるのが、**メーターを読む人**。使用量ベースの製品では、読んでいるのは売り手だ。AWS Marketplace Metering Service は売り手向けの API で、`MeterUsage` は EC2 インスタンスまたは ECS / EKS 上のコンテナから、`BatchMeterUsage` は SaaS アプリケーションから、`RegisterUsage` は有料コンテナ製品から呼ばれる。AWS が SaaS セラーに向けて書いている一文が、この関係のいちばん率直な説明になっている。「お客様の製品の使用量に対して当社が課金できるかどうかは、貴社から計量レコードを受け取れるかに依存します。計量レコードが正しく送信・受信されることを保証する責任は貴社にあります」。**請求書に載っている数量は、ベンダーが送ってきた数量**だ。
+
+3つ目に変わるのが、**どのメーターか**。これも売り手が選ぶ。SaaS サブスクリプションを出品するとき、価格カテゴリは Bandwidth、Data、Hosts、Requests、Users から選び、どれも当てはまらなければ汎用の Units を選ぶ。1製品あたりディメンションは最大 200。コンテナ製品はカスタムディメンションを最大 24 まで持てて、ユーザー数・ノード数・リポジトリ数・GB といったものが並ぶ。つまり Marketplace の行は **time** にも **bytes** にも **units** にもなりうるし、どれになるかは**プロビジョニングした物の性質ではなく、あるベンダーのプライシング担当が下した判断**でしかない。
+
+<PathDiagram
+  lang="ja"
+  caption="AWS 自身の計算例を、実態どおりに描いたもの。1つのインスタンスが2本の課金を生む。左のホップを値付けしたのは AWS。右を値付けしたのは売り手で、AWS はそれを回収する経路でしかない。"
+  nodes={[
+    {
+      id: 'inst',
+      label: 'EC2 インスタンス1台',
+      sub: '有料 AMI から起動',
+      charges: ['time'],
+    },
+    { id: 'aws', label: '1枚の AWS 請求書', sub: '2つの billing entity' },
+    { id: 'seller', label: '売り手', sub: 'ソフトの単価を決める人', charges: ['time'] },
+  ]}
+  hops={[
+    {
+      from: 'inst',
+      to: 'aws',
+      label: 'インフラ — bill/BillingEntity = AWS',
+      meter: 'time',
+      cost: '$0.085/時',
+    },
+    {
+      from: 'aws',
+      to: 'seller',
+      label: 'ソフトウェア — bill/BillingEntity = AWS Marketplace',
+      meter: 'time',
+      cost: '$0.12/時',
+    },
+  ]}
+/>
+
+## で、いくらなの
+
+「Marketplace はいくらか」という問いには、EBS に対するような答えは存在しない。あるのは**型**だけだ。
+
+**AMI の時間課金ソフトウェア。** AWS の計算例そのままいく。small インスタンスで 720 時間動かし、売り手のソフトウェア料金が時間 $0.12、EC2 の料金が時間 $0.085 のとき、請求は **$147.60**。内訳はソフトウェアが $86.40、インフラが $61.20 だ。**1台のインスタンス、2つの単価、2つのエンティティ**。ついでに、AMI の時間課金は「1時間単位に切り上げ」される一方、その下で動いている EC2 インスタンスは秒課金だ。**切り上げのルールは売り手のもの**であって AWS のものではない。
+
+**コンテナの pod / task 課金。** 時間単価で提示されるが、計測は秒単位、最低1分。AWS の例では controller pod が時間 $6 で、20分30秒動かすと 20 × ($6/60) + 30 × ($6/60/60) = $2.05、5個動かせば時間 $30。ここには AWS 料金と決定的に違う点がある。売り手がコンテナ製品に付けた価格は「すべての AWS リージョンに適用される」ので、安いリージョンへ移してもインフラの行は動くが、ソフトウェアの行は動かない。
+
+**月額。** 何台動かしていようが毎月定額。加入時と解約時に日割りされる。AWS の例は「月の1日だけ加入した買い手は 30分の1 を払う」。
+
+**年額。** 一括前払いで、その後12か月は時間課金がゼロ。ただし対象は **EC2 インスタンス1台**、しかも**購入時に指定したインスタンスタイプだけ**。それ以外は時間課金で走る。
+
+**契約 (contract)。** 公開契約は 1・12・24・36 か月から選び、ユニットごとに数量を指定すると、**契約総額が契約作成時点でアカウントに請求される**。プライベートオファーはこれを最長12年のカスタム期間まで広げ、請求日と支払額は売り手が設定する。Marketplace Agreement API の `agreementValue` は「契約のライフサイクル全体で顧客が支払うことが確定している総額」と定義されていて、従量課金を含む契約の場合この値は「コミット済みの金額のみを含み、超過分は含まない」。
+
+ここから先が、実際に金の出入りするところだ。
+
+**Savings Plans も Reserved Instances も、ソフトウェア料金には届かない。** Savings Plans の対象サービスは EC2・Fargate・Lambda・SageMaker AI であって、Marketplace はそこにいない。Reserved Instance のほうも、条件の合う On-Demand の EC2 使用量に適用される請求割引でしかない。バイヤーガイドはインスタンスタイプ変更の話の中で一文で言い切っている。インスタンスタイプを変えると「Amazon EC2 のインフラは締結済みの savings plan にもとづいて請求されます。ただし AWS Marketplace の AMI ライセンスは自動的に時間課金に切り替わります」。**コミットメントが覆うのはインスタンスの AWS 側の半分だけ**で、もう半分は無傷どころか、このケースではむしろ悪化する。
+
+**Marketplace は、AWS Support 料金の計算基礎から除外される。** Support は割引・クレジット適用前の gross な AWS 利用料に対するパーセンテージで、料金ページはその基礎から外れるものを12個名指ししている。**AWS Marketplace** はその1つで、AWS Support 自身、AWS Managed Services、AWS Professional Services、AWS Training and Certifications、Amazon EKS Anywhere、VMware Cloud on AWS などと並んでいる。自前で動かす代わりに Marketplace でソフトを買うと、その分だけ支出が計算基礎の外に出ていく。注釈が1つある。Bedrock Marketplace と Bedrock のサーバーレス購入は、請求が AWS Marketplace 経由で見えても Bedrock の使用量として扱われる。
+
+<SequenceDiagram
+  lang="ja"
+  caption="使用量ベースの Marketplace 製品の全体像。AWS は言われた数量を請求する。ベンダーの計量レコードが届かなければ課金は存在しない。同じ理由で、その数字を AWS が公開している情報から再構成することもできない。"
+  actors={[
+    { id: 'sw', label: '売り手のソフトウェア' },
+    { id: 'meter', label: 'Marketplace Metering' },
+    { id: 'bill', label: '自分の請求書' },
+  ]}
+  steps={[
+    {
+      from: 'sw',
+      to: 'meter',
+      label: 'MeterUsage — ディメンション + 数量、毎時',
+      meter: 'units',
+      charge: '単位は売り手が定義',
+    },
+    {
+      from: 'meter',
+      to: 'bill',
+      label: '月次で集計して請求',
+      meter: 'units',
+      charge: 'bill/BillingEntity = AWS Marketplace',
+    },
+    {
+      from: 'bill',
+      to: 'sw',
+      label: '計量レコードなし = 課金なし',
+      reply: true,
+    },
+  ]}
+/>
+
+## 例外と罠
+
+**Marketplace の行を AWS サービスの行として読む。** その行には製品名も usage type も時間単価も載っているので、サービスの行にしか見えない。それで Price List に単価を確認しにいって、見つからない。**AWS がそもそも公開していない**からだ。まず `bill/BillingEntity` を見る。`AWS Marketplace` と書いてあれば、単価があるのは出品ページと自分が承諾した契約書の中で、それを裏づける AWS のドキュメントは存在しない。**billing entity で割らずにサービス別で支出を集計するツールは、性質の違う2種類の数字を静かに混ぜている。**
+
+**インスタンスを消してサブスクリプションを残す、またはその逆。** この2つは独立したオブジェクトで、片方を消してももう片方は動かない。金が出ていくほうの向きについて、AWS は身も蓋もない。「サブスクリプションをキャンセルしても、その AMI から起動されたインスタンスは終了しません。実行中のインスタンスは終了されるまで課金が続きます」。逆向きも同じ形だ。インスタンスを全部消してサブスクリプションを忘れると、月額固定の製品は使用量に関係なく請求され続ける。日割りされるのは実際に解約した月だけ。
+
+**ワークロードが消えたあとも生き残るコミット契約。** 前払い契約と支払スケジュール付きプライベートオファーは**売り手が決めた日付で請求**され、`agreementValue` は使用量の予測ではなく契約期間全体で支払うことが確定した額だ。その製品に関係するリソースを全部消しても、この請求書は1円も動かない。更新はこれを静かに膨らませる。更新やアップグレードのオファーを承諾すると新条件が即座に発効し、「それ以前の条件や残っている支払スケジュールはキャンセルされ、この新しい契約の条件に置き換えられる」。承諾しているのは**延長ではなく新しい総額**だ。
+
+**コスト最適化がこの行に触れられると思い込む。** 右サイジング、スケジューリング、Savings Plans、Reserved Instances、リージョン移動 — 全部 AWS 側の半分に効くレバーだ。Marketplace 側で引けるレバーは、**サブスクリプションを解約する / 契約を満了させる / プライベートオファーを再交渉する**。以上。しかも標準的な最適化のひとつは逆効果になる。年額 AMI サブスクリプションで覆われているインスタンスを右サイジングすると、**年額が覆っているのは購入時に指定したインスタンスタイプだけ**なのでライセンスは時間課金に戻る。
+
+**逆に、見た目より何とかなるものが1つある。配賦だ。** Marketplace はコスト配分タグに対応している。AMI のソフトウェアコストは紐づく EC2 インスタンスのタグをそのまま継承するし、売り手は AMI・コンテナ・SaaS 製品に vendor-metered タグを付けられる。ユーザー数で課金する SaaS 製品が部署別に使用量をタグ付けする、といった使い方だ。落とし穴もいつもと同じで、**タグが追跡するのは有効化した時点以降のコストだけ**。今目の前にある請求書ではなく、来月の請求書に効く手当だ。

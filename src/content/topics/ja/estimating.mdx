@@ -1,0 +1,99 @@
+---
+title: 作る前に値段を出す
+short: 見積もり
+oneLiner: 見積もりとは「どのメーターが何回回るか」のモデルだ。外すのはレートではなく、メーターの存在ごと。
+meters: []
+order: 35
+checked: 2026-08-08
+sources:
+  - 'https://docs.aws.amazon.com/pricing-calculator/latest/userguide/what-is-pricing-calculator.html'
+  - 'https://aws.amazon.com/calculator/calculator-assumptions/'
+  - 'https://docs.aws.amazon.com/cost-management/latest/userguide/pricing-calculator.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/price-changes.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api-fetching-price-list-files-manually.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/reading-service-price-list-file-for-services.html'
+  - 'https://docs.aws.amazon.com/cli/latest/reference/pricing/get-products.html'
+  - 'https://docs.aws.amazon.com/cur/latest/userguide/table-dictionary-cur2-line-item.html'
+  - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
+  - 'https://aws.amazon.com/vpc/pricing/'
+  - 'https://repost.aws/knowledge-center/estimating-aws-resource-costs'
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## なぜそうなるのか
+
+見積もりは一見「調べ物」に見える。レートを引いて、数量を掛けて、足す。違う。レートは公開されているし、機械可読だし、タダで引ける。数字が合うかどうかを決めているのは、**紙の上に並べられたメーターの一覧**のほうだ。そのモノは何時間存在するのか、何 GB が境界を越えるのか、いくつの離散単位が数えられるのか。一覧さえ正しければ算数は自明で、一覧が1行足りなければ算数には意味がない。
+
+この非対称性のせいで、見積もりは常に同じ方向に外れる。レートを打ち間違える人はまずいない。そこに書いてあるから。起きるのは、プライベートサブネットに必要だった NAT Gateway が最初の絵に描かれておらず、そいつが回すメーターごと合計から抜け落ちる、という事故だ。見積もりはほぼ必ず**安いほうに**外れる。値付けを誤ったからではなく、メーターを数え落としたからだ。
+
+AWS はこの用途に2つ道具を出していて、両者は代替関係にない。AWS Pricing Calculator はフォームで、構成を書くと値段が出る。AWS Price List はその下にあるレート表そのもので、同じ数字がファイルと API として、フォームなしで置いてある。しかも Pricing Calculator のドキュメント自身が「価格は Price List API から来ている」と明言している。つまり UI を飛び越して直に引くのは裏道ではなく、途中の仮定を減らして同じ場所に行くだけだ。
+
+そして Pricing Calculator は2つある。ここで混乱する人が多い。calculator.aws にある公開版はアカウント不要で無料。もう一方は Billing and Cost Management コンソールの中にある版で、既存の使用量を取り込み、それに対して Savings Plans や Reserved Instances をモデル化し、割引前・割引後どちらのレートでも見せられる。こちらは workload estimate は無料、bill estimate は暦月あたり5件まで無料で、6件目からは1件 $2。見積もりツール自体に units メーターが付いている。
+
+<SequenceDiagram
+  lang="ja"
+  caption="計算機は Price List の上に載ったフォームでしかない。課金されるのは最後のやり取りだけ、しかもコンソール版で暦月に5件の bill estimate を使い切った後だけ。"
+  actors={[
+    { id: 'you', label: '自分' },
+    { id: 'calc', label: 'Pricing Calculator' },
+    { id: 'pl', label: 'Price List API' },
+  ]}
+  steps={[
+    { from: 'you', to: 'calc', label: 'サービスを構成し、リージョンを選ぶ' },
+    { from: 'calc', to: 'pl', label: 'そのリージョンのレートを取得' },
+    { from: 'pl', to: 'calc', label: 'SKU / terms / priceDimensions', reply: true },
+    { from: 'calc', to: 'you', label: '月 730 時間換算の合計', reply: true },
+    {
+      from: 'you',
+      to: 'calc',
+      label: 'コンソール版 bill estimate、今月6件目',
+      meter: 'units',
+      charge: '1件 $2',
+    },
+  ]}
+/>
+
+どちらの計算機も、**入力したものだけ**を値付けする。合計を信じる前に公開されている前提条件を読むといい。1か月は 730 時間、うるう年は無視、税金は含まない、そして無料利用枠・プロモーションクレジット・その他の割引は一切反映しない。表示されるのは最初の12か月分だけなので、3年コミットの見積もりも12か月に切られた断面として出てくる。
+
+## で、いくらなの
+
+Price List は `pricing.us-east-1.amazonaws.com` 配下に置かれた静的ファイルの小さな木で、どのサービスのレート表もルートから3ホップで届く。
+
+<PathDiagram
+  lang="ja"
+  caption="ただの HTTPS ファイルが4枚。最後の1枚が、1サービス×1リージョンのレート表の全部。JSON でも CSV でも取れる。"
+  nodes={[
+    { id: 'services', label: 'index.json', sub: 'サービス索引' },
+    { id: 'versions', label: '<service>/index.json', sub: 'バージョン索引' },
+    { id: 'regions', label: 'region_index.json', sub: '該当バージョンのリージョン' },
+    { id: 'rates', label: '<region>/index.json', sub: 'products と terms' },
+  ]}
+  hops={[
+    { from: 'services', to: 'versions', label: 'offerCode を選ぶ (例: AmazonVPC)' },
+    { from: 'versions', to: 'regions', label: 'バージョン、または "current"' },
+    { from: 'regions', to: 'rates', label: 'us-east-1 を選ぶ' },
+  ]}
+/>
+
+最後のファイルの中で、`products` は SKU をキーにしたマップで、各エントリが `productFamily` と属性の袋を持つ。`terms` はそれと並行するマップで、まず term type — `OnDemand` / `Reserved` / `FlatRate` — でキーが切られ、その下に同じ SKU、さらに offer term code が来る。term の下にあるのが `priceDimensions` で、`unit`、`startingRange` と `endingRange`、`pricePerUnit` を持つ。このレンジが階段そのものだ。1つの SKU が複数の price dimension を抱えるのは、量が増えるとレートが変わるからで、SKU だけを見てもどの段に落ちるかは分からない。
+
+レート表と請求書を橋渡しする属性が `usagetype` だ。これは Cost and Usage Report の `line_item_usage_type` 列に出てくるのとまったく同じ文字列なので、**見積もり時に見つけた usage type は、後から実際の請求書で検索して答え合わせできる**。実例として、us-east-1 の AmazonVPC のレート表には `USE1-PublicIPv4:InUseAddress` という product があり、その OnDemand の price dimension は unit が `Hrs`、価格が $0.005、説明は "$0.005 per In-use public IPv4 address per hour"。その隣に同じレートで `USE1-PublicIPv4:IdleAddress` が並んでいる。あるサービスの usage type 一覧を読むのは、そのサービスが回しうるメーターのチェックリストを読むのに一番近い行為だ。
+
+同じデータへのもう一つの入口が Price List Query API で、これは独自のエンドポイント (`api.pricing.us-east-1.amazonaws.com` / `api.pricing.eu-central-1.amazonaws.com` / `api.pricing.ap-south-1.amazonaws.com`) と独自の IAM 権限を持つ、れっきとした AWS サービスだ。`aws pricing describe-services` でサービスコードと絞り込める属性名が出る。`aws pricing get-products --service-code AmazonEC2 --filters ...` で条件に合う product が terms 付きで返る。**エンドポイントのリージョンは呼び出し先でしかなく、値付けの対象リージョンとは無関係**。フィルタで少数の SKU を取りたいときは Query API、サービス丸ごと欲しいとき・スループットが要るとき・過去バージョンが要るときはバルクファイル。公開済みのバージョンはすべてアドレス可能なまま残り、`current` は最新への別名だ。
+
+見積もり目線でカタログの穴は2つ。Query API は Savings Plans の価格を返さない (別系統の `savingsPlan/v1.0/` 配下のバルクファイルにある)。そしてカタログには恒久的な従量無料枠のオファーは載るが、アカウントの経過月数で切れる期間限定の無料枠は載らず、EC2 スポットは丸ごと対象外だ。
+
+## 例外と罠
+
+**機械可読なコピーは正本ではない。** Pricing Calculator も Price List も、言い方を変えて同じことを書いている。ファイルとサービスの料金ページが食い違ったら、**課金されるのは料金ページのほう**。API は「速くて全量あってクエリできるレートの写し」であって、契約書ではない。
+
+**見積もったのはリソース単体で、組み立て一式ではない。** コンピュートのインスタンスは色々引きずってきて、そのどれもが独立したメーターと独立した usage type を持つ。インスタンスが止まっていてもプロビジョニング量で課金される EBS ボリューム。us-east-1 で1時間 $0.005 のパブリック IPv4 アドレス (使用中でもアイドルでも同額)。そしてインターネットに出る必要があるプライベートサブネットに置くなら、1時間 $0.045 + 処理 1GB あたり $0.045 の NAT Gateway。計算機自身の 730 時間換算なら、この Gateway は1バイトも流れないうちに月 $32.85 だ。さらに形の話がある。設計に AZ が2つ現れた瞬間、その間の通信は bytes メーターになる。単一 AZ の絵には箱すら存在しなかったメーターだ。
+
+**合計を読む前にリージョンを確認する。** 計算機は既定のリージョンで開き、間違ったリージョンの数字でも平然と自信ありげに出してくる。ほぼ全サービスで価格はリージョンごとに違うので、どのリージョンが生んだ数字か分からない合計に意味はない。Price List 側ではリージョンは見落としようがない。URL のパス片であり、全 usage type の接頭辞でもあるからだ。計算機の合計をファイルで裏取りする価値はここにある。
+
+**term の取り違えは両方向に効く。** 実際には Savings Plans や Reserved Instance の下で走るワークロードをオンデマンドのレートで見積もれば高く出る。逆に、まだ誰もコミットしていない容量をコミット後のレートで見積もれば安く出て、しかもそのモノが生きている間ずっと安いままだ。バルクファイルはこの区別を明示している。同じ SKU の下に `OnDemand` と `Reserved` が別ブロックで並んでいるので、ファイルから値付けする限り、間違ったブロックを選ぶのは「うっかり」ではなく能動的な選択になる。
+
+**無料枠の前提は、無料枠より長生きする。** 公開版の計算機は無料利用枠を一切適用しないので、新規アカウントの最初の1年は高めに出て、その後は正しくなる。Price List を読むスクリプトは1点だけ逆の死角を持つ。恒久的な無料枠オファーはカタログに載っていて、12か月枠は載っていない。どちらにせよ、無料枠にこっそり依存した見積もりには賞味期限が付いていて、それが切れたことをツールは何も教えてくれない。

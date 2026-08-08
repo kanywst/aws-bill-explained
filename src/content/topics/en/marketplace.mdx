@@ -1,0 +1,131 @@
+---
+title: Charges AWS did not price
+short: Marketplace
+oneLiner: Some lines are software someone else sells, billed through AWS. The seller picked the meter; your levers stop there.
+meters: []
+order: 37
+checked: 2026-08-08
+sources:
+  - 'https://docs.aws.amazon.com/cur/latest/userguide/billing-columns.html'
+  - 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create-filters.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/pricing-ami-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/pricing-container-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/userguide/saas-subscriptions.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/developerguide/metering-apis.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-paying-for-products.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-ami-subscriptions.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/buyerguide/buyer-private-offers.html'
+  - 'https://docs.aws.amazon.com/marketplace/latest/APIReference/API_marketplace-agreements_EstimatedCharges.html'
+  - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/marketplace-manage-subscriptions.html'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-services.html'
+---
+
+import PathDiagram from '../../../components/PathDiagram.astro';
+import SequenceDiagram from '../../../components/SequenceDiagram.astro';
+
+## Why it works that way
+
+Every other page here assumes three things: AWS runs the meter, AWS publishes the rate, and you can look that rate up before you spend anything. AWS Marketplace breaks all three, on the same invoice, in lines that look exactly like the rest.
+
+The field that separates them is `bill/BillingEntity` in the Cost and Usage Report. It takes two values. `AWS` identifies a transaction for AWS services other than in AWS Marketplace. `AWS Marketplace` identifies a purchase in AWS Marketplace. That one column is the entire boundary. On one side the price came from AWS. On the other it came from a company that is not AWS, out of a listing AWS did not write. The same dimension exists as a **Billing entity** filter in AWS Budgets and Cost Explorer, so you can split a bill on it without touching SQL.
+
+AWS states the division plainly in its seller documentation for AMI products. Infrastructure charges "are defined and controlled by AWS, and can vary between AWS Regions". Software charges, on paid products, are what "the seller defines". Two categories, shown separately on the listing, and only one has a rate card you can read in advance.
+
+The second thing that changes is who reads the meter. For usage-based products, the seller does. The AWS Marketplace Metering Service is a seller-facing API: `MeterUsage` from an EC2 instance or an ECS/EKS container, `BatchMeterUsage` from a SaaS application, `RegisterUsage` from paid container software. AWS's instruction to SaaS sellers is the clearest description of the arrangement on any AWS page — "Our ability to bill customers for usage of your product is dependent upon receiving metering records from you. You are responsible for ensuring that your product's metering records are successfully transmitted and received." The quantity on your bill is a quantity the vendor sent.
+
+The third thing that changes is which meter. The seller picks it. Listing a SaaS subscription means choosing a pricing category from Bandwidth, Data, Hosts, Requests or Users — or a generic Units bucket when none of those fit — across up to 200 dimensions in one product. Container products allow up to 24 custom dimensions: users, nodes, repositories, GB. A Marketplace line can therefore be time, bytes or units, and which one it is was a decision made by a vendor's pricing team rather than a property of the thing you provisioned.
+
+<PathDiagram
+  lang="en"
+  caption="AWS's own worked example, drawn as what it is: one instance producing two charges. AWS priced the left hop. The seller priced the right one, and AWS is only the channel that collects it."
+  nodes={[
+    {
+      id: 'inst',
+      label: 'One EC2 instance',
+      sub: 'launched from a paid AMI',
+      charges: ['time'],
+    },
+    { id: 'aws', label: 'One AWS invoice', sub: 'two billing entities' },
+    { id: 'seller', label: 'The seller', sub: 'sets the software rate', charges: ['time'] },
+  ]}
+  hops={[
+    {
+      from: 'inst',
+      to: 'aws',
+      label: 'Infrastructure — bill/BillingEntity = AWS',
+      meter: 'time',
+      cost: '$0.085/hr',
+    },
+    {
+      from: 'aws',
+      to: 'seller',
+      label: 'Software — bill/BillingEntity = AWS Marketplace',
+      meter: 'time',
+      cost: '$0.12/hr',
+    },
+  ]}
+/>
+
+## What it costs
+
+There is no answer to "what does Marketplace cost" the way there is an answer for EBS. There are shapes.
+
+**Hourly software on an AMI.** AWS's worked example: run software for 720 hours on a small instance where the seller's fee is $0.12 per hour and the EC2 charge is $0.085 per hour, and you are billed $147.60 — $86.40 of software and $61.20 of infrastructure, one instance, two rates, two entities. Note also that AMI hourly software usage "is rounded up to the nearest whole hour" while the EC2 instance underneath it bills per second. The rounding rule belongs to the seller.
+
+**Per pod or per task on a container.** Priced per hour, measured to the second, with a one-minute minimum. AWS's example puts a controller pod at $6 per hour: run it for 20 minutes 30 seconds and you pay 20 × ($6/60) + 30 × ($6/60/60) = $2.05; run five of them and you pay $30 an hour. One property differs sharply from AWS pricing — the price a seller sets for a container product "applies to all AWS Regions", so moving the workload to a cheaper Region moves the AWS line and not the software line.
+
+**Monthly.** A fixed fee every month regardless of how many instances run, prorated at sign-up and at cancellation — AWS's example is a buyer who subscribes for one day and pays a thirtieth.
+
+**Annual.** One upfront payment, no hourly fee for twelve months, covering exactly one EC2 instance of exactly the instance types named at purchase. Anything else runs at the hourly rate.
+
+**Contracts.** Public contracts run 1, 12, 24 or 36 months; you pick a quantity for each unit and the total contract price is charged when the contract is created. Private offers extend that to custom durations up to 12 years, with invoice dates and payment amounts the seller sets. The Marketplace Agreement API exposes `agreementValue` as "the total known amount customer has to pay across the lifecycle of the agreement" — and for a contract with consumption pricing, that figure "will only include the committed value and not include any overages that occur".
+
+Two consequences are where the money actually goes.
+
+**Savings Plans and Reserved Instances do not reach software charges.** The services eligible for Savings Plans are EC2, Fargate, Lambda and SageMaker AI; Marketplace is not among them, and a Reserved Instance is only a billing discount on matching On-Demand EC2 usage. The buyer guide puts it in one sentence about resizing: change the instance type and "your Amazon EC2 infrastructure will be billed according to your signed savings plan. However, the AMI license from AWS Marketplace will automatically change to hourly pricing." The commitment covers the half of the instance that AWS priced. The other half is untouched, and in that particular case gets worse.
+
+**Marketplace is excluded from the base AWS Support fees are calculated on.** Support is a percentage of gross AWS charges before discounts or credits, and the pricing page names twelve exclusions from that base. AWS Marketplace is one of them, alongside AWS Support itself, AWS Managed Services, AWS Professional Services, AWS Training and Certifications, Amazon EKS Anywhere and VMware Cloud on AWS. Buying software through Marketplace instead of running it yourself moves spend out of the base. One asterisk: Bedrock Marketplace and Bedrock serverless purchases count as Bedrock usage even though you may see them billed through AWS Marketplace.
+
+<SequenceDiagram
+  lang="en"
+  caption="Usage-based Marketplace products, end to end. AWS bills what it is told. If the vendor's records do not arrive, the charge does not exist — which is the same reason you cannot reconstruct the number from anything AWS publishes."
+  actors={[
+    { id: 'sw', label: "The seller's software" },
+    { id: 'meter', label: 'Marketplace Metering' },
+    { id: 'bill', label: 'Your invoice' },
+  ]}
+  steps={[
+    {
+      from: 'sw',
+      to: 'meter',
+      label: 'MeterUsage — dimension + quantity, hourly',
+      meter: 'units',
+      charge: 'unit defined by the seller',
+    },
+    {
+      from: 'meter',
+      to: 'bill',
+      label: 'Aggregated and billed monthly',
+      meter: 'units',
+      charge: 'bill/BillingEntity = AWS Marketplace',
+    },
+    {
+      from: 'bill',
+      to: 'sw',
+      label: 'No metering record, no charge',
+      reply: true,
+    },
+  ]}
+/>
+
+## Traps
+
+**Reading a Marketplace line as an AWS service line.** The line carries a product name, a usage type and an hourly rate, so it reads like a service. Then you go to the Price List to check the rate and it is not there, because AWS never published it. Check `bill/BillingEntity` first. If it says `AWS Marketplace`, the rate lives on the product listing and in the agreement you accepted, and no AWS document will confirm it. Anything that groups spend by service without splitting on billing entity is quietly mixing two kinds of number.
+
+**Terminating the instance and leaving the subscription, or the reverse.** These are two independent objects and cancelling one does not touch the other. AWS is blunt about the direction that costs money: "Canceling a subscription does not terminate the instances launched with that AMI. We'll continue to bill you for your running instances until they're terminated." The other direction has the same shape — terminate the instances, forget the subscription, and a product on a fixed monthly fee keeps billing regardless of usage, prorated only in the month you actually cancel.
+
+**A committed contract that outlives the workload.** Upfront contracts and private offers with a payment schedule are invoiced on the seller's dates, and `agreementValue` is the amount owed across the agreement's lifecycle, not a forecast of usage. Deleting every resource associated with the product changes nothing on those invoices. Renewals compound it: accepting a renewal or upgrade offer takes effect immediately and "any previous terms or remaining scheduled payments are cancelled and replaced by this new agreement's terms", so what you are agreeing to is a new total, not an extension.
+
+**Assuming a cost optimisation exercise can reach these lines at all.** Rightsizing, scheduling, Savings Plans, Reserved Instances and Region moves are levers on the AWS half of the bill. On the Marketplace half the levers are: cancel the subscription, let the agreement expire, renegotiate a private offer. That is the whole list. Worse, one standard optimisation actively backfires — resize an instance covered by an annual AMI subscription and the license reverts to hourly, because the annual subscription covers only the instance types you named.
+
+**One thing more tractable than it looks: allocation.** Marketplace supports cost allocation tagging. AMI software costs inherit the tags of the EC2 instance they attach to, and sellers can add vendor-metered tags to AMI, container and SaaS products — a product billing per user can tag usage by department. The catch is the usual one: tagging tracks costs only from the moment the tags were activated, so it fixes next month, not the invoice in front of you.
