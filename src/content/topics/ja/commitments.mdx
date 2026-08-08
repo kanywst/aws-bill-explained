@@ -32,10 +32,10 @@ Reserved Instance は先にあった、そして別物の仕組みだ。こち�
 
 Savings Plans の種類は3つではなく**4つ**ある。Database Savings Plans が re:Invent 2025 で増えたが、古いページはまだ追いついていない。
 
-- **Compute Savings Plans**。EC2 をファミリー・サイズ・リージョン・OS・テナンシー問わず。加えて Fargate と Lambda。On-Demand 比で最大66%。
+- **Compute Savings Plans**: EC2 をファミリー・サイズ・リージョン・OS・テナンシー問わず。加えて Fargate と Lambda。On-Demand 比で最大66%。
 - **EC2 Instance Savings Plans**: 1リージョンの1インスタンスファミリーに固定。その中でサイズ・OS・テナンシーは自由。最大72%。
-- **Database Savings Plans**。Aurora / RDS / DynamoDB / ElastiCache / DocumentDB / Neptune / Timestream / Keyspaces / DMS / OpenSearch Service。最新世代のプロビジョンドインスタンスとサーバーレスが対象。最大35%、1年、前払いなし。
-- **SageMaker AI Savings Plans**。SageMaker AI のインスタンス使用量。ファミリー・サイズ・リージョン・コンポーネントを跨いで効く。最大64%。
+- **Database Savings Plans**: Aurora / RDS / DynamoDB / ElastiCache / DocumentDB / Neptune / Timestream / Keyspaces / DMS / OpenSearch Service。最新世代のプロビジョンドインスタンスとサーバーレスが対象。最大35%、1年、前払いなし。
+- **SageMaker AI Savings Plans**: SageMaker AI のインスタンス使用量。ファミリー・サイズ・リージョン・コンポーネントを跨いで効く。最大64%。
 
 上から下に読むとトレードは明快だ。**プランが狭いほど割引が深い**。手放した自由度の分だけ金が返ってくる。
 
@@ -69,18 +69,18 @@ Savings Plans の種類は3つではなく**4つ**ある。Database Savings Plan
 
 ただ、人が詰まるのは料率ではない。**行の種類**のほうだ。コミットがある請求書には、ない請求書には出てこない charge type が並び、しかもそのいくつかは互いを打ち消すために存在する。
 
-- **`SavingsPlanUpfrontFee`**。全額前払い・一部前払いプランの一時金。購入日に立つ。
-- **`SavingsPlanRecurringFee`**。前払いなし・一部前払いプランの**時間課金**。期間中は毎時追加される。全額前払いプランでもこの行は出るが、そちらが表しているのは**その請求期間で使い切れなかった分**だ。
-- **`SavingsPlanCoveredUsage`**。割引が当たった使用量。ただし unblended cost には **On-Demand だったらいくらだったか**が入る。だからこの行だけ見ても何も安くなっていないように見える。
-- **`SavingsPlanNegation`**。それを打ち消すマイナスの行。plan ARN・operation・usage type・AZ で1時間ごとにまとめられるので、**1本の negation が複数の covered usage を相殺する**。行数は合わない。本当の金額はどちらの行でもなく `savingsPlan/SavingsPlanEffectiveCost` にある。
-- **`RIFee`**。Reserved Instance の定期手数料。Savings Plans の recurring fee が時間単位なのに対し、**こちらは月単位**。全額前払い RI で金額が $0.00 でも行は立つ。AWS がこの行に `reservation/AmortizedUpfrontFeeForBillingPeriod` と `reservation/ReservationARN` を載せているからだ。$0.00 の RIFee はバグではなく**容れ物**。
-- **`DiscountedUsage`**。RI が当たったインスタンス使用量。AWS のドキュメントは、この行の unblended rate は 0 だと明記している。例の $0.00 の行はこれで、意味は「無料」ではなく「カバー済み」。
+- **`SavingsPlanUpfrontFee`**: 全額前払い・一部前払いプランの一時金。購入日に立つ。
+- **`SavingsPlanRecurringFee`**: 前払いなし・一部前払いプランの**時間課金**。期間中は毎時追加される。全額前払いプランでもこの行は出るが、そちらが表しているのは**その請求期間で使い切れなかった分**だ。
+- **`SavingsPlanCoveredUsage`**: 割引が当たった使用量。ただし unblended cost には **On-Demand だったらいくらだったか**が入る。だからこの行だけ見ても何も安くなっていないように見える。
+- **`SavingsPlanNegation`**: それを打ち消すマイナスの行。plan ARN・operation・usage type・AZ で1時間ごとにまとめられるので、**1本の negation が複数の covered usage を相殺する**。行数は合わない。本当の金額はどちらの行でもなく `savingsPlan/SavingsPlanEffectiveCost` にある。
+- **`RIFee`**: Reserved Instance の定期手数料。Savings Plans の recurring fee が時間単位なのに対し、**こちらは月単位**。全額前払い RI で金額が $0.00 でも行は立つ。AWS がこの行に `reservation/AmortizedUpfrontFeeForBillingPeriod` と `reservation/ReservationARN` を載せているからだ。$0.00 の RIFee はバグではなく**容れ物**。
+- **`DiscountedUsage`**: RI が当たったインスタンス使用量。AWS のドキュメントは、この行の unblended rate は 0 だと明記している。例の $0.00 の行はこれで、意味は「無料」ではなく「カバー済み」。
 
 そしてコスト列が3種類ある。**わざと食い違うように**作られている。
 
-- **unblended**。課金された日の現金。前払いは購入日に、定期費は月初に立つ。「AWS はいつ、いくら請求したのか」に答える列。
-- **amortized**。コミットを期間に均した額。AWS の例では、$365 の全額前払い1年プランに一致する使用量があると、1日あたり $1 の amortized cost になる。「このワークロードは実際いくらで動いたのか」に答える列。
-- **blended**。組織全体の SKU ごとの平均料率。管理アカウント側で計算され、メンバーアカウントへの配賦に使われる。AWS はコンソールに出る blended rate を**参考値**だと言い切っている。割引を組織で均して社内チャージバックするなら使える。**請求書との突き合わせには絶対に使わない**。合わないから。
+- **unblended**: 課金された日の現金。前払いは購入日に、定期費は月初に立つ。「AWS はいつ、いくら請求したのか」に答える列。
+- **amortized**: コミットを期間に均した額。AWS の例では、$365 の全額前払い1年プランに一致する使用量があると、1日あたり $1 の amortized cost になる。「このワークロードは実際いくらで動いたのか」に答える列。
+- **blended**: 組織全体の SKU ごとの平均料率。管理アカウント側で計算され、メンバーアカウントへの配賦に使われる。AWS はコンソールに出る blended rate を**参考値**だと言い切っている。割引を組織で均して社内チャージバックするなら使える。**請求書との突き合わせには絶対に使わない**。合わないから。
 
 このページにメーターのバッジが付いていないのは手抜きではない。**コミットメントはメーターを回さない**。インスタンス1時間は $0.192 だろうと $0.088 だろうと **time** を回す。そのインスタンスから出ていく転送は **bytes** を回すし、どの Savings Plans もそれをカバーしない。Lambda の呼び出しは **units** を回す。プランはメーターの横に座って、単価だけを書き換える。
 
