@@ -40,6 +40,9 @@ jobs:
       # Deploying past a failing guard would publish a diagram that renders
       # nothing or a claim with no source, so the gates run here too rather
       # than being trusted from the CI workflow.
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+
       - name: Types
         run: npx astro check
 
@@ -49,9 +52,26 @@ jobs:
       - name: Build and post-build guards
         run: npm run build
 
+      # The gate that matters most here, and the one this job used to skip.
+      # Everything above answers a question about the source; a page that
+      # loads but does nothing passes all of it, which is exactly what shipped.
+      - name: Smoke tests against the build
+        run: npm run test:smoke
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=aws-bill-explained --branch=main
+
+      # Passing locally is not the same as being served correctly. The defect
+      # that prompted these tests was in the response headers, which only the
+      # host sends — a local pass could not have seen it. This runs the same
+      # tests against what readers actually get.
+      - name: Smoke tests against the deployed site
+        env:
+          SMOKE_BASE_URL: https://aws-bill-explained.pages.dev
+        run: |
+          sleep 20
+          npm run test:smoke

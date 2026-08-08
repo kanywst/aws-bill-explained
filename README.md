@@ -33,11 +33,14 @@ Unofficial. Not affiliated with Amazon Web Services.
 
 ```bash
 npm install
-npm run dev      # local dev server
-npm run test     # domain, layout, i18n and catalogue tests
-npm run check    # lint + types + tests + build guards (CI also runs actionlint, coverage thresholds, npm audit and the source checker)
-npm run build    # static build into dist/
+npm run dev         # local dev server
+npm run test        # domain, layout, i18n and catalogue tests
+npm run test:smoke  # opens the built pages in a browser (needs npm run build first)
+npm run check       # lint + types + tests + build + smoke (CI also runs actionlint, coverage thresholds, npm audit and the source checker)
+npm run build       # static build into dist/
 ```
+
+`npm run test:smoke` serves `dist/` through `scripts/serve-dist.mjs`, which applies the rules in `public/_headers`. That is deliberate: `astro preview` ignores those headers, and the last thing these tests caught lived in them rather than in the page.
 
 ## Layout
 
@@ -78,7 +81,11 @@ Cross-service questions — what's free, what bills the same way, how much of th
 
 ### Why the build guards
 
-`npm run build` runs `scripts/check-build.mjs` afterwards. It scans the built HTML for negative SVG dimensions and `NaN` coordinates, checks translation parity, and requires a checked date on every topic — a second net under the unit tests, catching anything a component composes wrongly at render time.
+`npm run build` runs two scripts afterwards.
+
+`scripts/csp-hashes.mjs` hashes every inline script in the build and writes those hashes into the `script-src` directive in `dist/_headers`. Astro emits small scripts inline rather than as files, and the policy is `script-src 'self'`, so without this the browser refuses to run them: the home page's cost counter stops and the services filter does nothing, with valid HTML and a green build. The hashes change whenever the code does, which is why they are generated rather than pasted, and why the answer is not `'unsafe-inline'`.
+
+`scripts/check-build.mjs` then scans the built HTML for negative SVG dimensions and `NaN` coordinates, checks translation parity, requires a checked date and at least one source on every topic, and fails if any inline script is missing from the policy above. It is a second net under the unit tests, catching what a component composes wrongly at render time — and `npm run test:smoke` is the third, catching what only a browser can see.
 
 ## Adding a service
 

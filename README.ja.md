@@ -29,11 +29,14 @@ AWS 公式とは無関係の非公式な解説。
 
 ```bash
 npm install
-npm run dev      # ローカル開発サーバ
-npm run test     # ドメイン・図形計算・i18n・カタログのテスト
-npm run check    # lint + 型 + テスト + ビルドガード (CI と同じ)
-npm run build    # dist/ への静的ビルド
+npm run dev         # ローカル開発サーバ
+npm run test        # ドメイン・図形計算・i18n・カタログのテスト
+npm run test:smoke  # ビルド済みページをブラウザで開く (先に npm run build が要る)
+npm run check       # lint + 型 + テスト + ビルド + スモーク (CI と同じ)
+npm run build       # dist/ への静的ビルド
 ```
+
+`npm run test:smoke` は `scripts/serve-dist.mjs` 経由で `dist/` を配信し、`public/_headers` の内容を実際に適用する。これは意図的で、`astro preview` はそのヘッダを無視するし、このテストが最後に捕まえた不具合はページではなくヘッダ側にあった。
 
 ## 構成
 
@@ -74,7 +77,11 @@ scripts/
 
 ### なぜビルドガードがあるのか
 
-`npm run build` は後段で `scripts/check-build.mjs` を走らせる。ビルド済み HTML から負の SVG 寸法と `NaN` 座標を探し、ロケール間でキーが揃っているかを検査し、全記事に確認日があることを要求する。ユニットテストの下に敷いた二枚目の網で、コンポーネントが描画時に組み間違えたものを捕まえる。
+`npm run build` は後段で 2 つのスクリプトを走らせる。
+
+`scripts/csp-hashes.mjs` はビルド内の全インラインスクリプトをハッシュ化し、`dist/_headers` の `script-src` に書き込む。Astro は小さいスクリプトをファイルにせず埋め込むが、ポリシーは `script-src 'self'` なので、これが無いとブラウザが実行を拒否する。トップのカウンタは止まり、サービス一覧のフィルタは無反応になる。HTML は妥当なままで、ビルドも緑のままだ。ハッシュはコードが変われば変わるので貼り付けではなく生成しており、答えを `'unsafe-inline'` にしていないのもそのため。
+
+続く `scripts/check-build.mjs` は、ビルド済み HTML から負の SVG 寸法と `NaN` 座標を探し、ロケール間でキーが揃っているかを検査し、全記事に確認日と最低 1 本の出典があることを要求し、上のポリシーから漏れたインラインスクリプトがあれば落とす。ユニットテストの下に敷いた二枚目の網で、コンポーネントが描画時に組み間違えたものを捕まえる。三枚目が `npm run test:smoke` で、ブラウザでしか見えないものを捕まえる。
 
 ## サービスの追加
 
