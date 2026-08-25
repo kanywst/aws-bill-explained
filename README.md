@@ -127,3 +127,9 @@ Use `node scripts/merge-services.mjs batch.json` to fold a research batch into t
 ## Adding a locale
 
 Add it to `LANGS` in `src/i18n/strings.ts`, fill in the string bundle, and create `src/pages/<lang>/`. Three other places also hold the locale list and need updating: the sitemap config in `astro.config.mjs`, `LANGS` in `scripts/check-build.mjs`, and the `og:locale` mapping in `src/layouts/Base.astro`. A test asserts every locale carries the same key set. Pages that exist in only one language grey out in the language switcher rather than linking to a 404.
+
+## Licence
+
+Code is MIT; see [LICENSE](LICENSE). The dataset (`src/data/**/*.json`) and the articles (`src/content/**/*.mdx`) are CC BY 4.0; see [LICENSE-CONTENT](LICENSE-CONTENT). The split is deliberate: the code is worth copying without ceremony, and the dataset is worth reusing as long as it stays traceable back to the sources it cites.
+
+Unofficial. Not affiliated with Amazon Web Services.

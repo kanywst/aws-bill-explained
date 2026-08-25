@@ -1,0 +1,41 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 kanywst
+
+The content of this repository is licensed under the Creative Commons
+Attribution 4.0 International License. To view a copy of this license, visit
+
+    https://creativecommons.org/licenses/by/4.0/
+
+or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042,
+USA.
+
+WHAT THIS COVERS
+
+  src/data/**/*.json        the service dataset: meter classification, traps,
+                            usage types, sources and checked dates
+  src/content/**/*.mdx      the topic articles, in every locale
+
+Scoped by file type rather than by directory, because the two are not the same
+thing: src/content/ also holds topic-counts.test.ts, which is a test and so is
+covered by LICENSE, not by this. A directory-shaped rule would have quietly
+relicensed it.
+
+Everything else in the repository is code, and is covered by the MIT licence
+in LICENSE.
+
+ATTRIBUTION
+
+  AWS Bill Explained by kanywst, licensed CC BY 4.0
+  https://github.com/kanywst/aws-bill-explained
+
+WHAT THIS DOES NOT COVER
+
+This project is unofficial and not affiliated with, endorsed by, or sponsored
+by Amazon Web Services. "AWS", "Amazon Web Services" and the names of
+individual AWS services are trademarks of Amazon.com, Inc. or its affiliates,
+and no licence to them is granted here.
+
+The AWS documentation pages cited in the dataset are the property of their
+publisher. This project links to them and states what they say; it does not
+redistribute them.
