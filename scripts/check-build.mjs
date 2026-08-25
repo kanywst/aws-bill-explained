@@ -15,6 +15,7 @@ import { join, relative } from 'node:path';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
 const CONTENT = new URL('../src/content/topics/', import.meta.url).pathname;
+const DATA = new URL('../src/data/services/', import.meta.url).pathname;
 const LANGS = ['en', 'ja'];
 
 const failures = [];
@@ -139,6 +140,28 @@ for (const lang of LANGS) {
   for (const [hash, where] of seen) {
     if (!policy.includes(hash)) {
       failures.push(`inline script in ${where} is blocked by the CSP (missing '${hash}')`);
+    }
+  }
+}
+
+// 5. The dataset lives in exactly one layer of files.
+//
+//    Everything that reads src/data/services reads it one level deep: the
+//    repository imports the eight category files by name, and check-sources and
+//    check-freshness readdir the directory without recursing. A stray copy in a
+//    subdirectory is therefore invisible to every check in this repo, which is
+//    how src/data/services/services/ survived: eight byte-identical files that
+//    nothing imported and no sweep ever probed. Duplicated records are worse
+//    than absent ones, because the next `checked` bump touches one copy and
+//    leaves the other quietly contradicting it.
+{
+  for (const e of await readdir(DATA, { withFileTypes: true })) {
+    if (e.isDirectory()) {
+      failures.push(
+        `src/data/services/${e.name}/ is a subdirectory: the dataset is read one level deep, so nothing here would ever be loaded or checked`,
+      );
+    } else if (!e.name.endsWith('.json')) {
+      failures.push(`src/data/services/${e.name}: not a .json file, so no reader will pick it up`);
     }
   }
 }
