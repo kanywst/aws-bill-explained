@@ -125,3 +125,9 @@ scripts/
 ## ロケールの追加
 
 `src/i18n/strings.ts` の `LANGS` に足し、文字列バンドルを埋め、`src/pages/<lang>/` を作る。ロケール一覧は他に3箇所ある: `astro.config.mjs` の sitemap 設定、`scripts/check-build.mjs` の `LANGS`、`src/layouts/Base.astro` の `og:locale`。全ロケールが同じキー集合を持つことはテストが保証する。片方の言語にしか存在しないページは、404 へのリンクではなく言語スイッチャー上でグレーアウトする。
+
+## ライセンス
+
+コードは MIT ([LICENSE](LICENSE))。`src/data/` のデータセットと `src/content/` の記事は CC BY 4.0 ([LICENSE-CONTENT](LICENSE-CONTENT))。分けたのは意図的で、コードは断りなくコピーされて構わないが、データセットは引用元まで辿れる状態のまま再利用されてほしいから。
+
+非公式。Amazon Web Services とは無関係。
