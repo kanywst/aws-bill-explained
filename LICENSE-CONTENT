@@ -12,9 +12,14 @@ USA.
 
 WHAT THIS COVERS
 
-  src/data/       the service dataset: meter classification, traps, usage
-                  types, sources and checked dates
-  src/content/    the topic articles, in every locale
+  src/data/**/*.json        the service dataset: meter classification, traps,
+                            usage types, sources and checked dates
+  src/content/**/*.mdx      the topic articles, in every locale
+
+Scoped by file type rather than by directory, because the two are not the same
+thing: src/content/ also holds topic-counts.test.ts, which is a test and so is
+covered by LICENSE, not by this. A directory-shaped rule would have quietly
+relicensed it.
 
 Everything else in the repository is code, and is covered by the MIT licence
 in LICENSE.

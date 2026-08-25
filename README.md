@@ -130,6 +130,6 @@ Add it to `LANGS` in `src/i18n/strings.ts`, fill in the string bundle, and creat
 
 ## Licence
 
-Code is MIT; see [LICENSE](LICENSE). The dataset in `src/data/` and the articles in `src/content/` are CC BY 4.0; see [LICENSE-CONTENT](LICENSE-CONTENT). The split is deliberate: the code is worth copying without ceremony, and the dataset is worth reusing as long as it stays traceable back to the sources it cites.
+Code is MIT; see [LICENSE](LICENSE). The dataset (`src/data/**/*.json`) and the articles (`src/content/**/*.mdx`) are CC BY 4.0; see [LICENSE-CONTENT](LICENSE-CONTENT). The split is deliberate: the code is worth copying without ceremony, and the dataset is worth reusing as long as it stays traceable back to the sources it cites.
 
 Unofficial. Not affiliated with Amazon Web Services.

@@ -128,6 +128,6 @@ scripts/
 
 ## ライセンス
 
-コードは MIT ([LICENSE](LICENSE))。`src/data/` のデータセットと `src/content/` の記事は CC BY 4.0 ([LICENSE-CONTENT](LICENSE-CONTENT))。分けたのは意図的で、コードは断りなくコピーされて構わないが、データセットは引用元まで辿れる状態のまま再利用されてほしいから。
+コードは MIT ([LICENSE](LICENSE))。データセット (`src/data/**/*.json`) と記事 (`src/content/**/*.mdx`) は CC BY 4.0 ([LICENSE-CONTENT](LICENSE-CONTENT))。分けたのは意図的で、コードは断りなくコピーされて構わないが、データセットは引用元まで辿れる状態のまま再利用されてほしいから。
 
 非公式。Amazon Web Services とは無関係。
