@@ -17,9 +17,14 @@ updates:
         patterns:
           - astro
           - '@astrojs/*'
+      # vitest and @vitest/coverage-v8 pin each other as an exact peer
+      # (`peer vitest@"5.0.0"`), so splitting them into two pull requests gives
+      # two branches that both fail `npm ci` on ERESOLVE before any job runs.
+      # They only install together.
       dev-tooling:
         patterns:
           - vitest
+          - '@vitest/*'
           - prettier
           - prettier-plugin-astro
           - markdownlint-cli2
