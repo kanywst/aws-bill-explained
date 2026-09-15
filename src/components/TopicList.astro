@@ -24,19 +24,17 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
     <h1 class="display tl-h">{s.topicsLede}</h1>
 
     <ul class="tl-list">
-      {
-        topics.map((topic) => (
-          <li>
-            <a class="tl-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
-              <span class="tl-main">
-                <span class="tl-title">{topic.data.title}</span>
-                <span class="tl-one">{topic.data.oneLiner}</span>
-              </span>
-              <MeterLamps active={topic.data.meters} lang={lang} />
-            </a>
-          </li>
-        ))
-      }
+      {topics.map((topic) => (
+        <li>
+          <a class="tl-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
+            <span class="tl-main">
+              <span class="tl-title">{topic.data.title}</span>
+              <span class="tl-one">{topic.data.oneLiner}</span>
+            </span>
+            <MeterLamps active={topic.data.meters} lang={lang} />
+          </a>
+        </li>
+      ))}
     </ul>
   </section>
 </Base>

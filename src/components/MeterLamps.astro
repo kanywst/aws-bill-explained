@@ -21,18 +21,16 @@ const copy = t(lang);
 ---
 
 <ul class:list={['lamps', `is-${size}`]} aria-label={copy.a11y.metersLabel}>
-  {
-    METER_ORDER.map((id) => {
-      const on = active.includes(id);
-      return (
-        <li class:list={['lamp', on && 'is-on']} style={`--meter:var(--m-${id})`}>
-          <i />
-          <span>{copy.meters[id].name}</span>
-          <span class="sr">{on ? copy.a11y.billed : copy.a11y.notBilled}</span>
-        </li>
-      );
-    })
-  }
+  {METER_ORDER.map((id) => {
+    const on = active.includes(id);
+    return (
+      <li class:list={['lamp', on && 'is-on']} style={`--meter:var(--m-${id})`}>
+        <i />
+        <span>{copy.meters[id].name}</span>
+        <span class="sr">{on ? copy.a11y.billed : copy.a11y.notBilled}</span>
+      </li>
+    );
+  })}
 </ul>
 
 <style>

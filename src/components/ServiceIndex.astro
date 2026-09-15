@@ -40,14 +40,12 @@ const meterSummary = (service: Service) => {
         {s.services.filterAll}
         <span class="si-n">{catalogue.size}</span>
       </button>
-      {
-        METER_ORDER.map((m) => (
-          <button type="button" class={`si-chip meter-${m}`} data-filter={m} aria-pressed="false">
-            {s.meters[m].name}
-            <span class="si-n">{counts[m]}</span>
-          </button>
-        ))
-      }
+      {METER_ORDER.map((m) => (
+        <button type="button" class={`si-chip meter-${m}`} data-filter={m} aria-pressed="false">
+          {s.meters[m].name}
+          <span class="si-n">{counts[m]}</span>
+        </button>
+      ))}
       <button type="button" class="si-chip" data-filter="free" aria-pressed="false">
         {s.services.filterFree}
         <span class="si-n">{catalogue.free().length}</span>
@@ -56,37 +54,35 @@ const meterSummary = (service: Service) => {
 
     <p class="sr" role="status" aria-live="polite" data-count data-template={s.a11y.showing}></p>
 
-    {
-      categories.map((category) => (
-        <section class="si-cat" data-category>
-          <h2 class="si-cat-h">{s.categories[category]}</h2>
-          <ul class="si-list">
-            {catalogue.inCategory(category).map((service) => (
-              <li
-                class="si-item"
-                data-meters={service.meters.toArray().join(' ')}
-                data-free={service.isFree ? 'true' : 'false'}
-              >
-                <a href={localePath(lang, `/services/${service.slug.value}/`)}>
-                  <span class="si-name">
-                    {service.name}
-                    <span class="si-lamps" aria-hidden="true">
-                      {METER_ORDER.map((m) => (
-                        <i class={service.turns(m) ? `is-on meter-${m}` : ''} />
-                      ))}
-                    </span>
+    {categories.map((category) => (
+      <section class="si-cat" data-category>
+        <h2 class="si-cat-h">{s.categories[category]}</h2>
+        <ul class="si-list">
+          {catalogue.inCategory(category).map((service) => (
+            <li
+              class="si-item"
+              data-meters={service.meters.toArray().join(' ')}
+              data-free={service.isFree ? 'true' : 'false'}
+            >
+              <a href={localePath(lang, `/services/${service.slug.value}/`)}>
+                <span class="si-name">
+                  {service.name}
+                  <span class="si-lamps" aria-hidden="true">
+                    {METER_ORDER.map((m) => (
+                      <i class={service.turns(m) ? `is-on meter-${m}` : ''} />
+                    ))}
                   </span>
-                  <span class="sr">{meterSummary(service)}</span>
-                  <span class="si-one" lang={lang === 'en' ? undefined : 'en'}>
-                    {service.oneLiner}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    }
+                </span>
+                <span class="sr">{meterSummary(service)}</span>
+                <span class="si-one" lang={lang === 'en' ? undefined : 'en'}>
+                  {service.oneLiner}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
   </section>
 </Base>
 

@@ -34,32 +34,30 @@ const chars = [...value];
   id={id}
   aria-hidden="true"
 >
-  {
-    chars.map((c) =>
-      /\d/.test(c) ? (
-        <span class="odo-wheel" data-digit={c}>
-          <span class="odo-strip" style={`transform:translateY(${-Number(c) * 10}%)`}>
-            <>
-              <span>0</span>
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-            </>
-            <>
-              <span>5</span>
-              <span>6</span>
-              <span>7</span>
-              <span>8</span>
-              <span>9</span>
-            </>
-          </span>
+  {chars.map((c) =>
+    /\d/.test(c) ? (
+      <span class="odo-wheel" data-digit={c}>
+        <span class="odo-strip" style={`transform:translateY(${-Number(c) * 10}%)`}>
+          <>
+            <span>0</span>
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+          </>
+          <>
+            <span>5</span>
+            <span>6</span>
+            <span>7</span>
+            <span>8</span>
+            <span>9</span>
+          </>
         </span>
-      ) : (
-        <span class="odo-sep">{c}</span>
-      ),
-    )
-  }
+      </span>
+    ) : (
+      <span class="odo-sep">{c}</span>
+    ),
+  )}
 </span>
 
 <style>
