@@ -47,7 +47,9 @@ const alternates = (available ?? [...LANGS]).map((l) => ({
     <meta name="generator" content={Astro.generator} />
 
     <link rel="canonical" href={canonical.href} />
-    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    {alternates.map((a) => (
+      <link rel="alternate" hreflang={a.lang} href={a.href} />
+    ))}
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:type" content="website" />
@@ -60,7 +62,9 @@ const alternates = (available ?? [...LANGS]).map((l) => ({
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <a class="skip" href="#main">{s.skip}</a>
+    <a class="skip" href="#main">
+      {s.skip}
+    </a>
 
     <header class="hd">
       <a class="hd-mark" href={localePath(lang, '/')} aria-label={s.siteTitle}>
@@ -68,19 +72,19 @@ const alternates = (available ?? [...LANGS]).map((l) => ({
         <span class="hd-bottom">{s.markBottom}</span>
         {/* Three segments, one per meter. The logo is the thesis. */}
         <span class="hd-rule" aria-hidden="true">
-          {METER_ORDER.map((m) => <i style={`background:var(--m-${m})`} />)}
+          {METER_ORDER.map((m) => (
+            <i style={`background:var(--m-${m})`} />
+          ))}
         </span>
       </a>
 
       <div class="hd-right">
         <nav class="hd-nav">
-          {
-            nav.map((n) => (
-              <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
-                {n.label}
-              </a>
-            ))
-          }
+          {nav.map((n) => (
+            <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+              {n.label}
+            </a>
+          ))}
         </nav>
         <LangSwitch lang={lang} available={available} />
       </div>

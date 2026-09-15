@@ -14,26 +14,24 @@ const here = stripLocale(Astro.url.pathname);
 ---
 
 <div class="ls" role="group" aria-label="Language">
-  {
-    LANGS.map((l) =>
-      available.includes(l) ? (
-        <a
-          class:list={['ls-opt', l === lang && 'is-on']}
-          href={localePath(l, here)}
-          hreflang={l}
-          lang={l}
-          aria-current={l === lang ? 'true' : undefined}
-        >
-          {LANG_NAME[l]}
-        </a>
-      ) : (
-        /* Not translated yet. Show it greyed rather than linking to a 404. */
-        <span class="ls-opt is-missing" lang={l} title={`Not available in ${LANG_NAME[l]}`}>
-          {LANG_NAME[l]}
-        </span>
-      ),
-    )
-  }
+  {LANGS.map((l) =>
+    available.includes(l) ? (
+      <a
+        class:list={['ls-opt', l === lang && 'is-on']}
+        href={localePath(l, here)}
+        hreflang={l}
+        lang={l}
+        aria-current={l === lang ? 'true' : undefined}
+      >
+        {LANG_NAME[l]}
+      </a>
+    ) : (
+      /* Not translated yet. Show it greyed rather than linking to a 404. */
+      <span class="ls-opt is-missing" lang={l} title={`Not available in ${LANG_NAME[l]}`}>
+        {LANG_NAME[l]}
+      </span>
+    ),
+  )}
 </div>
 
 <style>

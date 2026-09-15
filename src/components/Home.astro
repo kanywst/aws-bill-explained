@@ -24,7 +24,9 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
   <section class="hero">
     <p class="eyebrow">{s.hero.eyebrow}</p>
     <h1 class="display hero-h">
-      {s.hero.headA}<br /><span class="hero-count">{s.hero.headB}</span>
+      {s.hero.headA}
+      <br />
+      <span class="hero-count">{s.hero.headB}</span>
     </h1>
     <p class="hero-lede">{s.hero.lede}</p>
 
@@ -65,28 +67,26 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
   <section class="meters">
     <h2 class="eyebrow sec-head">{s.sections.meters}</h2>
     <ol class="meter-list">
-      {
-        METER_ORDER.map((id, i) => {
-          const m = s.meters[id];
-          return (
-            <li class={`meter-card meter-${id}`}>
-              <p class="meter-n num">{String(i + 1).padStart(2, '0')}</p>
-              <h3 class="meter-name">{m.name}</h3>
-              <p class="meter-test">{m.test}</p>
-              <dl class="meter-dl">
-                <dt>{s.meterHeads.counts}</dt>
-                <dd>{m.counts}</dd>
-                <dt>{s.meterHeads.trap}</dt>
-                <dd>{m.trap}</dd>
-                <dt>{s.meterHeads.bill}</dt>
-                <dd>
-                  <code>{m.onTheBill}</code>
-                </dd>
-              </dl>
-            </li>
-          );
-        })
-      }
+      {METER_ORDER.map((id, i) => {
+        const m = s.meters[id];
+        return (
+          <li class={`meter-card meter-${id}`}>
+            <p class="meter-n num">{String(i + 1).padStart(2, '0')}</p>
+            <h3 class="meter-name">{m.name}</h3>
+            <p class="meter-test">{m.test}</p>
+            <dl class="meter-dl">
+              <dt>{s.meterHeads.counts}</dt>
+              <dd>{m.counts}</dd>
+              <dt>{s.meterHeads.trap}</dt>
+              <dd>{m.trap}</dd>
+              <dt>{s.meterHeads.bill}</dt>
+              <dd>
+                <code>{m.onTheBill}</code>
+              </dd>
+            </dl>
+          </li>
+        );
+      })}
     </ol>
   </section>
 
@@ -115,16 +115,14 @@ const slugOf = (id: string) => id.slice(id.indexOf('/') + 1);
     <h2 class="eyebrow sec-head">{s.sections.topics}</h2>
     <p class="index-lede">{s.topicsLede}</p>
     <ul class="index-list">
-      {
-        topics.map((topic) => (
-          <li>
-            <a class="index-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
-              <span class="index-title">{topic.data.short ?? topic.data.title}</span>
-              <span class="index-one">{topic.data.oneLiner}</span>
-            </a>
-          </li>
-        ))
-      }
+      {topics.map((topic) => (
+        <li>
+          <a class="index-item" href={localePath(lang, `/topics/${slugOf(topic.id)}/`)}>
+            <span class="index-title">{topic.data.short ?? topic.data.title}</span>
+            <span class="index-one">{topic.data.oneLiner}</span>
+          </a>
+        </li>
+      ))}
     </ul>
   </section>
 </Base>

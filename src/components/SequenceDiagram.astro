@@ -96,7 +96,9 @@ const stepAlt = (step: SeqStep) => {
   <div class="sq-scroll" tabindex="0" role="region" aria-label={caption}>
     <p class="sr">{a11y.seqAlt.replace('{actors}', actors.map((x) => x.label).join(', '))}</p>
     <ol class="sr">
-      {steps.map((step) => <li>{stepAlt(step)}</li>)}
+      {steps.map((step) => (
+        <li>{stepAlt(step)}</li>
+      ))}
     </ol>
     <svg viewBox={`0 0 ${W} ${H}`} width={W} class="sq-svg" aria-hidden="true">
       <defs>
@@ -116,108 +118,99 @@ const stepAlt = (step: SeqStep) => {
       {/* Billing gutter, the column AWS's own diagrams are missing. */}
       <rect x={LANES_W} y="0" width={GUTTER_W} height={H} fill="var(--surface)"></rect>
       <line x1={LANES_W} y1="0" x2={LANES_W} y2={H} stroke="var(--border)" stroke-width="1"></line>
-      <text x={LANES_W + 14} y="24" class="sq-gutter-head">{s.meter}</text>
+      <text x={LANES_W + 14} y="24" class="sq-gutter-head">
+        {s.meter}
+      </text>
 
-      {
-        actors.map((a) => (
-          <g>
-            <rect
-              x={laneX(a.id) - COL_W / 2 + 12}
-              y="10"
-              width={COL_W - 24}
-              height={HEAD_H - 14}
-              rx="6"
-              fill="var(--surface)"
-              stroke="var(--border)"
-              stroke-width="1.5"
-            />
-            <text x={laneX(a.id)} y={HEAD_H - 12} text-anchor="middle" class="sq-actor">
-              {a.label}
-            </text>
+      {actors.map((a) => (
+        <g>
+          <rect
+            x={laneX(a.id) - COL_W / 2 + 12}
+            y="10"
+            width={COL_W - 24}
+            height={HEAD_H - 14}
+            rx="6"
+            fill="var(--surface)"
+            stroke="var(--border)"
+            stroke-width="1.5"
+          />
+          <text x={laneX(a.id)} y={HEAD_H - 12} text-anchor="middle" class="sq-actor">
+            {a.label}
+          </text>
+          <line
+            x1={laneX(a.id)}
+            y1={HEAD_H}
+            x2={laneX(a.id)}
+            y2={H - 8}
+            stroke="var(--border-subtle)"
+            stroke-width="1"
+            stroke-dasharray="3 5"
+          />
+        </g>
+      ))}
+
+      {steps.map((step, i) => {
+        const y = stepY(i);
+        const x1 = laneX(step.from);
+        const x2 = laneX(step.to);
+        const lit = Boolean(step.meter);
+        const stroke = lit ? `var(--m-${step.meter})` : 'var(--unlit)';
+        const forward = x2 > x1;
+        const from = x1 + (forward ? 6 : -6);
+        const to = x2 + (forward ? -6 : 6);
+        return (
+          <g class:list={['sq-step', lit && 'is-lit']} style={`--stroke:${stroke}`}>
             <line
-              x1={laneX(a.id)}
-              y1={HEAD_H}
-              x2={laneX(a.id)}
-              y2={H - 8}
-              stroke="var(--border-subtle)"
-              stroke-width="1"
-              stroke-dasharray="3 5"
+              x1={from}
+              y1={y}
+              x2={to}
+              y2={y}
+              stroke={stroke}
+              stroke-width={lit ? 2.25 : 1.5}
+              stroke-dasharray={step.reply ? '6 4' : undefined}
+              marker-end="url(#sq-head)"
             />
+            <text
+              x={(from + to) / 2}
+              y={y - 9}
+              text-anchor="middle"
+              class:list={['sq-label', lit && 'is-lit']}
+            >
+              {step.label}
+            </text>
+
+            {/* Gutter row */}
+            <line x1={LANES_W} y1={y + 18} x2={W} y2={y + 18} stroke="var(--bg)" stroke-width="1" />
+            {lit ? (
+              <>
+                <circle cx={LANES_W + 20} cy={y - 3} r="4" fill={stroke} class="sq-lamp" />
+                <text x={LANES_W + 32} y={y + 1} class="sq-meter" fill={stroke}>
+                  {t(lang).meters[step.meter as MeterId].name}
+                </text>
+                {step.charge && (
+                  <text x={LANES_W + 32} y={y + 14} class="sq-charge">
+                    {step.charge}
+                  </text>
+                )}
+              </>
+            ) : (
+              <>
+                <circle
+                  cx={LANES_W + 20}
+                  cy={y - 3}
+                  r="4"
+                  fill="none"
+                  stroke="var(--unlit)"
+                  stroke-width="1.25"
+                />
+                <text x={LANES_W + 32} y={y + 1} class="sq-none">
+                  {s.idle}
+                </text>
+              </>
+            )}
           </g>
-        ))
-      }
-
-      {
-        steps.map((step, i) => {
-          const y = stepY(i);
-          const x1 = laneX(step.from);
-          const x2 = laneX(step.to);
-          const lit = Boolean(step.meter);
-          const stroke = lit ? `var(--m-${step.meter})` : 'var(--unlit)';
-          const forward = x2 > x1;
-          const from = x1 + (forward ? 6 : -6);
-          const to = x2 + (forward ? -6 : 6);
-          return (
-            <g class:list={['sq-step', lit && 'is-lit']} style={`--stroke:${stroke}`}>
-              <line
-                x1={from}
-                y1={y}
-                x2={to}
-                y2={y}
-                stroke={stroke}
-                stroke-width={lit ? 2.25 : 1.5}
-                stroke-dasharray={step.reply ? '6 4' : undefined}
-                marker-end="url(#sq-head)"
-              />
-              <text
-                x={(from + to) / 2}
-                y={y - 9}
-                text-anchor="middle"
-                class:list={['sq-label', lit && 'is-lit']}
-              >
-                {step.label}
-              </text>
-
-              {/* Gutter row */}
-              <line
-                x1={LANES_W}
-                y1={y + 18}
-                x2={W}
-                y2={y + 18}
-                stroke="var(--bg)"
-                stroke-width="1"
-              />
-              {lit ? (
-                <>
-                  <circle cx={LANES_W + 20} cy={y - 3} r="4" fill={stroke} class="sq-lamp" />
-                  <text x={LANES_W + 32} y={y + 1} class="sq-meter" fill={stroke}>
-                    {t(lang).meters[step.meter as MeterId].name}
-                  </text>
-                  {step.charge && (
-                    <text x={LANES_W + 32} y={y + 14} class="sq-charge">
-                      {step.charge}
-                    </text>
-                  )}
-                </>
-              ) : (
-                <>
-                  <circle
-                    cx={LANES_W + 20}
-                    cy={y - 3}
-                    r="4"
-                    fill="none"
-                    stroke="var(--unlit)"
-                    stroke-width="1.25"
-                  />
-                  <text x={LANES_W + 32} y={y + 1} class="sq-none">
-                    {s.idle}
-                  </text>
-                </>
-              )}
-            </g>
-          );
-        })
-      }
+        );
+      })}
     </svg>
   </div>
 

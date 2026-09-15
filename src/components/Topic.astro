@@ -34,7 +34,9 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
 >
   <article class="tp">
     <header class="tp-head">
-      <a class="tp-back" href={localePath(lang, '/topics/')}>&larr; {s.nav.topics}</a>
+      <a class="tp-back" href={localePath(lang, '/topics/')}>
+        &larr; {s.nav.topics}
+      </a>
       <h1 class="display tp-title">{entry.data.title}</h1>
       <MeterLamps active={entry.data.meters} lang={lang} size="lg" />
     </header>
@@ -49,35 +51,33 @@ const checked = entry.data.checked.toISOString().slice(0, 10);
       <Content />
     </div>
 
-    {
-      service && (
-        <aside class="tp-see">
-          <a href={localePath(lang, `/services/${service.slug.value}/`)}>
-            {s.services.seeEntry.replace('{name}', service.name)}
-          </a>
-        </aside>
-      )
-    }
+    {service && (
+      <aside class="tp-see">
+        <a href={localePath(lang, `/services/${service.slug.value}/`)}>
+          {s.services.seeEntry.replace('{name}', service.name)}
+        </a>
+      </aside>
+    )}
 
-    {
-      entry.data.sources.length > 0 && (
-        <section class="tp-src">
-          <h2>{s.sources}</h2>
-          <ul>
-            {entry.data.sources.map((url) => (
-              <li>
-                <a href={url} rel="noopener nofollow">
-                  {url.replace(/^https:\/\//, '')}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {entry.data.sources.length > 0 && (
+      <section class="tp-src">
+        <h2>{s.sources}</h2>
+        <ul>
+          {entry.data.sources.map((url) => (
+            <li>
+              <a href={url} rel="noopener nofollow">
+                {url.replace(/^https:\/\//, '')}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <footer class="tp-foot">
-      <span class="tp-checked">{s.checked}: <time datetime={checked}>{checked}</time></span>
+      <span class="tp-checked">
+        {s.checked}: <time datetime={checked}>{checked}</time>
+      </span>
     </footer>
   </article>
 </Base>
