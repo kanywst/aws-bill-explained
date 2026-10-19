@@ -67,8 +67,9 @@ const alternates = (available ?? [...LANGS]).map((l) => ({
     </a>
 
     <header class="hd">
-      <a class="hd-mark" href={localePath(lang, '/')} aria-label={s.siteTitle}>
-        <span class="hd-top">{s.markTop}</span>
+      {/* The name comes from the visible text, so it can't drift from it (WCAG 2.5.3). */}
+      <a class="hd-mark" href={localePath(lang, '/')}>
+        <span class="hd-top">{s.markTop}</span>{' '}
         <span class="hd-bottom">{s.markBottom}</span>
         {/* Three segments, one per meter. The logo is the thesis. */}
         <span class="hd-rule" aria-hidden="true">
