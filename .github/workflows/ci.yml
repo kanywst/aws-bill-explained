@@ -17,7 +17,7 @@ concurrency:
 # the SHA and the trailing version comment in step.
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -39,7 +39,7 @@ jobs:
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -66,7 +66,7 @@ jobs:
           retention-days: 7
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -113,7 +113,7 @@ jobs:
           retention-days: 7
 
   audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -139,7 +139,7 @@ jobs:
     # it exits non-zero only on a definite 404/410 and treats timeouts, 403s
     # and redirects as warnings, so the flakiness that flag was guarding
     # against cannot fail the job anyway.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
