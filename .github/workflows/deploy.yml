@@ -22,7 +22,7 @@ jobs:
     # push teaches people to ignore the colour. Skip loudly instead.
     if: github.event_name == 'workflow_dispatch' || vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     environment:
       name: production
       url: https://aws-bill-explained.pages.dev
@@ -42,7 +42,7 @@ jobs:
       # nothing or a claim with no source, so the gates run here too rather
       # than being trusted from the CI workflow.
       - name: Install the browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: scripts/install-browsers.sh
 
       - name: Types
         run: npx astro check
