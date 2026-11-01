@@ -17,14 +17,15 @@
     "category": "analytics",
     "meters": ["units"],
     "oneLiner": "Per object routed to a human reviewer, on top of whatever the workforce itself charges.",
-    "trap": "The Mechanical Turk reward is baked into the usage type, so changing the price per task moves the charge to a different rate code entirely. A2I is now in maintenance and no longer accepts new customers.",
+    "trap": "Mechanical Turk ended on September 29, 2026, but the price list still carries rate codes with its per-task reward baked into the name; they are leftovers. A2I is in maintenance and no longer accepts new customers.",
     "billOn": ["A2ICustom", "A2IRek-CM-Img", "A2ITextract-AD-Form"],
     "confidence": "medium",
     "sources": [
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonA2I/current/us-east-1/index.json",
-      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
+      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html",
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-01"
   },
   {
     "slug": "bedrock",
@@ -280,13 +281,14 @@
     "category": "analytics",
     "meters": ["units"],
     "oneLiner": "You pay per reviewed object, and with a vendor workforce, twice over.",
-    "trap": "Ground Truth bills per dataset object reviewed. A vendor workforce adds its own per-label Marketplace price; the pricing page lists no labor charge for a private one. Mechanical Turk ended on September 29, 2026.",
+    "trap": "Ground Truth bills per dataset object reviewed, and a vendor workforce adds its own per-label Marketplace price. Mechanical Turk ended on September 29, 2026, and Ground Truth is in maintenance, closed to new customers.",
     "billOn": ["LabeledObject"],
     "confidence": "medium",
     "sources": [
       "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management.html",
       "https://aws.amazon.com/sagemaker/ai/pricing/",
-      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/",
+      "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
     ],
     "checked": "2026-11-01"
   },
