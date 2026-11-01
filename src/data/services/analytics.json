@@ -280,7 +280,7 @@
     "category": "analytics",
     "meters": ["units"],
     "oneLiner": "You pay per labeled object, and with a vendor workforce, twice over.",
-    "trap": "A vendor adds its own per-label Marketplace price on top of the Ground Truth fee. Mechanical Turk ended on September 29, 2026, so the public workforce is gone; a private workforce's labor is not billed by AWS.",
+    "trap": "Every reviewed object bills the Ground Truth fee, and a vendor workforce adds its own per-label price from AWS Marketplace. Mechanical Turk ended on September 29, 2026, taking its per-review labor charge with it.",
     "billOn": ["LabeledObject"],
     "confidence": "medium",
     "sources": [
@@ -288,7 +288,7 @@
       "https://aws.amazon.com/sagemaker/ai/pricing/",
       "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-11-02"
+    "checked": "2026-11-01"
   },
   {
     "slug": "healthomics",
