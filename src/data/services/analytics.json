@@ -279,15 +279,16 @@
     "name": "Amazon SageMaker Ground Truth",
     "category": "analytics",
     "meters": ["units"],
-    "oneLiner": "You pay per labeled object, twice over.",
-    "trap": "Two charges land per object: the Ground Truth service fee and the workforce fee. Mechanical Turk tasks price per worker, so raising workers-per-object for label quality multiplies the human half.",
+    "oneLiner": "You pay per reviewed object, and with a vendor workforce, twice over.",
+    "trap": "Ground Truth bills per dataset object reviewed. A vendor workforce adds its own per-label Marketplace price; the pricing page lists no labor charge for a private one. Mechanical Turk ended on September 29, 2026.",
     "billOn": ["LabeledObject"],
     "confidence": "medium",
     "sources": [
-      "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management-public.html",
-      "https://aws.amazon.com/sagemaker/ai/pricing/"
+      "https://docs.aws.amazon.com/sagemaker/latest/dg/sms-workforce-management.html",
+      "https://aws.amazon.com/sagemaker/ai/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-01"
   },
   {
     "slug": "healthomics",

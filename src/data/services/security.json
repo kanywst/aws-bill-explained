@@ -385,18 +385,19 @@
   },
   {
     "slug": "security-agent",
-    "name": "AWS Security Agent",
+    "name": "AWS Security Agent (part of AWS Continuum)",
     "category": "security",
     "meters": ["time"],
     "oneLiner": "Per task-hour of autonomous penetration testing. Task-hours accumulate across parallel work.",
-    "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Threat modeling and code review are free only while in preview.",
+    "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Threat modeling is free only while in preview.",
     "billOn": ["USE1-Penetration-Testing"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/security-agent/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/SecAgent/current/us-east-1/index.json"
+      "https://aws.amazon.com/continuum/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/SecAgent/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/06/aws-security-agent-threat-modeling/"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-01"
   },
   {
     "slug": "security-hub",

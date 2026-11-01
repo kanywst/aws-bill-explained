@@ -121,10 +121,10 @@
     "billOn": ["PortUsage", "DataXfer-Out", "SiteLinkVifHour"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/directconnect/pricing/",
+      "https://aws.amazon.com/directconnect/pricing/pay-as-you-go/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDirectConnect/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-01"
   },
   {
     "slug": "elastic-ip",
@@ -367,10 +367,10 @@
     "billOn": ["TNB_MNFI", "TNB_API_Calls"],
     "confidence": "high",
     "sources": [
-      "https://aws.amazon.com/tnb/pricing/",
+      "https://docs.aws.amazon.com/tnb/latest/ug/what-is-tnb.html#pricing-tnb",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTelcoNetworkBuilder/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-01"
   },
   {
     "slug": "transit-gateway",
