@@ -280,7 +280,7 @@
     "category": "analytics",
     "meters": ["units"],
     "oneLiner": "You pay per labeled object, and with a vendor workforce, twice over.",
-    "trap": "Every reviewed object bills the Ground Truth fee, and a vendor workforce adds its own per-label price from AWS Marketplace. Mechanical Turk ended on September 29, 2026, taking its per-review labor charge with it.",
+    "trap": "Ground Truth bills per dataset object reviewed. A vendor workforce adds its own per-label Marketplace price; the pricing page lists no labor charge for a private one. Mechanical Turk ended on September 29, 2026.",
     "billOn": ["LabeledObject"],
     "confidence": "medium",
     "sources": [
