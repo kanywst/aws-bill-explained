@@ -17,7 +17,7 @@
     "category": "analytics",
     "meters": ["units"],
     "oneLiner": "Per object routed to a human reviewer, on top of whatever the workforce itself charges.",
-    "trap": "Mechanical Turk ended on September 29, 2026, yet the price list still has MTurk rate codes with the per-task reward in the name, such as A2IRek-CM-Img-MTurkAt0.048. A2I is in maintenance, closed to new customers.",
+    "trap": "Mechanical Turk ended on September 29, 2026, yet the price list still has MTurk rate codes that carry the per-task reward in the name (MTurkAt plus the amount). A2I is in maintenance, closed to new customers.",
     "billOn": ["A2ICustom", "A2IRek-CM-Img", "A2ITextract-AD-Form"],
     "confidence": "medium",
     "sources": [
