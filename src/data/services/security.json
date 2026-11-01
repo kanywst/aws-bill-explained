@@ -385,7 +385,7 @@
   },
   {
     "slug": "security-agent",
-    "name": "AWS Security Agent",
+    "name": "AWS Security Agent (AWS Continuum)",
     "category": "security",
     "meters": ["time"],
     "oneLiner": "Per task-hour of autonomous penetration testing. Task-hours accumulate across parallel work.",

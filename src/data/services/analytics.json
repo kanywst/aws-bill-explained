@@ -279,7 +279,7 @@
     "name": "Amazon SageMaker Ground Truth",
     "category": "analytics",
     "meters": ["units"],
-    "oneLiner": "You pay per labeled object, and with a vendor workforce, twice over.",
+    "oneLiner": "You pay per reviewed object, and with a vendor workforce, twice over.",
     "trap": "Ground Truth bills per dataset object reviewed. A vendor workforce adds its own per-label Marketplace price; the pricing page lists no labor charge for a private one. Mechanical Turk ended on September 29, 2026.",
     "billOn": ["LabeledObject"],
     "confidence": "medium",
