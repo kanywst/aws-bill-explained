@@ -265,9 +265,9 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/kms/pricing/",
-      "https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-kms-best-practices/cost.html"
+      "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-09"
   },
   {
     "slug": "license-manager",
