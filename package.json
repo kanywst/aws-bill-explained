@@ -35,7 +35,7 @@
     "prettier-plugin-astro": "^1.1.2",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0",
-    "wrangler": "^4.161.0"
+    "wrangler": "^4.165.0"
   },
   "overrides": {
     "katex": "0.18.10",
