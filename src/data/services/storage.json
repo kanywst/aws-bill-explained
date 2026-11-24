@@ -289,6 +289,51 @@
     "checked": "2026-11-25"
   },
   {
+    "slug": "s3-tables",
+    "name": "Amazon S3 Tables",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "S3-style storage and requests, plus a monthly fee per object monitored and a compaction charge per object and per GB.",
+    "trap": "Compaction runs on every table by default and bills per object and per GB it rewrites, so a stream of tiny Iceberg files costs real money to tidy. Sort and Z-order compaction charge double the per-GB rate.",
+    "billOn": [
+      "Tables-TimedStorage-ByteHrs",
+      "Tables-Requests-Tier1",
+      "Tables-Requests-Tier2",
+      "Tables-MonitoredObjects",
+      "Tables-CompactedObjects",
+      "Tables-ProcessedBytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/",
+      "https://docs.aws.amazon.com/prescriptive-guidance/latest/apache-iceberg-on-aws/maintenance-in-amazon-s3-tables.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
+    "slug": "s3-vectors",
+    "name": "Amazon S3 Vectors",
+    "category": "storage",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Per GB stored and per GB uploaded, and every query bills a request plus the size of the index it searched.",
+    "trap": "Query cost follows the index, not the answer: each query bills average vector size times every vector in the index, so one huge index costs more per search than a small one. Returned results bill per GB too.",
+    "billOn": [
+      "Vectors-TimedStorage-ByteHrs",
+      "Vectors-Put-Bytes",
+      "Vectors-Request-Tier3",
+      "Vectors-Query-ProcessedBytes-Tier1",
+      "Vectors-Query-Returned-Bytes"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/s3/pricing/",
+      "https://aws.amazon.com/opensearch-service/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
     "slug": "snow-family",
     "name": "AWS Snow Family",
     "category": "storage",

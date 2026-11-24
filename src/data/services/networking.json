@@ -412,6 +412,27 @@
     "checked": "2026-11-25"
   },
   {
+    "slug": "vpc-lattice",
+    "name": "Amazon VPC Lattice",
+    "category": "networking",
+    "meters": ["time", "bytes", "units"],
+    "oneLiner": "Each service bills hourly whether called or not, plus per GB through it and per request over a free hourly allowance.",
+    "trap": "The free request allowance is per service per hour, so quiet hours bank nothing for a spike. Inter-AZ traffic is folded into the per-GB fee, and VPC resources add their own hourly and per-GB charges.",
+    "billOn": [
+      "VPCLattice-Service-Hourly",
+      "VPCLattice-DataProcessing-Bytes",
+      "VPCLattice-RequestCount-Charged",
+      "VPCLattice-ConnectionCount-Charged",
+      "VpcLattice-Service-Network-Resource-Hours"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/vpc/lattice/pricing/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
     "slug": "vpc-peering",
     "name": "Amazon VPC Peering",
     "category": "networking",

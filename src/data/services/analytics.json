@@ -1,5 +1,25 @@
 [
   {
+    "slug": "agent-registry",
+    "name": "AWS Agent Registry",
+    "category": "analytics",
+    "meters": ["units"],
+    "oneLiner": "Per record held in the registry and per Search, List or Get call, each above a monthly free allowance.",
+    "trap": "Records bill on the net count present, so deleting stale entries lowers the bill. Auto-detecting every AgentCore runtime and gateway across an organization can fill the free allowance with nobody adding a record.",
+    "billOn": [
+      "Registry:Consumption-based:Records",
+      "Registry:Consumption-based:Search-API",
+      "Registry:Consumption-based:List-Get-API"
+    ],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/bedrock/agentcore/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/08/aws-agent-registry-generally-available/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awsagentregistry/current/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
     "slug": "athena",
     "name": "Amazon Athena",
     "category": "analytics",
@@ -65,6 +85,26 @@
     "sources": [
       "https://aws.amazon.com/bedrock/agentcore/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrockAgentCore/current/us-east-1/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
+    "slug": "bedrock-managed-knowledge-base",
+    "name": "Amazon Bedrock Managed Knowledge Base",
+    "category": "analytics",
+    "meters": ["time", "units"],
+    "oneLiner": "Per GB-month of raw data stored and per retrieval call. Parsing, embedding and sync are folded into those two.",
+    "trap": "Agentic retrieval bills a higher per-query rate than standard retrieval. Picking your own Bedrock model for embeddings, reranking or orchestration adds token charges, and storage meters raw data, not vectors.",
+    "billOn": [
+      "Knowledge-Base:Consumption-based:Storage",
+      "Knowledge-Base:Consumption-based:Retrieval",
+      "Knowledge-Base:Consumption-based:AgenticRetrieval"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/about-aws/whats-new/2026/06/amazon-bedrock-managed-knowledge-base/",
+      "https://aws.amazon.com/blogs/machine-learning/build-enterprise-search-for-agents-with-amazon-bedrock-managed-knowledge-base/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKnowledgeBase/current/index.json"
     ],
     "checked": "2026-11-25"
   },
@@ -200,6 +240,22 @@
     "sources": [
       "https://aws.amazon.com/blogs/media/support-for-amazon-elastic-transcoder-ending-soon/",
       "https://aws.amazon.com/elastictranscoder/faqs/"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
+    "slug": "elemental-inference",
+    "name": "AWS Elemental Inference",
+    "category": "analytics",
+    "meters": ["time"],
+    "oneLiner": "Per minute a feed processes source video, at a rate set by how many AI features that feed has switched on.",
+    "trap": "Rates are per feed, not per feature: a second feature on the same feed raises the minute rate by about half, not double. Functions call Bedrock models billed separately, and playground jobs add MediaConvert charges.",
+    "billOn": ["EINF-1F-DEFAULT", "EINF-2F-DEFAULT", "EINF-3F-DEFAULT", "EINF-4F-DEFAULT"],
+    "confidence": "high",
+    "sources": [
+      "https://docs.aws.amazon.com/elemental-inference/latest/userguide/pricing-for-inference.html",
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/elemental-inference-functions-decisions/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSElementalInference/current/index.json"
     ],
     "checked": "2026-11-25"
   },

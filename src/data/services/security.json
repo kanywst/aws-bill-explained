@@ -103,6 +103,22 @@
     "checked": "2026-11-25"
   },
   {
+    "slug": "continuum-code-vulnerabilities",
+    "name": "AWS Continuum for code vulnerabilities",
+    "category": "security",
+    "meters": ["time", "units"],
+    "oneLiner": "A monthly fee per line of code under protection, plus inference units for the security work Continuum performs.",
+    "trap": "The context fee bills on lines of code connected, not on findings, so a clean repository still costs every month. The free trial covers Continuum penetration testing only, not code vulnerabilities.",
+    "billOn": ["ContinuumContext-Code", "ContinuumInference"],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/continuum/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available/",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSContinuumService/current/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
     "slug": "detective",
     "name": "Amazon Detective",
     "category": "security",
@@ -323,6 +339,28 @@
     "sources": [
       "https://aws.amazon.com/network-firewall/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSNetworkFirewall/current/us-east-1/index.json"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
+    "slug": "network-security-manager",
+    "name": "AWS Network Security Manager",
+    "category": "security",
+    "meters": ["time"],
+    "oneLiner": "An hourly fee per account per Region where policies exist, plus an hourly fee per protected asset per firewall.",
+    "trap": "The account fee runs every hour a policy exists, even one guarding a single load balancer. The WAF and Shield Advanced protections it deploys bill at their own rates, and an asset behind both pays the asset fee twice.",
+    "billOn": [
+      "Usage-Trigger-Policy",
+      "Resource-ALB-WAF",
+      "Resource-CFD-WAF",
+      "Resource-APIGW-WAF",
+      "Resource-ALB-SHIELDADVANCED"
+    ],
+    "confidence": "high",
+    "sources": [
+      "https://aws.amazon.com/network-security-manager/pricing/",
+      "https://docs.aws.amazon.com/network-security-manager/latest/devguide/what-is.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSNSM/current/index.json"
     ],
     "checked": "2026-11-25"
   },
