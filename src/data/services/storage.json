@@ -17,7 +17,7 @@
       "https://aws.amazon.com/backup/pricing/",
       "https://docs.aws.amazon.com/aws-backup/latest/devguide/metering-and-billing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "data-transfer-terminal",
@@ -32,7 +32,7 @@
       "https://aws.amazon.com/data-transfer-terminal/pricing/",
       "https://aws.amazon.com/data-transfer-terminal/"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "datasync",
@@ -47,7 +47,7 @@
       "https://aws.amazon.com/datasync/pricing/",
       "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ebs",
@@ -67,7 +67,7 @@
       "https://aws.amazon.com/ebs/pricing/",
       "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-billing-usage-reports.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "efs",
@@ -87,7 +87,7 @@
       "https://aws.amazon.com/efs/pricing/",
       "https://docs.aws.amazon.com/efs/latest/ug/billing-usage-reports-understand.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elastic-disaster-recovery",
@@ -102,7 +102,7 @@
       "https://aws.amazon.com/disaster-recovery/pricing/",
       "https://docs.aws.amazon.com/drs/latest/userguide/what-is-drs.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "file-cache",
@@ -117,7 +117,7 @@
       "https://aws.amazon.com/filecache/pricing/",
       "https://docs.aws.amazon.com/fsx/latest/FileCacheGuide/what-is.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "fsx",
@@ -132,7 +132,7 @@
       "https://aws.amazon.com/fsx/netapp-ontap/pricing/",
       "https://aws.amazon.com/fsx/lustre/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "healthimaging",
@@ -153,22 +153,23 @@
       "https://aws.amazon.com/healthimaging/pricing/",
       "https://aws.amazon.com/healthimaging/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mainframe-modernization",
     "name": "AWS Mainframe Modernization",
     "category": "storage",
     "meters": ["time", "bytes"],
-    "oneLiner": "Closed to new customers since November 2025; existing runtime environments still bill per vCPU-hour.",
+    "oneLiner": "Closed to new customers since November 7, 2025; existing runtime environments still bill per CPU core-hour.",
     "trap": "The runtime meter is per AWS CPU core per hour on a provisioned environment, so an idle developer environment costs what a busy one does. Getting mainframe data across is priced separately per GB and it stings.",
     "billOn": ["BluAgeRuntime-Non-Managed-vCPU-Hours", "File-Transfer"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/mainframe-modernization/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSM2/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSM2/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2025/10/aws-service-availability/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mediastore",
@@ -183,11 +184,11 @@
       "https://aws.amazon.com/blogs/media/support-for-aws-elemental-mediastore-ending-soon/",
       "https://docs.aws.amazon.com/managedservices/latest/userguide/elemental-media-store.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mgn",
-    "name": "AWS Application Migration Service",
+    "name": "AWS Transform MGN (formerly Application Migration Service)",
     "category": "storage",
     "meters": ["time"],
     "oneLiner": "Free for 2,160 replication hours per server, then hourly.",
@@ -196,9 +197,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/application-migration-service/faqs/",
-      "https://docs.aws.amazon.com/mgn/latest/ug/migration_at_scale.html"
+      "https://docs.aws.amazon.com/mgn/latest/ug/migration_at_scale.html",
+      "https://aws.amazon.com/about-aws/whats-new/2026/06/aws-transform-mgn-rebrand/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "migration-hub",
@@ -213,7 +215,7 @@
       "https://docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html",
       "https://aws.amazon.com/about-aws/whats-new/2025/10/aws-service-availability/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "refactor-spaces",
@@ -228,7 +230,7 @@
       "https://docs.aws.amazon.com/migrationhub-refactor-spaces/latest/userguide/migrationhub-availability-change.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMigrationHubRefactorSpaces/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "s3",
@@ -249,7 +251,7 @@
       "https://aws.amazon.com/s3/pricing/",
       "https://docs.aws.amazon.com/AmazonS3/latest/userguide/aws-usage-report-understand.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "s3-express-one-zone",
@@ -264,7 +266,7 @@
       "https://aws.amazon.com/s3/storage-classes/express-one-zone/",
       "https://aws.amazon.com/blogs/aws/up-to-85-price-reductions-for-amazon-s3-express-one-zone/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "s3-glacier",
@@ -284,14 +286,14 @@
       "https://aws.amazon.com/s3/pricing/",
       "https://docs.aws.amazon.com/AmazonS3/latest/userguide/restoring-objects-retrieval-options.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "snow-family",
     "name": "AWS Snow Family",
     "category": "storage",
     "meters": ["time", "bytes"],
-    "oneLiner": "A per-job fee covers the device plus fifteen days on site. Keep it longer and each extra day bills.",
+    "oneLiner": "Closed to new customers since November 7, 2025. A per-job fee covers fifteen days on site; each extra day bills.",
     "trap": "Import into S3 moves at no charge, but export jobs pay data transfer out per GB at the source Region's rate. Shipping is billed at carrier rates, and the S3 storage and requests underneath are yours too.",
     "billOn": [
       "Snowball-Service-Fee-N-Shipping",
@@ -301,9 +303,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/snowball/pricing/",
-      "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html"
+      "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html",
+      "https://aws.amazon.com/about-aws/whats-new/2025/10/aws-service-availability/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "storage-gateway",
@@ -311,15 +314,16 @@
     "category": "storage",
     "meters": ["time", "bytes"],
     "oneLiner": "Two meters facing opposite ways, plus an hourly fee on the FSx File Gateway type.",
-    "trap": "The gateway fee counts gigabytes written up to AWS. Downloads back to an EC2-hosted gateway in the same Region are free. FSx File Gateway adds a per-hour charge the other types lack.",
+    "trap": "The gateway fee counts gigabytes written to AWS, capped per gateway each month. Downloads to an EC2-hosted gateway in the same Region are free. FSx File Gateway bills hourly but closed to new customers in October 2024.",
     "billOn": ["Uploaded-Bytes", "Retrieval-Bytes", "Gateway-Hrs"],
     "confidence": "medium",
     "sources": [
       "https://aws.amazon.com/storagegateway/pricing/",
       "https://aws.amazon.com/storagegateway/faqs/",
-      "https://repost.aws/knowledge-center/storage-gateway-bill-increasing"
+      "https://repost.aws/knowledge-center/storage-gateway-bill-increasing",
+      "https://docs.aws.amazon.com/filegateway/latest/filefsxw/DocumentHistory.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "transfer-family",
@@ -334,7 +338,7 @@
       "https://aws.amazon.com/aws-transfer-family/pricing/",
       "https://docs.aws.amazon.com/transfer/latest/APIReference/API_StopServer.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "transform",
@@ -349,6 +353,6 @@
       "https://aws.amazon.com/transform/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransform/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   }
 ]

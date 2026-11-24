@@ -10,9 +10,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/apprunner/pricing/",
-      "https://docs.aws.amazon.com/apprunner/latest/dg/manage-pause.html"
+      "https://docs.aws.amazon.com/apprunner/latest/dg/manage-pause.html",
+      "https://aws.amazon.com/apprunner/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "appstream",
@@ -27,7 +28,7 @@
       "https://aws.amazon.com/workspaces/applications/pricing/",
       "https://aws.amazon.com/workspaces/applications/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "batch",
@@ -39,7 +40,7 @@
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/batch/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "braket",
@@ -49,8 +50,8 @@
     "oneLiner": "QPU work bills per task and then again per shot; simulators bill per minute of execution.",
     "trap": "Shots dominate: one task with ten thousand shots is ten thousand shot charges, and IonQ error mitigation forces a 2,500-shot minimum. Hybrid jobs keep billing the classical instance while quantum tasks sit in the queue.",
     "billOn": [
-      "Job-QPU-Task-IonQ-Aria-1",
-      "Job-QPU-Task-Shot-IonQ-Aria-1",
+      "Task-IonQ-Forte-1",
+      "Task-Shot-IonQ-Forte-1",
       "Completed-Task-ExecutionDuration-SV1",
       "Job-ExecutionDuration-ml.m5.xlarge"
     ],
@@ -59,7 +60,7 @@
       "https://aws.amazon.com/braket/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBraket/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "compute-optimizer",
@@ -74,7 +75,7 @@
       "https://aws.amazon.com/compute-optimizer/pricing/",
       "https://docs.aws.amazon.com/compute-optimizer/latest/ug/enhanced-infrastructure-metrics.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "deadline-cloud",
@@ -95,7 +96,7 @@
       "https://aws.amazon.com/deadline-cloud/pricing/",
       "https://aws.amazon.com/deadline-cloud/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ec2",
@@ -116,7 +117,7 @@
       "https://aws.amazon.com/ec2/pricing/on-demand/",
       "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ec2-auto-scaling",
@@ -128,7 +129,7 @@
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/autoscaling/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ec2-spot",
@@ -143,7 +144,7 @@
       "https://aws.amazon.com/ec2/spot/pricing/",
       "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/billing-for-interrupted-spot-instances.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ecr",
@@ -152,13 +153,18 @@
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Storage per GB-month plus data transfer out. In-Region pulls to EC2, Fargate, Lambda and App Runner are free.",
     "trap": "Cross-Region replication charges data transfer out against the source Region on every copy. Untagged and superseded layers keep accruing storage until a lifecycle policy actually deletes them.",
-    "billOn": ["TimedStorage-ByteHrs", "TimedStorage-Archive-ByteHrs", "Retrieval-Archive"],
+    "billOn": [
+      "TimedStorage-ByteHrs",
+      "TimedStorage-Archive-ByteHrs",
+      "Retrieval-Archive",
+      "AsyncActions-ImageSigning"
+    ],
     "confidence": "medium",
     "sources": [
       "https://aws.amazon.com/ecr/pricing/",
       "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ecr-public",
@@ -173,7 +179,7 @@
       "https://aws.amazon.com/ecr/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECRPublic/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ecs",
@@ -182,13 +188,17 @@
     "meters": ["time"],
     "oneLiner": "Orchestration costs nothing. The bill is whatever EC2 or Fargate capacity your tasks land on.",
     "trap": "Free only holds for tasks on your own EC2 or on Fargate. ECS Anywhere bills per registered on-premises instance-hour, and ECS Managed Instances add a per-instance management fee on top of the EC2 rate.",
-    "billOn": ["ECS-Anywhere-Instance-hours", "ECS-EC2-vCPU-Hours"],
+    "billOn": [
+      "ECS-Anywhere-Instance-hours",
+      "ECS-EC2-vCPU-Hours",
+      "ECS-Managed-Instances:c6a.large-management-hours"
+    ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/ecs/pricing/",
       "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "eks",
@@ -200,14 +210,16 @@
     "billOn": [
       "AmazonEKS-Hours:perCluster",
       "AmazonEKS-Hours:extendedSupport",
-      "AmazonEKSHybridNodes-Hours:pervCPU"
+      "AmazonEKSHybridNodes-Hours:pervCPU",
+      "AmazonEKS-Hours:XL-ProvisionedTier",
+      "AmazonEKSCapabilities-ArgoCD-Hours:perCapability"
     ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/eks/pricing/",
       "https://aws.amazon.com/blogs/containers/amazon-eks-extended-support-for-kubernetes-versions-pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "eks-anywhere",
@@ -222,7 +234,7 @@
       "https://aws.amazon.com/eks/eks-anywhere/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEKSAnywhere/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elastic-beanstalk",
@@ -230,11 +242,11 @@
     "category": "compute",
     "meters": [],
     "oneLiner": "A free wrapper. The bill is whatever EC2, load balancer and database resources the environment stands up.",
-    "trap": "Beanstalk's own line item is always zero, so the cost hides under EC2 and ELB. A forgotten dev environment keeps paying for its load balancer and instances indefinitely.",
+    "trap": "Beanstalk's own line item is always zero, so the cost hides under EC2 and ELB. Cluster mode adds an EKS cluster fee and an Auto Mode fee per instance. A forgotten dev environment keeps paying indefinitely.",
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/elasticbeanstalk/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elastic-vmware-service",
@@ -246,7 +258,7 @@
     "billOn": ["EVSUsage", "EVSUsage-BYOS:i4i.metal"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/evs/pricing/", "https://aws.amazon.com/evs/"],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "fargate",
@@ -266,15 +278,15 @@
       "https://aws.amazon.com/fargate/pricing/",
       "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "gamelift",
     "name": "Amazon GameLift Servers",
     "category": "compute",
-    "meters": ["time", "units"],
-    "oneLiner": "Per instance-hour for hosting fleets, plus FlexMatch matchmaking hours and per-player packages.",
-    "trap": "Fleets hold instances at whatever minimum you configured whether players connect or not, so an empty fleet bills all night. FlexMatch matchmaking bills by the hour on top, and player packages per player.",
+    "meters": ["time", "units", "bytes"],
+    "oneLiner": "Per instance-hour for managed fleets, per game session and connection minute on Anywhere fleets.",
+    "trap": "An empty fleet held at its configured minimum bills all night. Bandwidth is free only on generation 6 and later instances. FlexMatch is free with managed hosting but bills per hour and per player package standalone.",
     "billOn": [
       "BoxUsage:c5.large",
       "FlexMatchMatchmakingHrs",
@@ -285,9 +297,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/gamelift/servers/pricing/",
-      "https://aws.amazon.com/gamelift/"
+      "https://docs.aws.amazon.com/gameliftservers/latest/developerguide/gamelift-intro-pricing.html",
+      "https://docs.aws.amazon.com/gameliftservers/latest/flexmatchguide/match-intro.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "gamelift-streams",
@@ -306,27 +319,29 @@
       "https://aws.amazon.com/gamelift/streams/pricing/",
       "https://aws.amazon.com/gamelift/streams/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "lambda",
     "name": "AWS Lambda",
     "category": "compute",
     "meters": ["time", "units", "bytes"],
-    "oneLiner": "Every invocation bills twice: once as a request, once as GB-seconds of memory multiplied by run time.",
+    "oneLiner": "Event functions bill each invocation twice: as a request and as GB-seconds. Web functions bill active CPU time instead.",
     "trap": "Provisioned concurrency bills from the moment you enable it until you turn it off, with zero invocations. Since 1 August 2025 the INIT phase counts toward billed duration on on-demand invokes as well.",
     "billOn": [
       "Request",
       "Lambda-GB-Second",
       "Lambda-Provisioned-Concurrency",
-      "Lambda-Storage-GB-Second"
+      "Lambda-Storage-GB-Second",
+      "Lambda-Web-vCPU-Second-ARM",
+      "Lambda-MicroVM-vCPU-Second"
     ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/lambda/pricing/",
       "https://aws.amazon.com/blogs/compute/aws-lambda-standardizes-billing-for-init-phase/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "lightsail",
@@ -341,7 +356,7 @@
       "https://aws.amazon.com/lightsail/pricing/",
       "https://docs.aws.amazon.com/lightsail/latest/userguide/amazon-lightsail-faq-data-transfer-allowance.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "outposts",
@@ -353,7 +368,7 @@
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/outposts/rack/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "pcs",
@@ -373,7 +388,7 @@
       "https://aws.amazon.com/pcs/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSPCS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workdocs",
@@ -381,14 +396,14 @@
     "category": "compute",
     "meters": ["time", "units"],
     "oneLiner": "Shut down. WorkDocs reached end of support on 25 April 2025 and the service is gone.",
-    "trap": "The user guide has been withdrawn and the pricing offer is frozen at 2022. While it ran it billed per user-month, per GB stored and per API call, though deletes were rated at zero. Nothing to migrate to inside AWS.",
+    "trap": "The user guide has been withdrawn and the pricing offer is frozen. While it ran it billed per user-month, per GB stored and per API call, though deletes were rated at zero. Nothing to migrate to inside AWS.",
     "billOn": ["WorkDocs-UserHrs", "WorkDocs-StorageByteHrs", "WorkDocs-ReadAPICalls"],
     "confidence": "high",
     "sources": [
       "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/business-applications.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkDocs/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workspaces",
@@ -403,7 +418,7 @@
       "https://aws.amazon.com/workspaces/desktop-as-a-service/pricing/",
       "https://aws.amazon.com/workspaces-family/workspaces/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workspaces-core",
@@ -423,7 +438,7 @@
       "https://aws.amazon.com/workspaces/vdi-partners/faqs/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesInstances/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workspaces-thin-client",
@@ -431,14 +446,15 @@
     "category": "compute",
     "meters": ["time"],
     "oneLiner": "A flat monthly management fee per activated device. The hardware is bought separately from Amazon Business.",
-    "trap": "The monthly fee is not prorated, so a device managed for one day of the month costs a full month. It keeps billing until you delete it from inventory, and re-enrolling in another Region can bill in both.",
+    "trap": "The monthly fee is not prorated, so a device managed for one day costs a full month until you delete it from inventory. Re-enrolling in another Region can bill in both. Support ends 31 March 2027.",
     "billOn": ["USE1-Amazon-WorkSpaces-Thin-Client-service"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/workspaces/thin-client/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesThinClient/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesThinClient/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/workspaces-thin-client/latest/ag/workspacesthinclient-end-of-support.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workspaces-web",
@@ -446,13 +462,14 @@
     "category": "compute",
     "meters": ["time"],
     "oneLiner": "Billed per monthly active user, not per running instance.",
-    "trap": "A single sign-in during the calendar month makes that user billable in full; there is no partial MAU. Included streaming hours are granted per MAU, so heavy users tip into hourly overage while idle accounts cost nothing.",
+    "trap": "A single sign-in in a calendar month makes that user billable in full. Included streaming hours are per MAU, so heavy users tip into hourly overage. Closed to new customers since 29 October 2026.",
     "billOn": ["WORKSPACES-WEB-ST", "WORKSPACES-WEB-ST-LARGE"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/workspaces/secure-browser/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesWeb/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkSpacesWeb/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]

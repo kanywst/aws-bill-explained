@@ -17,7 +17,7 @@
       "https://aws.amazon.com/rds/aurora/pricing/",
       "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "aurora-dsql",
@@ -36,7 +36,7 @@
       "https://aws.amazon.com/rds/aurora/dsql/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AuroraDSQL/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "aurora-serverless-v2",
@@ -49,9 +49,10 @@
     "confidence": "high",
     "sources": [
       "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_ServerlessV2ScalingConfigurationInfo.html",
-      "https://aws.amazon.com/blogs/database/introducing-scaling-to-0-capacity-with-amazon-aurora-serverless-v2/"
+      "https://aws.amazon.com/blogs/database/introducing-scaling-to-0-capacity-with-amazon-aurora-serverless-v2/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/10/aurora-serverless-supports-384-acu/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "dax",
@@ -66,7 +67,7 @@
       "https://aws.amazon.com/dynamodb/pricing/",
       "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.concepts.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "dms",
@@ -78,7 +79,7 @@
     "billOn": ["InstanceUsg:dms.c5.large", "DMS:GP2-Storage", "ZETLCDCUsg"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/dms/pricing/", "https://aws.amazon.com/dms/faqs/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "documentdb",
@@ -93,7 +94,7 @@
       "https://aws.amazon.com/documentdb/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDocDB/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "dynamodb",
@@ -101,7 +102,7 @@
     "category": "database",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Which meter applies depends entirely on the table's capacity mode.",
-    "trap": "Provisioned RCU/WCU bill hourly at zero traffic, so that side is Time. On-demand RRU/WRU bill per request, so that side is Calls. Same queries, different meter. Storage and PITR bill separately either way.",
+    "trap": "Provisioned RCU/WCU bill hourly at zero traffic, so that side is Time. On-demand RRU/WRU bill per request, so that side is Units. Same queries, different meter. Storage and PITR bill separately either way.",
     "billOn": [
       "ReadCapacityUnit-Hrs",
       "ReadRequestUnits",
@@ -113,7 +114,7 @@
       "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-understanding-billing.html",
       "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/on-demand-capacity-mode.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elasticache",
@@ -128,7 +129,7 @@
       "https://aws.amazon.com/elasticache/pricing/",
       "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.corecomponents.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "healthlake",
@@ -146,7 +147,7 @@
     ],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/healthlake/pricing/", "https://aws.amazon.com/healthlake/"],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "keyspaces",
@@ -161,7 +162,7 @@
       "https://aws.amazon.com/keyspaces/pricing/",
       "https://docs.aws.amazon.com/keyspaces/latest/devguide/ReadWriteCapacityMode.OnDemand.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "managed-blockchain",
@@ -169,7 +170,7 @@
     "category": "database",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Hourly membership and peer nodes for Fabric, node storage per GB, and per-request Access and Query.",
-    "trap": "A Hyperledger Fabric network bills the membership fee plus every peer node by the hour whether or not a transaction is ever submitted, and each member pays their own. Data written to the network meters separately.",
+    "trap": "A Fabric network bills the membership fee plus every peer node by the hour whether or not a transaction is ever submitted, and each member pays their own. Support ends 29 September 2027.",
     "billOn": [
       "Member",
       "Node:bc.m5.large",
@@ -181,9 +182,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/managed-blockchain/pricing/",
-      "https://aws.amazon.com/managed-blockchain/faqs/"
+      "https://aws.amazon.com/managed-blockchain/faqs/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "memorydb",
@@ -198,7 +200,7 @@
       "https://aws.amazon.com/memorydb/pricing/",
       "https://docs.aws.amazon.com/memorydb/latest/devguide/snapshots-costs.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "neptune",
@@ -206,7 +208,7 @@
     "category": "database",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Instance-hours or NCU-seconds on Serverless, plus storage and per-million I/O.",
-    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. You can switch between them only once per 30 days, in either direction, unlike Aurora.",
+    "trap": "Standard bills I/O per million; I/O-Optimized removes that meter for higher instance and storage rates. The user guide allows one switch per 30 days in either direction, stricter than Aurora's rule.",
     "billOn": [
       "InstanceUsage",
       "InstanceUsageIOOptimized",
@@ -216,16 +218,17 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/neptune/pricing/",
-      "https://aws.amazon.com/about-aws/whats-new/2024/02/amazon-neptune-io-optimized/"
+      "https://aws.amazon.com/about-aws/whats-new/2024/02/amazon-neptune-io-optimized/",
+      "https://docs.aws.amazon.com/neptune/latest/userguide/storage-types.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "oracle-database-at-aws",
     "name": "Oracle Database@AWS",
     "category": "database",
     "meters": ["bytes"],
-    "oneLiner": "An AWS Marketplace subscription for Oracle-run Exadata infrastructure, with rates set by Oracle.",
+    "oneLiner": "An AWS Marketplace subscription for Oracle-run Exadata or serverless Autonomous Database, with rates set by Oracle.",
     "trap": "The bulk of the cost arrives under AWS Marketplace on your invoice, not as an ordinary service line. Only the zero-ETL side is AWS-metered, and change data capture transfer costs far more per GB than the initial load.",
     "billOn": ["USE1-ODB:CDC-DataTransfer", "USE1-ODB:DataExport"],
     "confidence": "medium",
@@ -233,14 +236,14 @@
       "https://docs.aws.amazon.com/odb/latest/UserGuide/what-is-odb.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/OracleDbAtAWS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "rds",
     "name": "Amazon RDS",
     "category": "database",
     "meters": ["time", "bytes"],
-    "oneLiner": "The instance clock runs from create to delete, with storage and backups alongside. I/O only meters on magnetic.",
+    "oneLiner": "Instance-hours while it runs; storage and backups bill even while it is stopped. I/O only meters on magnetic.",
     "trap": "RDS does not charge on its own side of a cross-AZ hop, so an app reaching the DB across an AZ pays the EC2 side twice and the RDS side not at all. Multi-AZ still doubles the instance and storage lines.",
     "billOn": ["InstanceUsage", "Multi-AZUsage", "RDS:GP3-Storage", "RDS:ChargedBackupUsage"],
     "confidence": "high",
@@ -248,7 +251,7 @@
       "https://aws.amazon.com/rds/pricing/",
       "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/User_DBInstanceBilling.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "rds-proxy",
@@ -263,22 +266,23 @@
       "https://aws.amazon.com/rds/proxy/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "redshift",
     "name": "Amazon Redshift",
     "category": "database",
     "meters": ["time", "bytes", "units"],
-    "oneLiner": "Cluster node-hours and managed storage carry the base cost. Spectrum queries against S3 meter on bytes scanned.",
-    "trap": "Spectrum rounds each query up to the next megabyte and applies a 10 MB floor per query, so many tiny scans add up. Concurrency Scaling earns one credit hour per 24 hours of cluster uptime, then bills per second.",
+    "oneLiner": "Node-hours and managed storage carry the base cost. Spectrum bills S3 scans by the byte on RA3; RG scans the lake free.",
+    "trap": "On RA3, Spectrum rounds each query up to the next megabyte and applies a 10 MB floor per query, so many tiny scans add up. Concurrency Scaling earns one credit hour per 24 hours of cluster uptime, then bills per second.",
     "billOn": ["Node", "RMS", "CS", "DataScanned"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/redshift/pricing/",
-      "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing-on-demand.html"
+      "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing-on-demand.html",
+      "https://aws.amazon.com/about-aws/whats-new/2026/05/amazon-redshift-rg-instances-powered-by-graviton/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "redshift-serverless",
@@ -293,7 +297,7 @@
       "https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing-on-demand.html",
       "https://aws.amazon.com/redshift/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "schema-conversion-tool",
@@ -306,9 +310,10 @@
     "confidence": "high",
     "sources": [
       "https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html",
-      "https://aws.amazon.com/dms/faqs/"
+      "https://aws.amazon.com/dms/faqs/",
+      "https://docs.aws.amazon.com/prescriptive-guidance/latest/optimize-costs-microsoft-workloads/modernize-sql-server.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "simpledb",
@@ -324,7 +329,7 @@
       "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/Welcome.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSimpleDB/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "timestream",
@@ -339,6 +344,6 @@
       "https://aws.amazon.com/timestream/pricing/",
       "https://docs.aws.amazon.com/timestream/latest/developerguide/AmazonTimestreamForLiveAnalytics-availability-change.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]

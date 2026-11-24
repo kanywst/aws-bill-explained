@@ -9,7 +9,7 @@
     "billOn": ["DataScannedInTB", "ReservedCapacityInDPUHours", "CodeExecutionInDPUHours"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/athena/pricing/", "https://aws.amazon.com/athena/faqs/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "augmented-ai",
@@ -25,7 +25,7 @@
       "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html",
       "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/"
     ],
-    "checked": "2026-11-01"
+    "checked": "2026-11-25"
   },
   {
     "slug": "bedrock",
@@ -45,7 +45,7 @@
       "https://aws.amazon.com/bedrock/pricing/",
       "https://docs.aws.amazon.com/bedrock/latest/userguide/cost-mgmt-understanding-cur-data.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "bedrock-agentcore",
@@ -53,7 +53,7 @@
     "category": "analytics",
     "meters": ["time", "units", "bytes"],
     "oneLiner": "Runtime rents vCPU and memory by the hour; Gateway, Memory and each built-in tool meter separately.",
-    "trap": "Runtime charges memory for the whole session but vCPU only while the CPU is busy, so I/O wait is free. Gateway adds a monthly fee per indexed tool, and AgentCore observability lands on your CloudWatch bill instead.",
+    "trap": "CPU bills only while busy, so I/O wait is free, and Runtime v2 reclaims memory left idle for 120 seconds. Gateway charges a monthly fee per indexed tool, and observability lands on your CloudWatch bill instead.",
     "billOn": [
       "Runtime:Consumption-based:vCPU",
       "Runtime:Consumption-based:Memory",
@@ -66,7 +66,7 @@
       "https://aws.amazon.com/bedrock/agentcore/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrockAgentCore/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "bio-discovery",
@@ -74,7 +74,7 @@
     "category": "analytics",
     "meters": ["time", "units"],
     "oneLiner": "A monthly plan bundling a set number of Experiment Units. Extra experiments bill per unit.",
-    "trap": "Collaborators and result viewing are free, so cost tracks experiments rather than seats. Unit consumption scales with candidate count, sequence length and model choice, and wet-lab orders bill outside the plan.",
+    "trap": "Collaborators are free, so cost tracks experiments rather than seats. Unused units do not carry over, consumption scales with candidates, sequence length and model choice, and wet-lab orders bill separately.",
     "billOn": [
       "USE1-researchstudio-Starter",
       "USE1-researchstudio-Pro",
@@ -86,7 +86,7 @@
       "https://aws.amazon.com/biodiscovery/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/researchstudio/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "clean-rooms",
@@ -108,7 +108,7 @@
       "https://aws.amazon.com/clean-rooms/pricing/",
       "https://docs.aws.amazon.com/clean-rooms/latest/userguide/what-is.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloudsearch",
@@ -123,7 +123,7 @@
       "https://aws.amazon.com/cloudsearch/pricing/",
       "https://docs.aws.amazon.com/cloudsearch/latest/developerguide/what-is-cloudsearch.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "comprehend",
@@ -138,7 +138,7 @@
       "https://aws.amazon.com/comprehend/pricing/",
       "https://docs.aws.amazon.com/comprehend/latest/dg/manage-endpoints.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "comprehend-medical",
@@ -159,7 +159,7 @@
       "https://aws.amazon.com/comprehend/medical/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/comprehendmedical/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "data-exchange",
@@ -174,7 +174,7 @@
       "https://aws.amazon.com/data-exchange/pricing/",
       "https://docs.aws.amazon.com/data-exchange/latest/userguide/what-is.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "datazone",
@@ -186,7 +186,7 @@
     "billOn": ["DataZoneRequests", "DataZoneStorage", "DataZoneCompute", "DataZoneRecommendations"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/datazone/pricing/", "https://aws.amazon.com/datazone/"],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elastic-transcoder",
@@ -201,7 +201,7 @@
       "https://aws.amazon.com/blogs/media/support-for-amazon-elastic-transcoder-ending-soon/",
       "https://aws.amazon.com/elastictranscoder/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "emr",
@@ -216,7 +216,7 @@
       "https://aws.amazon.com/emr/pricing/",
       "https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-longrunning-transient.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "entity-resolution",
@@ -229,9 +229,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/entity-resolution/pricing/",
-      "https://docs.aws.amazon.com/entityresolution/latest/userguide/what-is-service.html"
+      "https://docs.aws.amazon.com/entityresolution/latest/userguide/what-is-service.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEntityResolution/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "forecast",
@@ -246,14 +247,14 @@
       "https://aws.amazon.com/forecast/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonForecast/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "fraud-detector",
     "name": "Amazon Fraud Detector",
     "category": "analytics",
     "meters": ["time", "units"],
-    "oneLiner": "Predictions are cheap per call; the deployed model holds the meter open.",
+    "oneLiner": "Closed to new customers. Predictions are cheap per call; the deployed model holds the meter open.",
     "trap": "Billed training compute hours can exceed elapsed training time, because Fraud Detector picks bigger instances than the baseline spec. A deployed model then bills hourly for hosting until you undeploy it.",
     "billOn": ["TrainingHrs", "HostingHrs", "FraudPrediction-OnlineFraudInsights"],
     "confidence": "high",
@@ -261,7 +262,7 @@
       "https://aws.amazon.com/fraud-detector/pricing/",
       "https://docs.aws.amazon.com/frauddetector/latest/ug/frauddetector-pricing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "glue",
@@ -273,7 +274,7 @@
     "billOn": ["ETL-DPU-Hour", "Crawler-DPU-Hour", "Catalog-Request", "Catalog-Storage"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/glue/pricing/", "https://aws.amazon.com/glue/faqs/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ground-truth",
@@ -290,7 +291,7 @@
       "https://aws.amazon.com/about-aws/whats-new/2026/09/aws-service-availability/",
       "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
     ],
-    "checked": "2026-11-01"
+    "checked": "2026-11-25"
   },
   {
     "slug": "healthomics",
@@ -311,7 +312,7 @@
       "https://aws.amazon.com/healthomics/pricing/",
       "https://aws.amazon.com/healthomics/"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-analytics",
@@ -324,9 +325,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/about-aws/whats-new/2025/05/aws-service-changes/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTAnalytics/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTAnalytics/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/greengrass/v1/developerguide/iot-analytics-connector.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ivs",
@@ -341,7 +343,7 @@
       "https://aws.amazon.com/ivs/pricing/",
       "https://docs.aws.amazon.com/ivs/latest/LowLatencyUserGuide/what-is.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "kendra",
@@ -349,14 +351,15 @@
     "category": "analytics",
     "meters": ["time", "units"],
     "oneLiner": "An empty index costs exactly what a busy one costs.",
-    "trap": "AWS states it plainly: once an index exists you pay for it with zero documents and zero queries, and deleting it is the only way to stop the meter. Kendra also closes to new customers on July 30, 2026.",
+    "trap": "AWS states it plainly: once an index exists you pay for it with zero documents and zero queries, and deleting it is the only way to stop the meter. Kendra closed to new customers on July 30, 2026.",
     "billOn": ["KendraEnterpriseEdition", "KendraStorageCapacityUnit", "KendraQueryCapacityUnit"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/kendra/pricing/",
-      "https://docs.aws.amazon.com/kendra/latest/dg/adjusting-capacity.html"
+      "https://docs.aws.amazon.com/kendra/latest/dg/adjusting-capacity.html",
+      "https://docs.aws.amazon.com/kendra/latest/dg/kendra-availability-change.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "lake-formation",
@@ -371,7 +374,7 @@
       "https://aws.amazon.com/lake-formation/pricing/",
       "https://docs.aws.amazon.com/lake-formation/latest/dg/data-filtering.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "lex",
@@ -391,7 +394,7 @@
       "https://aws.amazon.com/lex/pricing/",
       "https://docs.aws.amazon.com/lexv2/latest/dg/what-is.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "managed-flink",
@@ -406,7 +409,7 @@
       "https://aws.amazon.com/managed-service-apache-flink/pricing/",
       "https://docs.aws.amazon.com/managed-flink/latest/java/how-pricing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mediaconnect",
@@ -414,7 +417,7 @@
     "category": "analytics",
     "meters": ["time", "bytes"],
     "oneLiner": "Flows and outputs bill by the hour, and transport-stream data transfer bills per GB on top.",
-    "trap": "A running flow charges hourly whether or not it is passing traffic, and every output adds its own hourly rate. Only a flow left in standby is free. Reserved outbound bandwidth locks you into a 12-month commitment.",
+    "trap": "A running flow charges hourly with or without traffic, and router, CDI and JPEG XS outputs add their own hourly rate. Only a flow in standby is free. Reserved outbound bandwidth locks you into a 12-month commitment.",
     "billOn": [
       "Usage-Hours",
       "DataTransfer-Out-Hours",
@@ -426,7 +429,7 @@
       "https://aws.amazon.com/mediaconnect/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSMediaConnect/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mediaconvert",
@@ -441,7 +444,7 @@
       "https://aws.amazon.com/mediaconvert/pricing/",
       "https://docs.aws.amazon.com/mediaconvert/latest/ug/usage-report-understand.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "medialive",
@@ -456,7 +459,7 @@
       "https://aws.amazon.com/medialive/pricing/",
       "https://docs.aws.amazon.com/medialive/latest/ug/pricing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mediapackage",
@@ -471,7 +474,7 @@
       "https://aws.amazon.com/mediapackage/pricing/",
       "https://docs.aws.amazon.com/mediapackage/latest/ug/pricing-for-emp.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mediatailor",
@@ -486,7 +489,7 @@
       "https://aws.amazon.com/mediatailor/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSElementalMediaTailor/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "nova-act",
@@ -502,22 +505,28 @@
       "https://docs.aws.amazon.com/nova-act/latest/userguide/what-is-nova-act.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/NovaAct/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "opensearch",
     "name": "Amazon OpenSearch Service",
     "category": "analytics",
-    "meters": ["time", "bytes"],
+    "meters": ["time", "bytes", "units"],
     "oneLiner": "Rent the cluster by the hour plus the storage under it. Searches themselves are free.",
     "trap": "Nodes bill around the clock with nobody querying. Classic Serverless collections floor at two OCUs, while NextGen collections scale to zero after ten idle minutes. Node-to-node traffic is free.",
-    "billOn": ["ESInstance:instanceType", "ES:GP3-Storage", "IndexingOCU", "SearchOCU"],
+    "billOn": [
+      "ESInstance:instanceType",
+      "ES:GP3-Storage",
+      "IndexingOCU",
+      "SearchOCU",
+      "Nova-2-lite:Standard:in-region:Input-Token"
+    ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/opensearch-service/pricing/",
       "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-scaling.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "personalize",
@@ -525,14 +534,15 @@
     "category": "analytics",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Ingest bills per GB, training bills per hour, recommendations bill per thousand.",
-    "trap": "Custom solutions only cost you when you train or ask for recommendations. Use-case optimized recommenders behave differently: each active recommender carries an hourly rate that keeps running with no traffic.",
+    "trap": "An active campaign bills at least its minimum provisioned TPS with zero requests, and each active recommender carries an hourly rate that keeps running with no traffic. Stop or delete what you are not using.",
     "billOn": ["DataIngestion", "TrainingHour", "RealTimeRecommendations"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/personalize/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPersonalize/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPersonalize/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/personalize/latest/dg/campaigns.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "polly",
@@ -551,14 +561,14 @@
       "https://aws.amazon.com/polly/pricing/",
       "https://docs.aws.amazon.com/polly/latest/dg/speechmarks.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "q",
     "name": "Amazon Q",
     "category": "analytics",
     "meters": ["time", "units"],
-    "oneLiner": "Named-user seats by the month, plus index units billed by the hour.",
+    "oneLiner": "Closed to new customers. Named-user seats by the month, plus index units billed by the hour.",
     "trap": "Index units accrue hourly regardless of query volume, alongside seats you keep paying for on behalf of dormant users. Embedded and anonymous access bills consumption units per ChatSync call instead.",
     "billOn": [
       "Amazon-Q-Business-Pro-Month",
@@ -568,17 +578,18 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/q/business/pricing/",
-      "https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/tiers.html"
+      "https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/tiers.html",
+      "https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/qbusiness-availability-change.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "quick-suite",
     "name": "Amazon Quick Suite",
     "category": "analytics",
     "meters": ["time", "bytes"],
-    "oneLiner": "A per-user monthly or annual subscription, plus pooled index storage per GB and per-hour agents.",
-    "trap": "Seats bill for the whole month even if the user never signs in, and the Professional and Enterprise plans add a flat monthly per-account infrastructure fee on top of the seats. Free and Plus plans carry no seat charge.",
+    "oneLiner": "A per-user monthly or annual plan, plus agent hours and pooled index storage billed as overage past each allowance.",
+    "trap": "Only the Free plan has no seat charge. Essentials, Professional and Enterprise add a flat monthly infrastructure fee per account, and agent hours keep metering while Quick waits on an external tool.",
     "billOn": [
       "QuickSuiteMonthly-QuickSuiteMonthlyTeam",
       "QuickSuiteYearly-QuickSuiteYearlyTeam",
@@ -587,7 +598,7 @@
     ],
     "confidence": "medium",
     "sources": ["https://aws.amazon.com/quick/pricing/", "https://aws.amazon.com/quick/"],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "quicksight",
@@ -602,7 +613,7 @@
       "https://aws.amazon.com/quick/quicksight/pricing/",
       "https://docs.aws.amazon.com/quick/latest/userguide/spice.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "rekognition",
@@ -622,7 +633,7 @@
       "https://aws.amazon.com/rekognition/pricing/",
       "https://docs.aws.amazon.com/rekognition/latest/customlabels-dg/running-model.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "sagemaker",
@@ -637,7 +648,7 @@
       "https://aws.amazon.com/sagemaker/ai/pricing/",
       "https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "textract",
@@ -656,22 +667,23 @@
       "https://aws.amazon.com/textract/pricing/",
       "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "transcribe",
     "name": "Amazon Transcribe",
     "category": "analytics",
     "meters": ["units"],
-    "oneLiner": "Billed on audio duration in one-second increments, with a fifteen-second floor per request.",
-    "trap": "Slicing a stream into short clips pays the fifteen-second minimum over and over. Call Analytics, Medical and toxicity detection each carry their own rate on top of plain transcription.",
+    "oneLiner": "Billed on audio duration in one-second increments, with no per-request minimum on standard transcription.",
+    "trap": "The old fifteen-second floor is gone for standard transcription, but generative call summarization still bills 15 seconds minimum per request. Call Analytics, Medical and redaction each carry their own rate.",
     "billOn": ["TranscribeAudio", "StreamingAudio", "CallAnalyticsTranscribeAudio"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/transcribe/pricing/",
-      "https://aws.amazon.com/transcribe/faqs/"
+      "https://aws.amazon.com/transcribe/faqs/",
+      "https://docs.aws.amazon.com/transcribe/latest/dg/what-is.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "translate",
@@ -686,6 +698,6 @@
       "https://aws.amazon.com/translate/pricing/",
       "https://docs.aws.amazon.com/translate/latest/dg/customizing-translations.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]

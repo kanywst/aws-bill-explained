@@ -12,7 +12,7 @@
       "https://aws.amazon.com/elasticloadbalancing/pricing/",
       "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-billing-usage-reports.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "application-recovery-controller",
@@ -20,14 +20,14 @@
     "category": "networking",
     "meters": ["time"],
     "oneLiner": "Routing control clusters and readiness checks bill hourly; Region switch plans bill monthly.",
-    "trap": "A routing control cluster bills every hour from creation to deletion whether or not you ever fail over, and each readiness check bills hourly too. Zonal shift and zonal autoshift cost nothing.",
+    "trap": "A routing control cluster bills every hour from creation to deletion whether or not you ever fail over. Readiness checks bill hourly too, and new customers cannot create them after 30 April 2026. Zonal shift is free.",
     "billOn": ["Cluster-Hours", "ReadinessCheck-Hours", "AmazonARCRegionSwitchPlan"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/application-recovery-controller/pricing/",
       "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "client-vpn",
@@ -39,7 +39,7 @@
     "billOn": ["ClientVPN-EndpointHours", "ClientVPN-ConnectionHours"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/vpn/pricing/", "https://aws.amazon.com/vpc/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloud-map",
@@ -54,14 +54,14 @@
       "https://aws.amazon.com/cloud-map/pricing/",
       "https://docs.aws.amazon.com/cloud-map/latest/dg/what-is-cloud-map.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloud-wan",
     "name": "AWS Cloud WAN",
     "category": "networking",
     "meters": ["time", "bytes"],
-    "oneLiner": "Per hour for each Core Network Edge and each attachment, plus per GB of data through the network.",
+    "oneLiner": "Per hour for each Core Network Edge and attachment, per GB processed, plus a Multipath Resilience fee per GB.",
     "trap": "The Core Network Edge is the expensive part and you need one in every Region the network reaches. It bills by the hour on its own, before a single attachment or byte, so an empty core network is not a free one.",
     "billOn": [
       "CloudWAN-CoreNetworkEdge-Hours",
@@ -74,7 +74,7 @@
       "https://aws.amazon.com/cloud-wan/pricing/",
       "https://docs.aws.amazon.com/network-manager/latest/cloudwan/what-is-cloudwan.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloudfront",
@@ -82,7 +82,7 @@
     "category": "networking",
     "meters": ["bytes", "units"],
     "oneLiner": "Per GB out to viewers and per 10,000 requests, plus another per-GB charge for traffic heading back to origin.",
-    "trap": "Cacheable data from AWS origins to the edge is free, but edge-to-origin traffic such as POST and PUT bodies bills at origin transfer rates. Invalidations are free for the first 1,000 paths each month.",
+    "trap": "Cacheable data from AWS origins to the edge is free, but edge-to-origin traffic such as POST and PUT bodies bills at origin transfer rates. Invalidations are free for the first 1,000 paths or tags each month.",
     "billOn": [
       "DataTransfer-Out-Bytes",
       "DataTransfer-Out-OBytes",
@@ -94,7 +94,7 @@
       "https://aws.amazon.com/cloudfront/pricing/pay-as-you-go/",
       "https://aws.amazon.com/cloudfront/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "data-transfer",
@@ -109,22 +109,23 @@
       "https://aws.amazon.com/ec2/pricing/on-demand/",
       "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "direct-connect",
     "name": "AWS Direct Connect",
     "category": "networking",
     "meters": ["time", "bytes"],
-    "oneLiner": "Port hours bill continuously while the port is provisioned, then per GB on the way out.",
+    "oneLiner": "Port hours bill while the port is provisioned, then per GB out, unless a flat-rate port folds transfer into the hour.",
     "trap": "Data transfer in is free, which makes the link look cheap, but port hours run around the clock regardless of traffic. The colo cross-connect comes from your provider, not AWS, and SiteLink adds its own hourly fee.",
-    "billOn": ["PortUsage", "DataXfer-Out", "SiteLinkVifHour"],
+    "billOn": ["PortUsage", "DataXfer-Out", "FlatRatePortUsage", "SiteLinkVifHour"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/directconnect/pricing/pay-as-you-go/",
+      "https://aws.amazon.com/directconnect/pricing/flat-rate/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDirectConnect/current/us-east-1/index.json"
     ],
-    "checked": "2026-11-01"
+    "checked": "2026-11-25"
   },
   {
     "slug": "elastic-ip",
@@ -139,7 +140,7 @@
       "https://aws.amazon.com/blogs/aws/new-aws-public-ipv4-address-charge-public-ip-insights/",
       "https://repost.aws/knowledge-center/vpc-identify-public-ipv4-charges"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "gateway-load-balancer",
@@ -154,7 +155,7 @@
       "https://aws.amazon.com/elasticloadbalancing/pricing/",
       "https://aws.amazon.com/elasticloadbalancing/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "gateway-vpc-endpoint",
@@ -169,7 +170,7 @@
       "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html",
       "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-ddb.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "global-accelerator",
@@ -178,13 +179,19 @@
     "meters": ["time", "bytes"],
     "oneLiner": "A flat hourly fee per accelerator, plus a transfer premium layered on top of normal egress.",
     "trap": "The premium is charged on the dominant direction only, so an upload-heavy app pays on inbound bytes it assumed were free. It sits on top of standard EC2 data transfer out, never in place of it.",
-    "billOn": ["OUT-Bytes-Internet", "IN-Bytes-Internet", "OUT-Bytes-AWS"],
+    "billOn": [
+      "Global-Accelerator-fixed-fee",
+      "OUT-Bytes-Internet",
+      "IN-Bytes-Internet",
+      "OUT-Bytes-AWS"
+    ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/global-accelerator/pricing/",
-      "https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-pricing.html"
+      "https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-pricing.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSGlobalAccelerator/current/aws-other/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ground-station",
@@ -199,7 +206,7 @@
       "https://docs.aws.amazon.com/ground-station/latest/ug/contacts.billing.html",
       "https://aws.amazon.com/ground-station/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "interconnect",
@@ -207,7 +214,7 @@
     "category": "networking",
     "meters": ["time"],
     "oneLiner": "Per hour for each interconnect, priced by bandwidth and a distance tier. Data transfer is not metered.",
-    "trap": "Billing starts when you create the interconnect and stops only when you delete it, so an idle link costs what a saturated one does. The tier follows the longest path it serves, and the other cloud bills its own side.",
+    "trap": "An idle link bills what a saturated one does, from creation to deletion. The tier follows the longest path it serves, the other cloud bills its own side, and one local 500 Mbps link per provider per Region is free.",
     "billOn": [
       "GCP-MgdConUsage:10G-Tier2",
       "OCI-MgdConUsage:1G-Tier1",
@@ -218,7 +225,7 @@
       "https://aws.amazon.com/interconnect/multicloud/pricing/",
       "https://docs.aws.amazon.com/interconnect/latest/userguide/interconnect-pricing.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "internet-gateway",
@@ -233,7 +240,7 @@
       "https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html",
       "https://aws.amazon.com/vpc/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "local-zones",
@@ -248,14 +255,14 @@
       "https://docs.aws.amazon.com/local-zones/latest/ug/what-is-aws-local-zones.html",
       "https://aws.amazon.com/about-aws/global-infrastructure/localzones/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "nat-gateway",
     "name": "NAT Gateway",
     "category": "networking",
     "meters": ["time", "bytes"],
-    "oneLiner": "An hourly fee for existing, then a per-GB fee on everything that passes through.",
+    "oneLiner": "An hourly fee for existing, per AZ in regional mode, then a per-GB fee on everything that passes through.",
     "trap": "Data processing is charged in both directions at the same rate. Inbound is not free here, and the fee stacks on top of ordinary data transfer out when the traffic is headed for the internet.",
     "billOn": ["NatGateway-Hours", "NatGateway-Bytes"],
     "confidence": "high",
@@ -263,7 +270,7 @@
       "https://aws.amazon.com/vpc/pricing/",
       "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-pricing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "network-load-balancer",
@@ -278,7 +285,7 @@
       "https://aws.amazon.com/elasticloadbalancing/pricing/",
       "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/load-balancer-billing-usage-reports.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "privatelink-interface-endpoint",
@@ -293,7 +300,7 @@
       "https://aws.amazon.com/privatelink/pricing/",
       "https://aws.amazon.com/blogs/storage/introducing-private-dns-support-for-amazon-s3-with-aws-privatelink/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "public-ipv4-address",
@@ -302,13 +309,14 @@
     "meters": ["time"],
     "oneLiner": "Public IPv4 now costs by the hour, in use or idle.",
     "trap": "The charge reaches EC2, RDS, ELB, EKS, EMR, ECS, Global Accelerator and Site-to-Site VPN endpoints. Addresses you bring under BYOIP are exempt and IPv6 is free, which is the whole point of the charge.",
-    "billOn": ["PublicIPv4:InUseAddress", "PublicIPv4:IdleAddress"],
+    "billOn": ["PublicIPv4:InUseAddress", "PublicIPv4:IdleAddress", "PublicIPv4:ContiguousBlock"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/vpc/pricing/",
-      "https://aws.amazon.com/blogs/aws/new-aws-public-ipv4-address-charge-public-ip-insights/"
+      "https://aws.amazon.com/blogs/aws/new-aws-public-ipv4-address-charge-public-ip-insights/",
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-billing-usage-reports.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "route-53",
@@ -316,14 +324,14 @@
     "category": "networking",
     "meters": ["time", "units"],
     "oneLiner": "DNS queries are genuinely a per-request charge here. Hosted zones bill monthly and Resolver ENIs bill hourly.",
-    "trap": "Alias records pointing at ELB, CloudFront, API Gateway and similar AWS targets answer for free, and private hosted zone queries cost nothing extra. Resolver endpoint ENIs bill hourly at any query volume.",
+    "trap": "Alias records pointing at ELB, CloudFront, API Gateway and similar AWS targets answer for free, and private zone queries are free except AZ Affinity routing ones. Resolver endpoint ENIs bill hourly at any query volume.",
     "billOn": ["HostedZone", "DNS-Queries", "Intra-AWS-DNS-Queries", "ResolverNetworkInterface"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/route53/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRoute53/current/aws-other/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "rtb-fabric",
@@ -343,7 +351,7 @@
       "https://aws.amazon.com/rtb-fabric/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSRTBFabric/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "site-to-site-vpn",
@@ -355,7 +363,7 @@
     "billOn": ["VPN-Usage-Hours:ipsec.1", "DataTransfer-Out-Bytes"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/vpn/pricing/", "https://aws.amazon.com/vpc/pricing/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "telco-network-builder",
@@ -370,14 +378,14 @@
       "https://docs.aws.amazon.com/tnb/latest/ug/what-is-tnb.html#pricing-tnb",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTelcoNetworkBuilder/current/us-east-1/index.json"
     ],
-    "checked": "2026-11-01"
+    "checked": "2026-11-25"
   },
   {
     "slug": "transit-gateway",
     "name": "AWS Transit Gateway",
     "category": "networking",
     "meters": ["time", "bytes"],
-    "oneLiner": "Every attachment bills hourly, and traffic sent into the gateway bills per GB.",
+    "oneLiner": "Every attachment bills hourly and traffic sent into the gateway bills per GB; Multipath Resilience adds a per-GB fee.",
     "trap": "The hourly attachment fee runs at zero traffic. Data processing is charged to whoever sends into the gateway, and traffic arriving from a peering attachment is not processed-charged a second time.",
     "billOn": ["TransitGateway-Hours", "TransitGateway-Bytes"],
     "confidence": "high",
@@ -385,7 +393,7 @@
       "https://aws.amazon.com/transit-gateway/pricing/",
       "https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "vpc",
@@ -394,28 +402,30 @@
     "meters": ["time"],
     "oneLiner": "Almost nothing bills for the VPC itself; nearly every charge belongs to something you attached.",
     "trap": "The exception is Encryption Controls, billed per hour per non-empty VPC, and incurred on any VPC attached to an encryption-capable Transit Gateway whether or not you turned it on.",
-    "billOn": [],
+    "billOn": ["VPCEncryptionControls-hours"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/vpc/pricing/",
-      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-billing-usage-reports.html"
+      "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-billing-usage-reports.html",
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "vpc-peering",
     "name": "Amazon VPC Peering",
     "category": "networking",
     "meters": ["bytes"],
-    "oneLiner": "Creating the peering costs nothing. Bytes that cross an AZ or a Region boundary do.",
+    "oneLiner": "Creating the peering costs nothing. Bytes crossing an AZ or Region do, more with Multipath Resilience on.",
     "trap": "Same-AZ peering is free even across accounts. Cross-AZ is metered on both sides, and since April 2025 lands on VpcPeering-In/Out-Bytes rather than DataTransfer-Regional-Bytes.",
     "billOn": ["VpcPeering-In-Bytes", "VpcPeering-Out-Bytes", "DataTransfer-Regional-Bytes"],
     "confidence": "high",
     "sources": [
       "https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html",
-      "https://aws.amazon.com/blogs/networking-and-content-delivery/demystifying-amazon-vpc-peering-charges/"
+      "https://aws.amazon.com/blogs/networking-and-content-delivery/demystifying-amazon-vpc-peering-charges/",
+      "https://aws.amazon.com/vpc/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "wavelength",
@@ -430,6 +440,6 @@
       "https://aws.amazon.com/wavelength/pricing/",
       "https://aws.amazon.com/wavelength/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]
