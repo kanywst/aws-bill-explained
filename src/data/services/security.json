@@ -12,7 +12,7 @@
       "https://aws.amazon.com/appfabric/pricing/",
       "https://docs.aws.amazon.com/appfabric/latest/adminguide/what-is-appfabric.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "audit-manager",
@@ -20,33 +20,36 @@
     "category": "security",
     "meters": ["units"],
     "oneLiner": "Per resource assessment, where one assessment is one piece of evidence about one resource.",
-    "trap": "A single daily config snapshot across a hundred instances is a hundred assessments a day, not one. Adding frameworks multiplies the count, and the Config and Security Hub checks feeding evidence bill on their own.",
+    "trap": "A daily config snapshot across a hundred instances is a hundred assessments a day, not one, and the Config and Security Hub checks feeding evidence bill on their own. Closed to new customers since April 30, 2026.",
     "billOn": ["USE1-Resource-Assessment-Collected"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/audit-manager/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/auditmanager/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/auditmanager/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/audit-manager/latest/userguide/audit-manager-availability-change.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "certificate-manager",
     "name": "AWS Certificate Manager (ACM)",
     "category": "security",
     "meters": ["units"],
-    "oneLiner": "Certificates you terminate on AWS are free. Exporting one, or issuing over ACME, is not.",
-    "trap": "The free tier of ACM covers non-exportable public certs bound to integrated AWS services. Exportable and ACME certs bill per domain name at issuance and at every renewal, wildcards far higher than plain names.",
+    "oneLiner": "Public certificates you terminate on AWS are free. Exporting one, ACME, or an Amazon N2 mTLS cert is not.",
+    "trap": "Only non-exportable public certs on integrated AWS services are free. Exportable, ACME and Amazon N2 certs bill per domain name at issuance and every renewal, N2 even on AWS services, wildcards far higher.",
     "billOn": [
       "IssueExportablePublicCertificateDomain",
       "IssueACMEPublicCertificateDomain",
+      "Amazon-N2-mTLS-Exportable-395d-Domain",
       "ExportPublicCertificate"
     ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/certificate-manager/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/ACM/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/ACM/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/acm-amazon-n2-certificates/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloud-directory",
@@ -61,7 +64,7 @@
       "https://aws.amazon.com/cloud-directory/pricing/",
       "https://docs.aws.amazon.com/general/latest/gr/maintenance_services.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cloudhsm",
@@ -76,7 +79,7 @@
       "https://aws.amazon.com/cloudhsm/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudHSM/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "cognito",
@@ -84,11 +87,12 @@
     "category": "security",
     "meters": ["time", "units"],
     "oneLiner": "User pools bill per monthly active user. Machine-to-machine tokens sit on a separate per-request meter.",
-    "trap": "Identity pools are free; user pools are not. A client_credentials token request never counts as an MAU and there is no longer any per-app-client fee. Moving Lite to Essentials or Plus reprices every user.",
+    "trap": "Identity pools are free; user pools are not. M2M token requests never count as MAUs and app clients are free. Multi-Region replication adds a fee on every MAU, failover or not. Lite to Essentials reprices every user.",
     "billOn": [
       "CognitoLiteMAU",
       "CognitoEssentialsMAU",
       "CognitoPlusMAU",
+      "CognitoEssentialsMRRMAU",
       "CUPM2MTokenRequestsFull"
     ],
     "confidence": "high",
@@ -96,7 +100,7 @@
       "https://aws.amazon.com/cognito/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCognito/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "detective",
@@ -111,7 +115,7 @@
       "https://aws.amazon.com/detective/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDetective/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "directory-service",
@@ -126,7 +130,7 @@
       "https://aws.amazon.com/directoryservice/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDirectoryService/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "firewall-manager",
@@ -141,7 +145,7 @@
       "https://aws.amazon.com/firewall-manager/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSFMS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "guardduty",
@@ -149,14 +153,15 @@
     "category": "security",
     "meters": ["time", "bytes", "units"],
     "oneLiner": "Priced on what it reads: per CloudTrail event, per GB of log data analyzed, per vCPU-month of runtime agent.",
-    "trap": "The per-GB meter counts log volume analyzed, so keeping traffic inside the VPC saves nothing. You never enable or pay for those VPC flow and DNS logs yourself; GuardDuty consumes them directly.",
+    "trap": "The per-GB meter counts log volume analyzed, so keeping traffic inside the VPC saves nothing. With Security Hub on in the same account and Region, the runtime vCPU charge moves onto the Security Hub bill.",
     "billOn": ["PaidEventsAnalyzed", "PaidEventsAnalyzed-Bytes", "PaidEC2vCPUMonitored"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/guardduty/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonGuardDuty/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonGuardDuty/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/10/aws-security-hub-runtime-monitoring/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iam",
@@ -168,7 +173,7 @@
     "billOn": [],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/iam/faqs/"],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iam-access-analyzer",
@@ -187,7 +192,7 @@
       "https://aws.amazon.com/iam/access-analyzer/pricing/",
       "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iam-identity-center",
@@ -202,7 +207,7 @@
       "https://aws.amazon.com/iam/identity-center/faqs/",
       "https://aws.amazon.com/directoryservice/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iam-roles-anywhere",
@@ -217,17 +222,18 @@
       "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html",
       "https://aws.amazon.com/private-ca/pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "inspector",
     "name": "Amazon Inspector",
     "category": "security",
     "meters": ["time", "units"],
-    "oneLiner": "EC2 and Lambda meter by the hour of coverage. Container images and code repos meter per scan.",
+    "oneLiner": "EC2, AMIs and Lambda meter by the hour of coverage. Container images and code repos meter per scan.",
     "trap": "ECR bills per assessment, so a CI pipeline pushing all day pays for every initial scan and every rescan of every image. EC2 and Lambda coverage prorates by instance-hour, so short-lived hosts cost little.",
     "billOn": [
       "EC2-Scanning",
+      "EC2-AMI-Scanning",
       "Lambda-Standard-Scanning",
       "container-image-initial-scan",
       "container-image-re-scan"
@@ -235,9 +241,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/inspector/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonInspectorV2/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonInspectorV2/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/ec2-amis-scanned-through-inspector/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-device-defender",
@@ -245,14 +252,15 @@
     "category": "security",
     "meters": ["time", "units"],
     "oneLiner": "Audit bills per device per month. Detect bills per metric datapoint reported, not per device.",
-    "trap": "ML Detect costs up to eighty times Rules Detect per datapoint at low volume, narrowing to about five times at scale, and it bills from the moment datapoints arrive: including the two-week training window.",
+    "trap": "ML Detect costs up to eighty times Rules Detect per datapoint, about five times at scale, and bills through its two-week training window. Detect is closed to new customers since August 31, 2026.",
     "billOn": ["USE1-Audit", "USE1-Detect", "USE1-ML-Detect"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/iot-device-defender/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceDefender/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceDefender/current/us-east-1/index.json",
+      "https://docs.aws.amazon.com/iot-device-defender/latest/devguide/dd-detect-availability-change.html"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "kms",
@@ -267,7 +275,7 @@
       "https://aws.amazon.com/kms/pricing/",
       "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html"
     ],
-    "checked": "2026-11-09"
+    "checked": "2026-11-25"
   },
   {
     "slug": "license-manager",
@@ -282,7 +290,7 @@
       "https://aws.amazon.com/license-manager/pricing/",
       "https://aws.amazon.com/ec2/dedicated-hosts/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "macie",
@@ -301,7 +309,7 @@
       "https://aws.amazon.com/macie/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMacie/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "network-firewall",
@@ -316,7 +324,7 @@
       "https://aws.amazon.com/network-firewall/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSNetworkFirewall/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "payment-cryptography",
@@ -331,7 +339,7 @@
       "https://aws.amazon.com/payment-cryptography/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/PaymentCryptography/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "private-ca",
@@ -351,7 +359,7 @@
       "https://aws.amazon.com/private-ca/pricing/",
       "https://docs.aws.amazon.com/privateca/latest/userguide/PCARestoreCA.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ram",
@@ -366,7 +374,7 @@
       "https://docs.aws.amazon.com/ram/latest/userguide/what-is.html",
       "https://aws.amazon.com/ram/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "secrets-manager",
@@ -374,45 +382,47 @@
     "category": "security",
     "meters": ["time", "units"],
     "oneLiner": "Storing a secret costs a flat monthly fee. Reading it costs a little more each time.",
-    "trap": "Uncached GetSecretValue on every request is the usual blowup. Rotation Lambdas and any customer-managed KMS key bill on their own meters, and the per-secret fee runs whether the secret is read or not.",
+    "trap": "Uncached GetSecretValue on every request is the usual blowup. Each replica, in another Region or now another account, bills as a full secret, and the fee runs whether the secret is read or not.",
     "billOn": ["AWSSecretsManager-Secrets", "AWSSecretsManagerAPIRequest"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/secrets-manager/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/secrets-manager-cross-account/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "security-agent",
-    "name": "AWS Security Agent (part of AWS Continuum)",
+    "name": "AWS Continuum for Penetration Testing (formerly AWS Security Agent)",
     "category": "security",
     "meters": ["time"],
     "oneLiner": "Per task-hour of autonomous penetration testing. Task-hours accumulate across parallel work.",
-    "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Threat modeling is free only while in preview.",
+    "trap": "Task-hours are cumulative, not wall clock: a pen test that finishes in four hours can bill twenty-four task-hours because the agent works in parallel. Revalidations past the third per finding bill too.",
     "billOn": ["USE1-Penetration-Testing"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/continuum/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/SecAgent/current/us-east-1/index.json",
-      "https://aws.amazon.com/about-aws/whats-new/2026/06/aws-security-agent-threat-modeling/"
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/continuum-pentest-pause-resume/"
     ],
-    "checked": "2026-11-01"
+    "checked": "2026-11-25"
   },
   {
     "slug": "security-hub",
     "name": "AWS Security Hub",
     "category": "security",
     "meters": ["time", "bytes", "units"],
-    "oneLiner": "Charged per monitored resource per month. Threat Analytics meters separately on events and log volume.",
-    "trap": "Resource units are weighted very unevenly. One EC2 instance is a whole unit while it takes roughly a dozen Lambda functions or over a hundred IAM identities to reach the same unit.",
+    "oneLiner": "Charged per monitored resource unit per month. Threat Analytics meters separately on events, logs and runtime vCPUs.",
+    "trap": "Resource units are weighted very unevenly. One EC2 instance or Azure or GCP VM is a whole unit while it takes about a dozen Lambda functions or over a hundred IAM identities to reach the same unit.",
     "billOn": ["MonitoredEC2", "MonitoredFunction", "EventsAnalyzed", "LogsAnalyzedBytes"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/security-hub/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityHub/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityHub/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/10/aws-security-hub-runtime-monitoring/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "security-incident-response",
@@ -427,7 +437,7 @@
       "https://aws.amazon.com/security-incident-response/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecurityIncidentResponse/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "security-lake",
@@ -446,7 +456,7 @@
       "https://aws.amazon.com/security-lake/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSecurityLake/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "shield",
@@ -461,7 +471,7 @@
       "https://aws.amazon.com/shield/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSShield/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "sts",
@@ -476,7 +486,7 @@
       "https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html",
       "https://aws.amazon.com/iam/faqs/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "verified-access",
@@ -495,7 +505,7 @@
       "https://aws.amazon.com/verified-access/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "verified-permissions",
@@ -514,21 +524,22 @@
       "https://aws.amazon.com/verified-permissions/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVerifiedPermissions/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "waf",
     "name": "AWS WAF",
     "category": "security",
     "meters": ["time", "units"],
-    "oneLiner": "Monthly per web ACL and per rule, plus a per-request charge on everything the ACL inspects.",
-    "trap": "Rules are counted per web ACL, so one managed rule group attached to five ACLs bills five times. Bot Control and ATP add a monthly subscription each plus a per-request rate. Shield Advanced zeroes most of it.",
+    "oneLiner": "Per web ACL and rule a month plus per request, until February 2027. Then per protected resource-hour plus per request.",
+    "trap": "From February 1, 2027 web ACL, rule and rule group fees go, but every associated resource bills hourly, so one ACL on fifty load balancers is fifty meters. Premium rule groups add a per-request fee on top.",
     "billOn": ["WebACLV2", "RuleV2", "RequestV2-Tier1", "AMR-BotControl"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/waf/pricing/",
-      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/current/us-east-1/index.json"
+      "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/current/us-east-1/index.json",
+      "https://aws.amazon.com/about-aws/whats-new/2026/11/aws-waf-introduces-simplified-pricing/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]

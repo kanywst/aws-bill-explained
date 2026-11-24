@@ -17,7 +17,7 @@
       "https://aws.amazon.com/api-gateway/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "appflow",
@@ -32,7 +32,7 @@
       "https://aws.amazon.com/appflow/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AppFlow/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "appsync",
@@ -47,7 +47,7 @@
       "https://aws.amazon.com/appsync/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAppSync/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "b2b-data-interchange",
@@ -68,7 +68,7 @@
       "https://aws.amazon.com/b2b-data-interchange/pricing/",
       "https://docs.aws.amazon.com/b2bi/latest/userguide/what-is-b2bi.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "chime-sdk",
@@ -76,14 +76,15 @@
     "category": "integration",
     "meters": ["time", "units"],
     "oneLiner": "Attendee-minutes and messages dominate; phone numbers rent monthly.",
-    "trap": "The Amazon Chime application hit end of support in February 2026. That did not touch the Chime SDK, which bills as normal. Separately, each provisioned DID costs a monthly rental at zero call volume.",
+    "trap": "The Chime app's end of support in February 2026 left the SDK billing as normal. SIP media applications closed to new customers on 29 October 2026. Each provisioned DID costs a monthly rental at zero call volume.",
     "billOn": ["Chime-SDK-attendee-minutes", "SDK-Messaging-Messages"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/chime/chime-sdk/pricing/",
-      "https://docs.aws.amazon.com/chime/latest/ag/doc-history.html"
+      "https://docs.aws.amazon.com/chime/latest/ag/doc-history.html",
+      "https://docs.aws.amazon.com/chime-sdk/latest/dg/sdk-use-pstn-service.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "connect",
@@ -98,7 +99,7 @@
       "https://aws.amazon.com/products/connect/customer/pricing/",
       "https://docs.aws.amazon.com/connect/latest/adminguide/granular-billing.html"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "connect-cases",
@@ -113,7 +114,7 @@
       "https://aws.amazon.com/products/connect/customer/pricing/appendix/",
       "https://aws.amazon.com/products/connect/customer/pricing/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "connect-health",
@@ -121,7 +122,7 @@
     "category": "integration",
     "meters": ["time", "units"],
     "oneLiner": "A monthly subscription per clinician for ambient documentation, plus per-action patient verification.",
-    "trap": "The seat fee covers a fixed monthly allowance of documentation minutes, not encounters; past it, captured audio bills per minute. The Amazon Connect voice minutes carrying those patient calls bill separately.",
+    "trap": "The seat fee covers a monthly cap of encounters per clinician; past it, the overage bills per minute. New users get a free trial first. The Amazon Connect voice minutes carrying patient calls bill separately.",
     "billOn": [
       "USE1-Subscription-Paid",
       "USE1-AmbientDocumentationMinutes:Overage",
@@ -133,7 +134,7 @@
       "https://docs.aws.amazon.com/connecthealth/latest/userguide/what-is-service.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/healthagent/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-08"
+    "checked": "2026-11-25"
   },
   {
     "slug": "data-firehose",
@@ -148,17 +149,19 @@
       "https://aws.amazon.com/firehose/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesisFirehose/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "eventbridge",
     "name": "Amazon EventBridge",
     "category": "integration",
-    "meters": ["units"],
-    "oneLiner": "Custom and partner events bill on ingestion. AWS service events land on the default bus for free.",
-    "trap": "A 200KB event is four billed events because each 64KB chunk counts as one, and Schema Discovery slices at 8KB. API destinations, Pipes and Scheduler invocations each carry their own per-million rate.",
+    "meters": ["units", "bytes"],
+    "oneLiner": "Classic buses bill per event ingested. The new custom bus bills per GB in, and per GB out to each subscriber.",
+    "trap": "On the newer bus every subscriber pays egress on its own copy, retries included, and events round up to 1KB. On classic buses each 64KB chunk is one event. Pipes and Scheduler carry their own rates.",
     "billOn": [
       "Event-64K-Chunks",
+      "EventsV2-Ingress-Bytes",
+      "EventsV2-Egress-Bytes",
       "Invocation-64K-Chunks",
       "ScheduledInvocation",
       "ArchivedEvents-Bytes"
@@ -166,9 +169,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/eventbridge/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2026/09/eventbridge-relaunches-custom-event-buses/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEvents/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-core",
@@ -183,7 +187,7 @@
       "https://aws.amazon.com/iot-core/pricing/",
       "https://aws.amazon.com/iot-core/pricing/additional-details/"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-device-management",
@@ -198,7 +202,7 @@
       "https://aws.amazon.com/iot-device-management/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTDeviceManagement/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-events",
@@ -213,22 +217,23 @@
       "https://aws.amazon.com/about-aws/whats-new/2025/05/aws-service-changes/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTEvents/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-fleetwise",
     "name": "AWS IoT FleetWise",
     "category": "integration",
     "meters": ["time", "units"],
-    "oneLiner": "Per vehicle per month for every vehicle registered, plus per million data messages collected.",
-    "trap": "The vehicle fee counts everything registered that month, not the vehicles that actually reported. A broad signal collection campaign multiplies messages fast, and the data still lands in S3 or Timestream at its own cost.",
+    "oneLiner": "Per active vehicle per month, plus per million data messages collected. Closed to new customers since 30 April 2026.",
+    "trap": "A vehicle counts as active once it connects or checks in, even if it sends nothing, and partial months are not prorated. Messages meter in 5KB blocks, and the data lands in S3 or Timestream at its own cost.",
     "billOn": ["vehicles", "Messages"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/iot-fleetwise/pricing/",
+      "https://docs.aws.amazon.com/iot-fleetwise/latest/developerguide/iotfleetwise-availability-change.html",
       "https://docs.aws.amazon.com/iot-fleetwise/latest/developerguide/what-is-iotfleetwise.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-greengrass",
@@ -243,7 +248,7 @@
       "https://aws.amazon.com/greengrass/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSGreengrass/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-sitewise",
@@ -258,7 +263,7 @@
       "https://aws.amazon.com/iot-sitewise/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSIoTSiteWise/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "iot-twinmaker",
@@ -273,15 +278,15 @@
       "https://aws.amazon.com/iot-twinmaker/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/IoTTwinMaker/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "kinesis-data-streams",
     "name": "Amazon Kinesis Data Streams",
     "category": "integration",
     "meters": ["time", "units", "bytes"],
-    "oneLiner": "Provisioned charges shard-hours plus 25KB PUT payload units. On-demand charges a stream-hour plus GB in and out.",
-    "trap": "The two modes meter differently. Provisioned rounds each record up to a 25KB payload unit, so a 1KB record is a full unit. On-demand charges per GB written, so ingress is not free here.",
+    "oneLiner": "Provisioned: shard-hours plus 25KB PUT payload units. On-demand: per GB in and out, and Standard adds a stream-hour.",
+    "trap": "Provisioned rounds each record up to a 25KB payload unit. On-demand Standard rounds writes up to 1KB. On-demand Advantage drops the stream-hour but bills an account-wide floor of 25MB/s in and 25MB/s out.",
     "billOn": [
       "Storage-ShardHour",
       "PutRequestPayloadUnits",
@@ -291,9 +296,10 @@
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/kinesis/data-streams/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2025/11/amazon-kinesis-data-streams-ondemand-advantage/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesis/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "kinesis-video-streams",
@@ -315,7 +321,7 @@
       "https://aws.amazon.com/kinesis/video-streams/pricing/",
       "https://aws.amazon.com/kinesis/video-streams/"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "location",
@@ -330,7 +336,7 @@
       "https://aws.amazon.com/location/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLocationService/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mq",
@@ -345,7 +351,7 @@
       "https://aws.amazon.com/amazon-mq/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMQ/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "msk",
@@ -365,42 +371,45 @@
       "https://aws.amazon.com/msk/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonMSK/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "mwaa",
     "name": "Amazon Managed Workflows for Apache Airflow (MWAA)",
     "category": "integration",
     "meters": ["time", "bytes"],
-    "oneLiner": "Hourly per environment by size, plus hourly per extra worker, scheduler and web server, plus DB storage.",
-    "trap": "The environment bills every hour it exists even with no DAGs scheduled, and there is no stop button: you delete it or keep paying. Autoscaled workers and extra schedulers each add their own hourly line.",
+    "oneLiner": "Provisioned bills hourly by environment size, plus extra workers and storage. Serverless bills per task-hour.",
+    "trap": "A provisioned environment bills every hour it exists even with no DAGs scheduled, and there is no stop button. Serverless bills only while tasks run, by the second with a one-minute minimum per task.",
     "billOn": [
       "Airflow-SmallEnvironment",
       "Airflow-LargeWorker",
       "Airflow-LargeScheduler",
-      "Airflow-StandardDatabaseStorage"
+      "Airflow-StandardDatabaseStorage",
+      "MWAA-Serverless-AWSManaged"
     ],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/managed-workflows-for-apache-airflow/pricing/",
+      "https://aws.amazon.com/about-aws/whats-new/2025/11/mwaa-serverless-deployment-apache-airflow-workflows/",
       "https://docs.aws.amazon.com/mwaa/latest/userguide/what-is-mwaa.html"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "pinpoint",
     "name": "Amazon Pinpoint",
     "category": "integration",
-    "meters": ["units", "time"],
-    "oneLiner": "Per endpoint targeted each month, plus per message on whichever channel does the sending.",
-    "trap": "Monthly Targeted Audience counts every endpoint a campaign or journey touches, deliverable or not. Support ends 30 October 2026; SMS, voice, push and OTP move to AWS End User Messaging.",
-    "billOn": ["MonthlyTargetedAudience", "EventsRecorded", "Email_Sends"],
+    "meters": ["units"],
+    "oneLiner": "Support ended 30 October 2026. What still runs bills per message sent on each channel.",
+    "trap": "Segments, campaigns, journeys and analytics are gone, so the per-endpoint audience meter stops. Push, OTP and number validation still bill; SMS, voice and email keep sending for existing customers only.",
+    "billOn": ["Email_Sends", "DeliveryAttempts_APNS", "DeliveryAttempts_GCM"],
     "confidence": "high",
     "sources": [
+      "https://docs.aws.amazon.com/pinpoint/latest/userguide/migrate.html",
       "https://aws.amazon.com/pinpoint/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonPinpoint/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "q-in-connect",
@@ -420,7 +429,7 @@
       "https://aws.amazon.com/products/connect/customer/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWisdom/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "ses",
@@ -435,7 +444,7 @@
       "https://aws.amazon.com/ses/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSES/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "sns",
@@ -455,7 +464,7 @@
       "https://aws.amazon.com/sns/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSNS/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "sqs",
@@ -467,7 +476,7 @@
     "billOn": ["Requests-RBP", "Requests-FIFO-RBP", "Requests-Fair-RBP"],
     "confidence": "high",
     "sources": ["https://aws.amazon.com/sqs/pricing/", "https://aws.amazon.com/sqs/features/"],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "step-functions",
@@ -482,7 +491,7 @@
       "https://aws.amazon.com/step-functions/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   },
   {
     "slug": "wickr",
@@ -497,21 +506,22 @@
       "https://aws.amazon.com/wickr/pricing/",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSWickr/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-07"
+    "checked": "2026-11-25"
   },
   {
     "slug": "workmail",
     "name": "Amazon WorkMail",
     "category": "integration",
     "meters": ["time"],
-    "oneLiner": "Flat per-mailbox monthly seat, prorated by the hour.",
+    "oneLiner": "Flat per-mailbox monthly seat, prorated by the hour. Closed to new customers; support ends 31 March 2027.",
     "trap": "Billing tracks active user accounts, not logins. Deactivating a user mid-month earns no credit for the remaining days, and the 50 GB per user is bundled, so there is no separate storage meter.",
     "billOn": ["WorkMail-NormalTier-UserHrs"],
     "confidence": "high",
     "sources": [
       "https://aws.amazon.com/workmail/faqs/",
+      "https://docs.aws.amazon.com/workmail/latest/adminguide/workmail-end-of-support.html",
       "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonWorkMail/current/us-east-1/index.json"
     ],
-    "checked": "2026-08-04"
+    "checked": "2026-11-25"
   }
 ]
