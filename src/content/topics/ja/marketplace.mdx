@@ -4,7 +4,7 @@ short: Marketplace
 oneLiner: 請求書の一部は他社のソフトで、AWS は決済経路にすぎない。メーターを決めたのは売り手で、いつものレバーは届かない。
 meters: []
 order: 37
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://docs.aws.amazon.com/cur/latest/userguide/billing-columns.html'
   - 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create-filters.html'
@@ -18,6 +18,8 @@ sources:
   - 'https://docs.aws.amazon.com/marketplace/latest/APIReference/API_marketplace-agreements_EstimatedCharges.html'
   - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/marketplace-manage-subscriptions.html'
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-services.html'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/plan-types.html'
+  - 'https://aws.amazon.com/premiumsupport/pricing/'
 ---
 
 import PathDiagram from '../../../components/PathDiagram.astro';
@@ -82,7 +84,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ここから先が、実際に金の出入りするところだ。
 
-**Savings Plans も Reserved Instances も、ソフトウェア料金には届かない。** Savings Plans の対象サービスは EC2・Fargate・Lambda・SageMaker AI であって、Marketplace はそこにいない。Reserved Instance のほうも、条件の合う On-Demand の EC2 使用量に適用される請求割引でしかない。バイヤーガイドはインスタンスタイプ変更の話の中で一文で言い切っている。インスタンスタイプを変えると「Amazon EC2 のインフラは締結済みの savings plan にもとづいて請求されます。ただし AWS Marketplace の AMI ライセンスは自動的に時間課金に切り替わります」。**コミットメントが覆うのはインスタンスの AWS 側の半分だけ**で、もう半分は無傷どころか、このケースではむしろ悪化する。
+**Savings Plans も Reserved Instances も、ソフトウェア料金には届かない。** Savings Plans が届くのは EC2・Fargate・Lambda・SageMaker AI と、Database Savings Plans 以降は名前の挙がった AWS のデータベースサービス群であって、Marketplace はそこにいない。Reserved Instance のほうも、条件の合う On-Demand の EC2 使用量に適用される請求割引でしかない。バイヤーガイドはインスタンスタイプ変更の話の中で一文で言い切っている。インスタンスタイプを変えると「Amazon EC2 のインフラは締結済みの savings plan にもとづいて請求されます。ただし AWS Marketplace の AMI ライセンスは自動的に時間課金に切り替わります」。**コミットメントが覆うのはインスタンスの AWS 側の半分だけ**で、もう半分は無傷どころか、このケースではむしろ悪化する。
 
 **Marketplace は、AWS Support 料金の計算基礎から除外される。** Support は割引・クレジット適用前の gross な AWS 利用料に対するパーセンテージで、料金ページはその基礎から外れるものを12個名指ししている。**AWS Marketplace** はその1つで、AWS Support 自身、AWS Managed Services、AWS Professional Services、AWS Training and Certifications、Amazon EKS Anywhere、VMware Cloud on AWS などと並んでいる。自前で動かす代わりに Marketplace でソフトを買うと、その分だけ支出が計算基礎の外に出ていく。注釈が1つある。Bedrock Marketplace と Bedrock のサーバーレス購入は、請求が AWS Marketplace 経由で見えても Bedrock の使用量として扱われる。
 

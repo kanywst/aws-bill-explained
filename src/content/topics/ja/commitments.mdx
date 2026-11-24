@@ -4,7 +4,7 @@ short: コミット
 oneLiner: 買っているのは容量ではなく単価。メーターは同じように回り、動くのは値段だけだ。
 meters: []
 order: 30
-checked: 2026-08-06
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/savingsplans/compute-pricing/'
   - 'https://aws.amazon.com/savingsplans/faqs/'
@@ -13,6 +13,9 @@ sources:
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html'
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/return-sp.html'
   - 'https://aws.amazon.com/about-aws/whats-new/2025/12/database-savings-plans-savings/'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-quotas.html'
+  - 'https://aws.amazon.com/about-aws/whats-new/2025/11/savings-plans-reserved-instances-group-sharing-generally-available/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/aws-benefits-sharing-capabilities/'
   - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/reservation-columns.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/troubleshooting-cur.html'
@@ -41,7 +44,7 @@ Savings Plans の種類は3つではなく**4つ**ある。Database Savings Plan
 
 次が、あの意味不明な行を生んでいる仕組み。AWS は**1時間ごとに独立して**、適格な使用量を並べ替え、コミット額をそこに突っ込む。まず無料利用枠、次に Reserved Instances、その次に Savings Plans。Savings Plans の中では EC2 Instance プランが先で Compute プランが後だ。Compute のほうが守備範囲が広いので、狭いプランでは届かない使用量のために取っておく。残った使用量については、適格な組み合わせごとに割引率を計算し、**割引率の高い順に**コミットを当てていく。同率ならプラン料率の低いほうが先。使用量が尽きるかコミットが尽きるまで続き、余った使用量は On-Demand で課金される。
 
-ここから2つ、直ちに帰結する。ひとつ、**会計単位は1時間**。14時に使い残したコミットは15時には存在しない。もうひとつ、**この並べ替えのどこにもアカウントの概念がない**。プランは組織内のどのアカウントでも買えて、共有がオン (デフォルト) なら、まず購入アカウントの使用量に当たり、次に他のアカウントの使用量へ、割引額の大きいところを追いかけて流れていく。手数料は買った側に残る。ベネフィットは一番深い割引が取れる場所へ行く。管理アカウントに手数料の行だけが孤立していて、実際の節約は3階層下のチームのアカウントに出ている。理由はこれで全部だ。
+ここから2つ、直ちに帰結する。ひとつ、**会計単位は1時間**。14時に使い残したコミットは15時には存在しない。もうひとつ、**この並べ替えのどこにもアカウントの概念がない**。プランは組織内のどのアカウントでも買えて、共有がオン (デフォルト) なら、まず購入アカウントの使用量に当たり、次に他のアカウントの使用量へ、割引額の大きいところを追いかけて流れていく。手数料は買った側に残る。ベネフィットは一番深い割引が取れる場所へ行く。管理アカウントに手数料の行だけが孤立していて、実際の節約は3階層下のチームのアカウントに出ている。理由はこれで全部だ。ただし組織全体への共有 (open sharing) はあくまでデフォルト。2025年11月からは Cost Categories で作ったグループ単位の共有設定で、コミットをまずそのグループに、あるいはそのグループだけに当てられるようになり、2026年11月17日からは同じ設定をプランや RI 1件ごとにも付けられる。上のルールで行き先を読む前に、そのコミットにどの共有設定が付いているかを確認すること。
 
 <PathDiagram
   lang="ja"

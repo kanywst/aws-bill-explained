@@ -4,7 +4,7 @@ short: Regions
 oneLiner: There is no AWS price. There is a price per region, and the usage type on your bill names which one.
 meters: ['time', 'bytes', 'units']
 order: 28
-checked: 2026-08-07
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/ec2/pricing/on-demand/'
   - 'https://aws.amazon.com/s3/pricing/'
@@ -18,6 +18,7 @@ sources:
   - 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/viewing-cloudfront-metrics.html'
   - 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html'
   - 'https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_pricing_GetProducts.html'
+  - 'https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-instance-regions.html'
 ---
 
 import PathDiagram from '../../../components/PathDiagram.astro';
@@ -91,7 +92,7 @@ Look at Tokyo twice. Storage there costs 8.7% more than N. Virginia and requests
 
 So why does a bill show us-east-1 usage for an account with nothing in N. Virginia? Because the side-effects of global services land there. Turn on additional CloudFront metrics and CloudFront sends up to eight metrics to CloudWatch **in the US East (N. Virginia) Region**. A distribution serving only Japan produces `USE1-` CloudWatch line items. A custom domain on that distribution needs an ACM certificate requested in us-east-1, because CloudFront accepts certificates from nowhere else. Billing and IAM console actions are logged in us-east-1. Virginia shows up because Virginia is where the global control plane lives.
 
-**Availability is a cost, not just a constraint.** `m8i.large` is offered in 24 regions, including us-east-1, eu-west-2 and sa-east-1. It is not offered in eu-north-1 (Stockholm), ap-northeast-3 (Osaka), il-central-1 (Tel Aviv) or me-central-1 (UAE). When the thing you need is missing from your region, the design that follows (reach across to a region that has it, or replicate the data there) turns an availability gap into a recurring bytes charge.
+**Availability is a cost, not just a constraint.** AWS's instance-types-by-Region list shows the M8i family in 25 regions (GovCloud and China included), among them us-east-1, eu-west-2 and sa-east-1. It is not offered in eu-north-1 (Stockholm), ap-northeast-3 (Osaka), il-central-1 (Tel Aviv) or me-central-1 (UAE). When the thing you need is missing from your region, the design that follows (reach across to a region that has it, or replicate the data there) turns an availability gap into a recurring bytes charge.
 
 ## Traps
 
