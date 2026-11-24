@@ -152,6 +152,25 @@
     "checked": "2026-11-25"
   },
   {
+    "slug": "end-user-messaging",
+    "name": "AWS End User Messaging",
+    "category": "integration",
+    "meters": ["units", "time"],
+    "oneLiner": "Per message by destination country, plus a monthly lease on every phone number or short code you hold.",
+    "trap": "US 10DLC sends add a separate carrier fee line per message on top of the AWS fee, and RCS bills only on delivery. A registered number keeps renting monthly at zero traffic. Pinpoint SMS now lands here.",
+    "billOn": [
+      "OutboundSMS-GB-Standard-Shortcode-MessageCount",
+      "OutboundSMS-GB-Standard-Shortcode-MessageFee"
+    ],
+    "confidence": "medium",
+    "sources": [
+      "https://aws.amazon.com/end-user-messaging/pricing/",
+      "https://docs.aws.amazon.com/end-user-messaging/latest/userguide/nx-sms-scale-spending.html",
+      "https://docs.aws.amazon.com/sms-voice/latest/userguide/sms-billing.html"
+    ],
+    "checked": "2026-11-25"
+  },
+  {
     "slug": "eventbridge",
     "name": "Amazon EventBridge",
     "category": "integration",
