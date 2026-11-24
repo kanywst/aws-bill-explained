@@ -34,6 +34,18 @@ describe('counts quoted in topic prose', () => {
     );
   });
 
+  it('matches the catalogue in the free-services topic', () => {
+    const free = catalogue.free().length;
+    expect(read('./topics/en/free-services.mdx')).toContain(
+      `This site classifies ${total} AWS services`,
+    );
+    expect(read('./topics/ja/free-services.mdx')).toContain(
+      `このサイトは AWS の${total}サービスを「3つのメーターのどれを回すか」で分類している。うち${free}サービスは1つも回さない。`,
+    );
+    // The English prose spells the free count out as a word; rewrite "Thirty" if this moves.
+    expect(free, 'en/free-services.mdx says "Thirty of them turn none"').toBe(30);
+  });
+
   /**
    * "Roughly half" is the claim the paragraph is built on. If the catalogue
    * ever drifts far from that, the sentence needs rewriting and not just a
