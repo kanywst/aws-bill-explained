@@ -4,7 +4,7 @@ short: Allocation
 oneLiner: The bill records what AWS metered, not who caused it. Turning one into the other is a system you build in advance.
 meters: []
 order: 36
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/custom-tags.html'
   - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/activating-tags.html'
@@ -18,6 +18,10 @@ sources:
   - 'https://docs.aws.amazon.com/cur/latest/userguide/Lineitem-columns.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/split-cost-allocation-data.html'
   - 'https://docs.aws.amazon.com/tag-editor/latest/userguide/tagging.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-limits.html'
+  - 'https://aws.amazon.com/about-aws/whats-new/2025/12/cost-allocation-tags/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/split-cost-allocation-data-s3/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/networking-flexible-cost-allocation/'
 ---
 
 import PathDiagram from '../../../components/PathDiagram.astro';
@@ -34,7 +38,7 @@ Turning "what was metered" into "who owes it" is a second system, and you are th
 
 **Cost categories** sit above tags. A cost category is a key-value pair applied to every cost line item, computed by rules over billing dimensions rather than stamped on a resource: account, charge type, another cost category, Region, service, tag key, usage type, billing entity. Because they are computed, they reach charges no tag can reach, and they are effective from the start of the current month. Edit the rules on 15 October and they apply to cost and usage from 1 October.
 
-**The account** is the mechanism nobody has to configure. Every organisation has a management account that pays the charges of all its member accounts, and every line item already carries an account ID. That is the whole argument behind "one account per team": it is a billing decision as much as a security one, because it is the only allocation boundary that cannot be forgotten, mistyped, or turned on too late.
+**The account** is the mechanism nobody has to configure. Every organisation has a management account that pays the charges of all its member accounts, and every line item already carries an account ID. That is the whole argument behind "one account per team": it is a billing decision as much as a security one, because it is the only allocation boundary that cannot be forgotten, mistyped, or turned on too late. Since December 2025 it can carry tags of its own: tags on an account in AWS Organizations can be activated as cost allocation tags, and they then apply to all metered usage in that account, including refunds, credits and other charges that have no resource to tag.
 
 <PathDiagram
   lang="en"
@@ -63,7 +67,7 @@ Turning "what was metered" into "who owes it" is a second system, and you are th
 
 Allocation is free. What it costs is lead time, plus the share of the bill you never manage to attribute.
 
-There are two families of cost allocation tag. **User-defined** tags are the ones you apply; they appear in the cost allocation report with a `user:` prefix. **AWS-generated** tags use the reserved `aws:` prefix and you cannot create, edit or delete them. `aws:createdBy` records who created a resource, must be activated by the management account, is populated in a fixed list of Regions only, and is built from CloudTrail. AWS calls it best effort and warns that CloudTrail problems can leave gaps. AWS Marketplace ISVs can attach `aws:marketplace:isv:` tags to your software usage. The `awsApplication` tag, added automatically to resources associated with a Service Catalog AppRegistry application, is activated for you and does not count against the quota. The cap is 500 active tag keys for billing reports.
+There are two families of cost allocation tag. **User-defined** tags are the ones you apply; they appear in the cost allocation report with a `user:` prefix. **AWS-generated** tags use the reserved `aws:` prefix and you cannot create, edit or delete them. `aws:createdBy` records who created a resource, must be activated by the management account, is populated in a fixed list of Regions only, and is built from CloudTrail. AWS calls it best effort and warns that CloudTrail problems can leave gaps. AWS Marketplace ISVs can attach `aws:marketplace:isv:` tags to your software usage. The `awsApplication` tag, added automatically to resources associated with a Service Catalog AppRegistry application, is activated for you and does not count against the quota. The default quota is 500 active tag keys per payer account, and it can now be raised through Service Quotas.
 
 The timing is what catches people. After you apply a user-defined tag it can take up to 24 hours for the key to appear on the cost allocation tags page, and up to another 24 hours to activate after you select it. Then it starts from there. Activation is forward-only.
 
@@ -103,7 +107,7 @@ The mechanical reason is visible one column over in the Cost and Usage Report. `
 
 Cost categories are where you deal with what tags cannot divide. Categorise the shared thing (a NAT gateway, a platform team's account, a payer-level fee) into its own cost category value, then write a split charge rule with that value as the source and the consuming teams as targets. Three allocation methods: **Proportional**, weighted by each target's cost; **Fixed**, by percentages you supply; **Even**, equal shares. An empty string as the source means uncategorised costs. A value can be a source only once, and only ten split charge rules exist per cost category.
 
-For a shared cluster there is a purpose-built answer instead. Split cost allocation data adds task-level and pod-level rows to the Cost and Usage Report for Amazon ECS and Amazon EKS, derived from the CPU and memory each container consumed on its EC2 instance, priced from the amortised instance cost, with the instance's unused capacity redistributed by utilisation. It supports user-defined cost allocation tags and Kubernetes primitives such as namespace and workload. Its cost is row count: two new usage records per task or pod per hour.
+For a shared cluster there is a purpose-built answer instead. Split cost allocation data adds task-level and pod-level rows to the Cost and Usage Report for Amazon ECS and Amazon EKS, derived from the CPU and memory each container consumed on its EC2 instance, priced from the amortised instance cost, with the instance's unused capacity redistributed by utilisation. It supports user-defined cost allocation tags and Kubernetes primitives such as namespace and workload. Its cost is row count: two new usage records per task or pod per hour. Since 17 November 2026 the same mechanism also splits a shared S3 general purpose bucket by prefix, fed by S3 Storage Lens advanced metrics.
 
 Consolidated billing does the rest for free. Member account bills are, in AWS's phrasing, for informational purpose only: the management account pays. AWS shows each member account its charges as unblended costs, while still applying the organisation's tier and reservation benefits underneath.
 
@@ -148,7 +152,7 @@ Consolidated billing does the rest for free. Member account bills are, in AWS's 
   ]}
 />
 
-**A tag on a resource does not tag the traffic between resources.** Tag every instance behind a NAT gateway and the gateway's processing and hourly charges are still one undivided line, because they belong to the gateway, not to the senders. The same holds for anything with a blank resource ID. Shared infrastructure stays shared until a split charge rule divides it, and note that split charge results appear only on the cost categories details page in the console. AWS states plainly that they do not appear in, and do not affect, the Cost and Usage Report, Cost Explorer, or the other cost management tools. Your pipeline will not see them.
+**A tag on a resource does not tag the traffic between resources.** Tag every instance behind a NAT gateway and the gateway's processing and hourly charges are still one undivided line, because they belong to the gateway, not to the senders. Since 16 November 2026 there is an opt-in exception: attach a cost allocation policy to the NAT gateway, peering connection or instance and enable Networking flexible cost allocation, and the CUR splits NAT data processing and data transfer by the resource that sent it. The gateway's hourly charge stays whole. The same holds for anything with a blank resource ID. Shared infrastructure stays shared until a split charge rule divides it, and note that split charge results appear only on the cost categories details page in the console. AWS states plainly that they do not appear in, and do not affect, the Cost and Usage Report, Cost Explorer, or the other cost management tools. Your pipeline will not see them.
 
 **Near-duplicate keys quietly split one team into two rows.** Tag keys and tag values are both case sensitive, so `Team`, `team` and `TEAM` are three columns and one team's spend lands in three places. Trailing whitespace does the same thing invisibly. Changing a tag partway through a billing period is a related surprise: the report splits that resource into two lines, one before the change and one after.
 

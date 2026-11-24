@@ -4,7 +4,7 @@ short: Commitments
 oneLiner: A commitment changes the rate, not which meter turns. The meter runs the same; only the price moves.
 meters: []
 order: 30
-checked: 2026-08-06
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/savingsplans/compute-pricing/'
   - 'https://aws.amazon.com/savingsplans/faqs/'
@@ -13,6 +13,9 @@ sources:
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-applying.html'
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/return-sp.html'
   - 'https://aws.amazon.com/about-aws/whats-new/2025/12/database-savings-plans-savings/'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-quotas.html'
+  - 'https://aws.amazon.com/about-aws/whats-new/2025/11/savings-plans-reserved-instances-group-sharing-generally-available/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/aws-benefits-sharing-capabilities/'
   - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/reservation-columns.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/troubleshooting-cur.html'
@@ -73,7 +76,11 @@ purchased in any account in the organisation, and with sharing on (the default) 
 purchasing account's usage first and then everyone else's, chasing the largest calculated
 saving. The fee stays with the buyer. The benefit goes wherever the discount is deepest. That is
 the whole explanation for a fee sitting alone in the management account while the savings show
-up in a team's account three levels down.
+up in a team's account three levels down. Open sharing is only the default, though. Since
+November 2025 a group sharing preference, built from Cost Categories, can keep a commitment
+inside a group of accounts first or only, and since 17 November 2026 the same preference can be
+set on a single plan or RI. Before reading a fee's destination off the rule above, check which
+preference that commitment carries.
 
 <PathDiagram
   lang="en"

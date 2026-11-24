@@ -4,7 +4,7 @@ short: 無料サービス
 oneLiner: メーターを1つも回さないサービスは答えの終点じゃない。それが作ったものが3つ回す。
 meters: []
 order: 9
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json'
   - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
@@ -26,9 +26,9 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## なぜそうなるのか
 
-このサイトは AWS の253サービスを「3つのメーターのどれを回すか」で分類している。うち30サービスは1つも回さない。調査の穴ではなく、機械的な定義を持った実在のカテゴリだ。
+このサイトは AWS の262サービスを「3つのメーターのどれを回すか」で分類している。うち30サービスは1つも回さない。調査の穴ではなく、機械的な定義を持った実在のカテゴリだ。
 
-定義は検証できる。AWS Price List は課金対象になるオファーコードの一覧を公開していて、執筆時点で268件ある。そこに IAM はない。STS もない。Organizations、EC2 Auto Scaling、Control Tower、Elastic Beanstalk、AWS Batch、Resource Explorer、Resource Access Manager。どれもない。オファーがないサービスには usage type がない。そして請求書の1行は usage type からしか作れない。書きようがないのだ。
+定義は検証できる。AWS Price List は課金対象になるオファーコードの一覧を公開していて、最終確認時点で273件ある。そこに IAM はない。STS もない。Organizations、EC2 Auto Scaling、Control Tower、Elastic Beanstalk、AWS Batch、Resource Explorer、Resource Access Manager。どれもない。オファーがないサービスには usage type がない。そして請求書の1行は usage type からしか作れない。書きようがないのだ。
 
 ドキュメントの言い回しも全部同じ形をしている。IAM は "offered at no additional charge"。EC2 Auto Scaling は "no additional fees… You only pay for the AWS resources (for example, EC2 instances, EBS volumes, and CloudWatch alarms) that you use"。S3 と DynamoDB のゲートウェイ VPC エンドポイントは "There is no additional charge for using gateway endpoints"。Control Tower は "There is no additional charge to use AWS Control Tower" と言った直後に、有効化した結果として課金されるサービスを並べる。Service Catalog、CloudTrail、Config、CloudWatch、SNS、S3、VPC。
 

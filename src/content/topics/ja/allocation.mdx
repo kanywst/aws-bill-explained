@@ -4,7 +4,7 @@ short: 按分
 oneLiner: 請求書は「何を計測したか」で並んでいる。「誰のせいか」に変換する仕組みは、先に自分で作るしかない。
 meters: []
 order: 36
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/custom-tags.html'
   - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/activating-tags.html'
@@ -18,6 +18,10 @@ sources:
   - 'https://docs.aws.amazon.com/cur/latest/userguide/Lineitem-columns.html'
   - 'https://docs.aws.amazon.com/cur/latest/userguide/split-cost-allocation-data.html'
   - 'https://docs.aws.amazon.com/tag-editor/latest/userguide/tagging.html'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-limits.html'
+  - 'https://aws.amazon.com/about-aws/whats-new/2025/12/cost-allocation-tags/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/split-cost-allocation-data-s3/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/11/networking-flexible-cost-allocation/'
 ---
 
 import PathDiagram from '../../../components/PathDiagram.astro';
@@ -34,7 +38,7 @@ AWS が記録するのは、常にメーター側から見た事実だ。1行の
 
 **コストカテゴリ**はタグの一段上にいる。コストカテゴリは全てのコスト明細行に適用されるキーと値のペアで、リソースに刻むのではなくルールで計算される。使える次元はアカウント、charge type、別のコストカテゴリ、リージョン、サービス、タグキー、usage type、billing entity。計算で決まるからタグの届かない課金にも届くし、当月の初日から有効になる: 10月15日にルールを直せば10月1日以降のコストと使用量に適用される。
 
-**アカウント**は、誰も設定しなくていい唯一の手段だ。どの組織にも全メンバーアカウントの料金を支払う管理アカウントがあり、どの明細行にも最初からアカウント ID が入っている。「1チーム1アカウント」の根拠はここにある。あれはセキュリティの判断であると同時に請求の判断で、忘れることも打ち間違えることも手遅れになることもない境界は、これしかない。
+**アカウント**は、誰も設定しなくていい唯一の手段だ。どの組織にも全メンバーアカウントの料金を支払う管理アカウントがあり、どの明細行にも最初からアカウント ID が入っている。「1チーム1アカウント」の根拠はここにある。あれはセキュリティの判断であると同時に請求の判断で、忘れることも打ち間違えることも手遅れになることもない境界は、これしかない。2025年12月からはアカウント自体にもタグが付けられる。AWS Organizations でアカウントに付けたタグをコスト配分タグとして有効化すると、そのアカウントの計測済み使用量すべてに適用され、返金やクレジットのような、タグを付けるリソースがない課金にも届く。
 
 <PathDiagram
   lang="ja"
@@ -63,7 +67,7 @@ AWS が記録するのは、常にメーター側から見た事実だ。1行の
 
 按分そのものは無料だ。かかるのはリードタイムと、結局どこにも割り当てられなかった請求の取り分。
 
-コスト配分タグには2系統ある。**ユーザー定義タグ**は自分で付けるほうで、コスト配分レポートには `user:` 接頭辞で並ぶ。**AWS 生成タグ**は予約接頭辞 `aws:` を使い、作成も編集も削除もできない。`aws:createdBy` は誰がそのリソースを作ったかを記録するタグで、有効化できるのは管理アカウントだけ、値が入るのは決められたリージョンのみ、しかも CloudTrail から組み立てられる。AWS 自身がベストエフォートだと言っていて、CloudTrail 側の問題でタグが欠けることがあると明記されている。AWS Marketplace の ISV は `aws:marketplace:isv:` タグをソフトウェア使用量に付けられる。Service Catalog AppRegistry のアプリケーションに紐づくリソースへ自動で付く `awsApplication` タグは、有効化も自動でクォータにも数えられない。請求レポート用のアクティブなタグキーの上限は500。
+コスト配分タグには2系統ある。**ユーザー定義タグ**は自分で付けるほうで、コスト配分レポートには `user:` 接頭辞で並ぶ。**AWS 生成タグ**は予約接頭辞 `aws:` を使い、作成も編集も削除もできない。`aws:createdBy` は誰がそのリソースを作ったかを記録するタグで、有効化できるのは管理アカウントだけ、値が入るのは決められたリージョンのみ、しかも CloudTrail から組み立てられる。AWS 自身がベストエフォートだと言っていて、CloudTrail 側の問題でタグが欠けることがあると明記されている。AWS Marketplace の ISV は `aws:marketplace:isv:` タグをソフトウェア使用量に付けられる。Service Catalog AppRegistry のアプリケーションに紐づくリソースへ自動で付く `awsApplication` タグは、有効化も自動でクォータにも数えられない。アクティブなタグキーの上限はペイヤーアカウントあたりデフォルト500で、いまは Service Quotas から引き上げられる。
 
 引っかかるのは時間差のほうだ。ユーザー定義タグを付けてから、そのキーが cost allocation tags のページに出てくるまで最大24時間。選んで有効化してから効き始めるまでさらに最大24時間。そしてそこから先の分しか集計されない。有効化は前向きにしか効かない。
 
@@ -103,7 +107,7 @@ AWS が記録するのは、常にメーター側から見た事実だ。1行の
 
 タグで割れないものを処理する場所がコストカテゴリだ。共有物 (NAT Gateway、基盤チームのアカウント、ペイヤー階層の固定費) をまず専用のコストカテゴリ値に分類し、その値を source、使っている各チームを target にして split charge rule を書く。配分方式は3つ。**Proportional** は各 target のコストで重み付け、**Fixed** は自分で指定した割合、**Even** は均等割り。source に空文字列を指定すると未分類コストを指す。1つの値を source にできるのは全ルールを通して1回だけで、split charge rule はコストカテゴリあたり10本まで。
 
-共有クラスタには専用の答えが別にある。split cost allocation data は Amazon ECS と Amazon EKS について、タスク単位・Pod 単位の行を Cost and Usage Report に追加する。値は各コンテナが EC2 インスタンス上で消費した CPU とメモリから、インスタンスの償却後コストを基準に算出され、インスタンスの未使用分は利用率に応じて再配分される。ユーザー定義のコスト配分タグにも、namespace や workload といった Kubernetes のプリミティブにも対応している。代償は行数で、タスクまたは Pod 1つあたり毎時2行増える。
+共有クラスタには専用の答えが別にある。split cost allocation data は Amazon ECS と Amazon EKS について、タスク単位・Pod 単位の行を Cost and Usage Report に追加する。値は各コンテナが EC2 インスタンス上で消費した CPU とメモリから、インスタンスの償却後コストを基準に算出され、インスタンスの未使用分は利用率に応じて再配分される。ユーザー定義のコスト配分タグにも、namespace や workload といった Kubernetes のプリミティブにも対応している。代償は行数で、タスクまたは Pod 1つあたり毎時2行増える。2026年11月17日からは同じ仕組みで、共有している S3 汎用バケットもプレフィックス単位に割れるようになった (データ源は S3 Storage Lens の advanced metrics)。
 
 残りは一括請求が無料でやってくれる。メンバーアカウントの請求は、AWS の言い方では情報提供目的にすぎない。支払うのは管理アカウントだ。そして AWS は各メンバーアカウントに対して、その料金をアンブレンドコストで表示する。組織としての段階価格やリザベーションの恩恵は、その裏で効いたままになる。
 
@@ -148,7 +152,7 @@ AWS が記録するのは、常にメーター側から見た事実だ。1行の
   ]}
 />
 
-**リソースに付けたタグは、リソース間の通信にはタグを付けない。** NAT Gateway の後ろのインスタンスを全部タグ付けしても、Gateway の処理料金と時間料金は分割されない1行のままだ。あれは Gateway のものであって、送信側のものではないから。リソース ID が空の明細も同じ。共有インフラは split charge rule で割るまで共有のまま残る。そしてここに落とし穴がある。split charge の結果が出るのはコンソールのコストカテゴリ詳細ページだけだ。AWS はそのまま書いている。それらのコストは Cost and Usage Report にも Cost Explorer にも他のコスト管理ツールにも現れないし、影響も与えない。自前の集計パイプラインからは見えない。
+**リソースに付けたタグは、リソース間の通信にはタグを付けない。** NAT Gateway の後ろのインスタンスを全部タグ付けしても、Gateway の処理料金と時間料金は分割されない1行のままだ。あれは Gateway のものであって、送信側のものではないから。2026年11月16日からはオプトインの例外がある。NAT Gateway・ピアリング接続・インスタンスにコスト配分ポリシーを付けて Networking flexible cost allocation を有効にすると、CUR が NAT のデータ処理とデータ転送を送信元リソースごとに割ってくれる。それでも Gateway の時間料金は1行のままだ。リソース ID が空の明細も同じ。共有インフラは split charge rule で割るまで共有のまま残る。そしてここに落とし穴がある。split charge の結果が出るのはコンソールのコストカテゴリ詳細ページだけだ。AWS はそのまま書いている。それらのコストは Cost and Usage Report にも Cost Explorer にも他のコスト管理ツールにも現れないし、影響も与えない。自前の集計パイプラインからは見えない。
 
 **似て非なるキーが、1チームを静かに2行に割る。** タグキーもタグ値も大文字小文字を区別する。`Team` と `team` と `TEAM` は3つの別カラムで、1チームの支出が3か所に散る。末尾の空白も同じことを、目に見えない形でやる。請求期間の途中でタグを変えたときの挙動も近い。レポートはそのリソースを変更前と変更後の2行に分割する。
 

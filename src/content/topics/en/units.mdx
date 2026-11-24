@@ -4,7 +4,7 @@ short: Units
 oneLiner: One call is very often not one billed unit. The payload decides how many.
 meters: ['units']
 order: 25
-checked: 2026-08-06
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/sqs/pricing/'
   - 'https://aws.amazon.com/sns/pricing/'
@@ -18,6 +18,7 @@ sources:
   - 'https://aws.amazon.com/firehose/pricing/'
   - 'https://aws.amazon.com/comprehend/pricing/'
   - 'https://aws.amazon.com/ebs/pricing/'
+  - 'https://aws.amazon.com/about-aws/whats-new/2026/09/eventbridge-relaunches-custom-event-buses/'
 ---
 
 import SequenceDiagram from '../../../components/SequenceDiagram.astro';
@@ -40,7 +41,9 @@ The chunk size is different for every service, and it is not guessable:
 - **Amazon SQS**: 64 KB per request.
 - **Amazon SNS**: 64 KB on the publish, and 64 KB again on each delivery.
 - **Amazon EventBridge**: 64 KB per custom event, so "an event with a 256 KB payload is
-  billed as 4 events". Schema Discovery slices the same payload at 8 KB instead.
+  billed as 4 events". Schema Discovery slices the same payload at 8 KB instead. That is
+  the classic bus; the enhanced Custom event bus launched in September 2026 bills by data
+  volume, with each event rounded up to the nearest 1 KB.
 - **Amazon API Gateway**: HTTP APIs are metered in 512 KB increments. WebSocket messages
   are metered in 32 KB increments, "so a 33KB message is metered as two messages". REST
   APIs are the exception: one call is one call, whatever it weighs.
@@ -151,7 +154,7 @@ for, and "request" is just the most common shape. In us-east-1:
 ## Traps
 
 **Roughly half of AWS has no Units meter, and the dividing line is not the one you'd
-guess.** Of the 253 services indexed on this site, 124 turn a Units meter and 129 never do.
+guess.** Of the 262 services indexed on this site, 133 turn a Units meter and 129 never do.
 The split is not "cheap services" versus "expensive". It is control plane versus data
 plane. `RunInstances`, `DescribeInstances`, every IAM call, every STS call: free, at any
 rate you can generate. EC2, ECS, EKS, RDS, ALB, Fargate, CloudFormation's own stack

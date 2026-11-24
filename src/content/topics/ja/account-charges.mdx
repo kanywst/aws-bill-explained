@@ -4,10 +4,11 @@ short: アカウント課金
 oneLiner: リソースにぶら下がらない課金がある。タグも付かず、インフラを消しても直接は減らない。
 meters: []
 order: 33
-checked: 2026-08-07
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/premiumsupport/pricing/'
   - 'https://docs.aws.amazon.com/awssupport/latest/user/aws-support-plans.html'
+  - 'https://aws.amazon.com/shield/faqs/'
   - 'https://aws.amazon.com/premiumsupport/technology/trusted-advisor/'
   - 'https://docs.aws.amazon.com/health/latest/APIReference/Welcome.html'
   - 'https://aws.amazon.com/shield/pricing/'
@@ -58,7 +59,7 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## で、いくらなの
 
-Support のラインナップは変わった。記憶で答えると古いほうを答えることになる。Developer Support・Business Support・Enterprise On-Ramp は 2027年1月1日にすべて提供終了で、Enterprise On-Ramp の顧客は 2026年中に Enterprise Support へ自動アップグレードされる。その過程で Enterprise の最低額は $15,000 から $5,000 に下がった。3つとも AWS GovCloud (US) リージョンでは引き続き提供される。現行で売っているのは3プラン。Support の価格にリージョンの区別はなく、どこで動かしていても同じ数字だ。
+Support のラインナップは変わった。記憶で答えると古いほうを答えることになる。Developer Support・Business Support・Enterprise On-Ramp は 2027年1月1日にすべて提供終了で、Enterprise On-Ramp の顧客は 2026年中に Enterprise Support へ自動アップグレードされる。その過程で Enterprise の最低額は $15,000 から $5,000 に下がった。3つとも AWS GovCloud (US) リージョンでは引き続き提供される。現行で売っているのは3プラン。Support の価格はワークロードを動かすリージョンでは変わらないが、料金ページには例外が2つある。Unified Operations は GovCloud (US) リージョンだけ高めの別料率を持ち、Enterprise Support には、全アカウントが対象市場 (AWS が挙げているのは中南米・インド・中国本土) に集中している顧客向けの安い地域別料率がある。それ以外は下の数字になる。
 
 どのプランも「最低額と帯計算の**大きいほう**」を取る。
 

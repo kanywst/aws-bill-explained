@@ -4,7 +4,7 @@ short: Marketplace
 oneLiner: Some lines are software someone else sells, billed through AWS. The seller picked the meter; your levers stop there.
 meters: []
 order: 37
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://docs.aws.amazon.com/cur/latest/userguide/billing-columns.html'
   - 'https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-create-filters.html'
@@ -18,6 +18,8 @@ sources:
   - 'https://docs.aws.amazon.com/marketplace/latest/APIReference/API_marketplace-agreements_EstimatedCharges.html'
   - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/marketplace-manage-subscriptions.html'
   - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-services.html'
+  - 'https://docs.aws.amazon.com/savingsplans/latest/userguide/plan-types.html'
+  - 'https://aws.amazon.com/premiumsupport/pricing/'
 ---
 
 import PathDiagram from '../../../components/PathDiagram.astro';
@@ -82,7 +84,7 @@ There is no answer to "what does Marketplace cost" the way there is an answer fo
 
 Two consequences are where the money actually goes.
 
-**Savings Plans and Reserved Instances do not reach software charges.** The services eligible for Savings Plans are EC2, Fargate, Lambda and SageMaker AI; Marketplace is not among them, and a Reserved Instance is only a billing discount on matching On-Demand EC2 usage. The buyer guide puts it in one sentence about resizing: change the instance type and "your Amazon EC2 infrastructure will be billed according to your signed savings plan. However, the AMI license from AWS Marketplace will automatically change to hourly pricing." The commitment covers the half of the instance that AWS priced. The other half is untouched, and in that particular case gets worse.
+**Savings Plans and Reserved Instances do not reach software charges.** Savings Plans reach EC2, Fargate, Lambda, SageMaker AI and, since Database Savings Plans, a named list of AWS database services; Marketplace is not among them, and a Reserved Instance is only a billing discount on matching On-Demand EC2 usage. The buyer guide puts it in one sentence about resizing: change the instance type and "your Amazon EC2 infrastructure will be billed according to your signed savings plan. However, the AMI license from AWS Marketplace will automatically change to hourly pricing." The commitment covers the half of the instance that AWS priced. The other half is untouched, and in that particular case gets worse.
 
 **Marketplace is excluded from the base AWS Support fees are calculated on.** Support is a percentage of gross AWS charges before discounts or credits, and the pricing page names twelve exclusions from that base. AWS Marketplace is one of them, alongside AWS Support itself, AWS Managed Services, AWS Professional Services, AWS Training and Certifications, Amazon EKS Anywhere and VMware Cloud on AWS. Buying software through Marketplace instead of running it yourself moves spend out of the base. One asterisk: Bedrock Marketplace and Bedrock serverless purchases count as Bedrock usage even though you may see them billed through AWS Marketplace.
 

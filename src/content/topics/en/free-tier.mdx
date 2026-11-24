@@ -4,7 +4,7 @@ short: Free tier
 oneLiner: Free is a discount applied to a meter that already ran. Nothing was switched off.
 meters: []
 order: 8
-checked: 2026-08-07
+checked: 2026-11-25
 sources:
   - 'https://aws.amazon.com/free/'
   - 'https://aws.amazon.com/free/terms/'
@@ -18,6 +18,11 @@ sources:
   - 'https://aws.amazon.com/lambda/pricing/'
   - 'https://aws.amazon.com/cloudfront/pricing/pay-as-you-go/'
   - 'https://aws.amazon.com/detective/pricing/'
+  - 'https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier-plans-activities.html'
+  - 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-free-tier-usage.html'
+  - 'https://docs.aws.amazon.com/detective/latest/userguide/free-trial-overview.html'
+  - 'https://aws.amazon.com/security-hub/pricing/'
+  - 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/flat-rate-pricing-plan.html'
 ---
 
 import BoundaryMap from '../../../components/BoundaryMap.astro';
@@ -43,8 +48,8 @@ use, not on sign-up). On **July 15, 2025** AWS rebuilt the front door and added 
 mechanism: credits.
 
 A new account now picks a plan at sign-up and gets **USD $100 in credits either way**, plus up
-to $100 more earned in $20 increments for five console activities. EC2, RDS, Lambda, Bedrock
-and Budgets. The credits expire twelve months from the account's open date, on either plan.
+to $100 more earned at $20 per console activity. AWS lists six (EC2, RDS, Lambda, Bedrock,
+Budgets and DynamoDB), so any five reach the cap. The credits expire twelve months from the account's open date, on either plan.
 
 - **Free plan.** You cannot incur a charge. It ends six months after account creation or when
   the credits are exhausted, whichever comes first, and then **the account closes
@@ -62,7 +67,8 @@ Tier AWS customers". An account opened before July 15, 2025 keeps them for the r
 its twelve months. Everyone else has always-free allowances, trials, and a credit balance
 with a clock on it. Even the eligible instance list forked on that date: before, "Free tier
 eligible" on EC2 meant `t2.micro` and `t3.micro`; on or after, it means `t3.micro`,
-`t3.small`, `t4g.micro`, `t4g.small`, `c7i-flex.large` and `m7i-flex.large`.
+`t3.small`, `t4g.micro`, `t4g.small`, `t8i.micro`, `t8i.small`, `t9g.micro`, `t9g.small`,
+`c7i-flex.large` and `m7i-flex.large`, and the list grows as new families launch.
 
 <BoundaryMap
   lang="en"
@@ -169,14 +175,14 @@ Gateway instead, which has no free tier and bills on two meters at once.
 Free Tier Terms say "we will aggregate your use across all AWS regions", and the 100 GB of
 free monthly data transfer out is "aggregated across all AWS Services and Regions (except
 China and GovCloud)". Trials count the other way. Amazon Detective grants "a 30-day free
-trial for each account in each Region"; Security Hub's trial allowance is 10,000 ingested
-findings per account per Region per month. Turn a trial service on in six Regions and you
+trial for each account in each Region"; Security Hub gives "every AWS account in each Region
+enabled with Security Hub" a 30-day trial of its own. Turn a trial service on in six Regions and you
 have started six independent clocks that expire on six different dates.
 
 **A free service does not make its bytes free.** Lambda's allowance is always free, but the
-pricing page is clear that data "transferred 'in' to and 'out' of your AWS Lambda functions,
-from outside the region the function executed, will be charged at the Amazon EC2 data
-transfer rates". Same-Region traffic to S3, DynamoDB, SQS, SNS, EFS, ECR and a handful of
+pricing page is clear that data "transferred 'in' to and 'out' of your AWS Lambda Event functions,
+from outside the region the function executed" is charged at Amazon EC2 data transfer
+rates. Same-Region traffic to S3, DynamoDB, SQS, SNS, EFS, ECR and a handful of
 others is free; anything crossing the Region boundary is not, and it draws down the same
 shared 100 GB that every other service in your organization is drawing down.
 
@@ -184,8 +190,8 @@ shared 100 GB that every other service in your organization is drawing down.
 still carries the always-free 1 TB of monthly data transfer and 10 million requests. Its
 flat-rate plans, offered alongside it, have a **Free tier at $0/month covering 1 million
 requests and 100 GB per distribution**, and there the overage behaviour inverts: exceed a
-plan's allowance and "you may experience reduced performance… but you won't incur overage
-charges." Same word, same service, allowances an order of magnitude apart, two different
+plan's allowance and "you will not incur overage charges, regardless of how much you exceed
+your allowance"; sustained excess gets your traffic delivery adjusted instead. Same word, same service, allowances an order of magnitude apart, two different
 failure modes.
 
 **Nothing stops at the cliff, and the cliff's shape depends on when you signed up.** For a

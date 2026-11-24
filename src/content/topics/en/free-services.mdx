@@ -4,7 +4,7 @@ short: Free services
 oneLiner: A service that turns no meter is not the end of the question. What it creates turns three.
 meters: []
 order: 9
-checked: 2026-08-08
+checked: 2026-11-25
 sources:
   - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json'
   - 'https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/us-east-1/index.json'
@@ -26,9 +26,9 @@ import SequenceDiagram from '../../../components/SequenceDiagram.astro';
 
 ## Why it works that way
 
-This site classifies 253 AWS services by which of the three meters they turn. Thirty of them turn none. That is a real category with a mechanical definition, not a gap in the research.
+This site classifies 262 AWS services by which of the three meters they turn. Thirty of them turn none. That is a real category with a mechanical definition, not a gap in the research.
 
-The definition is checkable. The AWS Price List publishes an index of every offer code AWS bills against: 268 of them at the time of writing. There is no offer code for IAM. None for STS, none for Organizations, none for EC2 Auto Scaling, Control Tower, Elastic Beanstalk, AWS Batch, Resource Explorer or Resource Access Manager. A service with no offer has no usage types, and a usage type is the only material a line item can be made of. There is nothing for the bill to say about it.
+The definition is checkable. The AWS Price List publishes an index of every offer code AWS bills against: 273 of them when this page was last checked. There is no offer code for IAM. None for STS, none for Organizations, none for EC2 Auto Scaling, Control Tower, Elastic Beanstalk, AWS Batch, Resource Explorer or Resource Access Manager. A service with no offer has no usage types, and a usage type is the only material a line item can be made of. There is nothing for the bill to say about it.
 
 The docs say the same thing in prose, and they all say it the same way. IAM "is offered at no additional charge." EC2 Auto Scaling has "no additional fees… You only pay for the AWS resources (for example, EC2 instances, EBS volumes, and CloudWatch alarms) that you use." Gateway VPC endpoints for S3 and DynamoDB: "There is no additional charge for using gateway endpoints." Control Tower: "There is no additional charge to use AWS Control Tower", followed immediately by the list of services you will be billed for as a result of turning it on, which runs to Service Catalog, CloudTrail, Config, CloudWatch, SNS, S3 and VPC.
 
